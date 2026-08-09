@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "artifactType": "measurement-plan",
+  "generatedAt": "2026-08-09T10:00:00Z",
+  "planId": "measure-20260809-001",
+  "projectProfileSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "status": "approved",
+  "events": [{"name": "_purchase", "businessOutcome": "Confirmed payment", "sourceOfTruth": "payment", "keyEvent": true, "parameters": [], "evidence": "Payment record"}],
+  "ecommerce": {"enabled": true, "currencySource": "Order currency", "valueRule": "Paid total", "transactionIdSource": "Order ID", "itemsRequired": true, "deduplication": "By transaction_id"},
+  "consent": {"mode": "unknown", "policyConfirmed": false, "defaults": {"analytics_storage": "denied", "ad_storage": "denied", "ad_user_data": "denied", "ad_personalization": "denied"}, "regions": [], "updateTrigger": "Consent callback", "persistence": "Consent manager"},
+  "verification": [{"event": "_purchase", "method": "manual", "successCriterion": "Observe event"}]
+}

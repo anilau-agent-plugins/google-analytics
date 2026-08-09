@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "artifactType": "journal-entry",
+  "generatedAt": "2026-08-09T10:02:00Z",
+  "journalId": "journal-20260809-001",
+  "planId": "mutation-20260809-001",
+  "planSha256": "2222222222222222222222222222222222222222222222222222222222222222",
+  "confirmationSha256": "2222222222222222222222222222222222222222222222222222222222222222",
+  "startedAt": "2026-08-09T10:01:00Z",
+  "finishedAt": "2026-08-09T10:02:00Z",
+  "status": "applied",
+  "requestIds": ["request-2"],
+  "readback": {"verified": true, "observedStateSha256": "3333333333333333333333333333333333333333333333333333333333333333", "message": "Expected field observed"}
+}
