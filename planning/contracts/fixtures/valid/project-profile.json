@@ -1,9 +1,0 @@
-{
-  "schemaVersion": 1,
-  "artifactType": "project-profile",
-  "generatedAt": "2026-08-09T10:00:00Z",
-  "project": {"id": "shop-example", "root": "C:/projects/shop", "language": "ru", "credentialRef": "os-store:google-analytics/default"},
-  "website": {"url": "https://shop.example", "stack": "Laravel", "productionDeployAuthorized": false},
-  "analytics": {"account": "accounts/100", "property": "properties/200", "webStream": "properties/200/dataStreams/300", "gtm": {"accountPath": "accounts/400", "containerPath": "accounts/400/containers/500"}},
-  "businessContext": {"timezone": "Asia/Bangkok", "currency": "USD", "outcomes": ["paid purchase"], "confirmedByUser": true}
-}
