@@ -80,6 +80,21 @@ class BaselineAuditTests(unittest.TestCase):
         self.assertEqual(len(snapshots), 2)
         self.assertIn("QUOTA_LIMITED", {item["code"] for item in result["audit"]["limitations"]})
 
+    def test_resource_discovery_does_not_drop_accounts_after_ten(self) -> None:
+        class Admin:
+            def account_summaries(self): return {"items": [], "pages": 1, "truncated": False}
+        class Gtm:
+            def accounts(self): return {"items": [{"path": f"accounts/{index}"} for index in range(12)], "pages": 1, "truncated": False}
+            def containers(self, path):
+                index = path.rsplit("/", 1)[1]
+                return {"items": [{"path": f"{path}/containers/{index}", "publicId": f"G-{index}", "features": {"supportWorkspaces": False}}], "pages": 1, "truncated": False}
+        class Service(BaselineService):
+            def _clients(self, profile): return profile, type("Executor", (), {"ledger": []})(), Admin(), object(), Gtm()
+        result = Service(auth=FakeAuth()).resources("profile-fixture")
+        self.assertEqual(len(result["tagManager"]["containers"]), 12)
+        self.assertEqual({item["containerKind"] for item in result["tagManager"]["containers"]}, {"google-tag"})
+        self.assertEqual(result["limitations"], [])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -98,12 +98,24 @@ class BaselineService:
             accounts = {"items": [], "pages": 0, "truncated": False}
             limitations.append({"code": exc.code, "message": exc.message, "provider": "tag-manager"})
         containers: list[dict[str, Any]] = []
-        limited = len(accounts["items"]) > 10
-        for account in accounts["items"][:10]:
+        limited = False
+        for account in accounts["items"]:
             path = account.get("path")
             if isinstance(path, str):
-                page = gtm.containers(path)
-                containers.extend(page["items"])
+                try:
+                    page = gtm.containers(path)
+                except AdvisorError as exc:
+                    limitations.append({"code": exc.code, "message": exc.message, "provider": "tag-manager", "resource": path})
+                    continue
+                for container in page["items"]:
+                    if isinstance(container, dict):
+                        features = container.get("features", {})
+                        public_id = str(container.get("publicId", ""))
+                        container = {
+                            **container,
+                            "containerKind": "gtm" if public_id.startswith("GTM-") or features.get("supportWorkspaces") else "google-tag",
+                        }
+                    containers.append(container)
                 limited = limited or page["truncated"]
         return {
             "profileId": selected, "analytics": summaries, "tagManager": {"accounts": accounts, "containers": containers},
