@@ -1,4 +1,4 @@
 interface:
   display_name: "Google Analytics Advisor"
-  short_description: "Read-only GA4, GTM and site audit"
-  default_prompt: "Use $google-analytics to inspect my GA4, GTM and local website tagging and explain the baseline in plain language."
+  short_description: "GA4 audit and measurement planning"
+  default_prompt: "Use $google-analytics to inspect my GA4, GTM and local website evidence, then design an immutable measurement plan in plain language."

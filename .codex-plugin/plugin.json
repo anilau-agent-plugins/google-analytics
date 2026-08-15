@@ -1,7 +1,7 @@
 {
   "name": "google-analytics",
-  "version": "0.5.0+codex.20260815144205",
-  "description": "Plain-language, read-only GA4, GTM and website baseline audits.",
+  "version": "0.6.0+codex.20260815155259",
+  "description": "Plain-language GA4/GTM audits and immutable measurement planning.",
   "author": {
     "name": "Eduard Volkov",
     "url": "https://anilau.com"
@@ -19,13 +19,14 @@
   "interface": {
     "displayName": "Google Analytics Advisor",
     "shortDescription": "Plain-language GA4 guidance for websites.",
-    "longDescription": "Helps non-specialists inspect GA4, GTM and local website tagging safely, with customer-owned OAuth and evidence-backed baseline findings.",
+    "longDescription": "Helps non-specialists inspect GA4, GTM and local website tagging, then design and approve an immutable local measurement plan without changing production systems.",
     "developerName": "Anilau",
     "category": "Productivity",
     "capabilities": [
       "Interactive",
       "Local diagnostics",
       "Read-only baseline audit",
+      "Measurement planning",
       "Google OAuth",
       "Local tag inspection"
     ],

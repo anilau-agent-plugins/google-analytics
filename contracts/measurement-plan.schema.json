@@ -1,95 +1,291 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:anilau:google-analytics:measurement-plan:v1",
+  "$id": "urn:anilau:google-analytics:measurement-plan:v2",
   "title": "Google Analytics Advisor measurement plan",
-  "type": "object",
-  "additionalProperties": false,
-  "required": ["schemaVersion", "artifactType", "generatedAt", "planId", "projectProfileSha256", "status", "events", "ecommerce", "consent", "verification"],
-  "properties": {
-    "schemaVersion": {"const": 1},
-    "artifactType": {"const": "measurement-plan"},
-    "generatedAt": {"type": "string", "format": "date-time"},
-    "planId": {"type": "string", "pattern": "^[A-Za-z0-9._-]{8,128}$"},
-    "projectProfileSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
-    "status": {"enum": ["draft", "approved", "superseded"]},
-    "events": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["name", "businessOutcome", "sourceOfTruth", "keyEvent", "parameters", "evidence"],
-        "properties": {
-          "name": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]{0,39}$"},
-          "businessOutcome": {"type": "string", "minLength": 1},
-          "sourceOfTruth": {"enum": ["browser", "backend", "payment", "crm", "gtm", "unknown"]},
-          "keyEvent": {"type": "boolean"},
-          "parameters": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "additionalProperties": false,
-              "required": ["name", "required", "meaning"],
-              "properties": {
-                "name": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]{0,39}$"},
-                "required": {"type": "boolean"},
-                "meaning": {"type": "string", "minLength": 1}
-              }
-            }
-          },
-          "evidence": {"type": "string", "minLength": 1}
-        }
+  "$defs": {
+    "v1Parameter": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "required", "meaning"],
+      "properties": {
+        "name": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]{0,39}$"},
+        "required": {"type": "boolean"},
+        "meaning": {"type": "string", "minLength": 1}
       }
     },
-    "ecommerce": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["enabled", "currencySource", "valueRule", "transactionIdSource", "itemsRequired", "deduplication"],
+    "v1Event": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "businessOutcome", "sourceOfTruth", "keyEvent", "parameters", "evidence"],
       "properties": {
-        "enabled": {"type": "boolean"},
-        "currencySource": {"type": ["string", "null"], "minLength": 1},
-        "valueRule": {"type": ["string", "null"], "minLength": 1},
-        "transactionIdSource": {"type": ["string", "null"], "minLength": 1},
-        "itemsRequired": {"type": "boolean"},
-        "deduplication": {"type": "string", "minLength": 1}
+        "name": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]{0,39}$"},
+        "businessOutcome": {"type": "string", "minLength": 1},
+        "sourceOfTruth": {"enum": ["browser", "backend", "payment", "crm", "gtm", "unknown"]},
+        "keyEvent": {"type": "boolean"},
+        "parameters": {"type": "array", "items": {"$ref": "#/$defs/v1Parameter"}},
+        "evidence": {"type": "string", "minLength": 1}
       }
     },
-    "consent": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["mode", "policyConfirmed", "defaults", "regions", "updateTrigger", "persistence"],
+    "consentDefaults": {
+      "type": "object", "additionalProperties": false,
+      "required": ["analytics_storage", "ad_storage", "ad_user_data", "ad_personalization"],
       "properties": {
-        "mode": {"enum": ["basic", "advanced", "unknown"]},
-        "policyConfirmed": {"type": "boolean"},
-        "defaults": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["analytics_storage", "ad_storage", "ad_user_data", "ad_personalization"],
+        "analytics_storage": {"enum": ["granted", "denied", "policy-dependent"]},
+        "ad_storage": {"enum": ["granted", "denied", "policy-dependent"]},
+        "ad_user_data": {"enum": ["granted", "denied", "policy-dependent"]},
+        "ad_personalization": {"enum": ["granted", "denied", "policy-dependent"]}
+      }
+    },
+    "v1": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schemaVersion", "artifactType", "generatedAt", "planId", "projectProfileSha256", "status", "events", "ecommerce", "consent", "verification"],
+      "properties": {
+        "schemaVersion": {"const": 1},
+        "artifactType": {"const": "measurement-plan"},
+        "generatedAt": {"type": "string", "format": "date-time"},
+        "planId": {"type": "string", "pattern": "^[A-Za-z0-9._-]{8,128}$"},
+        "projectProfileSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "status": {"enum": ["draft", "approved", "superseded"]},
+        "events": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/v1Event"}},
+        "ecommerce": {
+          "type": "object", "additionalProperties": false,
+          "required": ["enabled", "currencySource", "valueRule", "transactionIdSource", "itemsRequired", "deduplication"],
           "properties": {
-            "analytics_storage": {"enum": ["granted", "denied", "policy-dependent"]},
-            "ad_storage": {"enum": ["granted", "denied", "policy-dependent"]},
-            "ad_user_data": {"enum": ["granted", "denied", "policy-dependent"]},
-            "ad_personalization": {"enum": ["granted", "denied", "policy-dependent"]}
+            "enabled": {"type": "boolean"},
+            "currencySource": {"type": ["string", "null"], "minLength": 1},
+            "valueRule": {"type": ["string", "null"], "minLength": 1},
+            "transactionIdSource": {"type": ["string", "null"], "minLength": 1},
+            "itemsRequired": {"type": "boolean"},
+            "deduplication": {"type": "string", "minLength": 1}
           }
         },
-        "regions": {"type": "array", "items": {"type": "string", "pattern": "^[A-Z]{2}(?:-[A-Z0-9]{1,3})?$"}, "uniqueItems": true},
-        "updateTrigger": {"type": "string", "minLength": 1},
-        "persistence": {"type": "string", "minLength": 1}
+        "consent": {
+          "type": "object", "additionalProperties": false,
+          "required": ["mode", "policyConfirmed", "defaults", "regions", "updateTrigger", "persistence"],
+          "properties": {
+            "mode": {"enum": ["basic", "advanced", "unknown"]},
+            "policyConfirmed": {"type": "boolean"},
+            "defaults": {"$ref": "#/$defs/consentDefaults"},
+            "regions": {"type": "array", "items": {"type": "string", "pattern": "^[A-Z]{2}(?:-[A-Z0-9]{1,3})?$"}, "uniqueItems": true},
+            "updateTrigger": {"type": "string", "minLength": 1},
+            "persistence": {"type": "string", "minLength": 1}
+          }
+        },
+        "verification": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/verificationV1"}}
       }
     },
-    "verification": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["event", "method", "successCriterion"],
-        "properties": {
-          "event": {"type": "string"},
-          "method": {"enum": ["local-test", "measurement-protocol-debug", "realtime", "data-api", "manual"]},
-          "successCriterion": {"type": "string", "minLength": 1}
-        }
+    "verificationV1": {
+      "type": "object", "additionalProperties": false,
+      "required": ["event", "method", "successCriterion"],
+      "properties": {
+        "event": {"type": "string"},
+        "method": {"enum": ["local-test", "measurement-protocol-debug", "realtime", "data-api", "manual"]},
+        "successCriterion": {"type": "string", "minLength": 1}
+      }
+    },
+    "evidence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "reference", "sha256", "observedAt", "supports", "confidence"],
+      "properties": {
+        "kind": {"enum": ["baseline", "source", "config", "test", "user-confirmed"]},
+        "reference": {"type": "string", "minLength": 1},
+        "sha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+        "observedAt": {"type": "string", "format": "date-time"},
+        "supports": {"type": "string", "minLength": 1},
+        "confidence": {"enum": ["confirmed", "inferred", "unknown"]}
+      }
+    },
+    "parameter": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "meaning", "source", "type", "required", "scope", "privacy", "cardinality", "reportingUse", "registration"],
+      "properties": {
+        "name": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]{0,39}$"},
+        "meaning": {"type": "string", "minLength": 1},
+        "source": {"type": "string", "minLength": 1},
+        "type": {"enum": ["string", "integer", "number", "boolean", "items"]},
+        "required": {"type": "boolean"},
+        "scope": {"enum": ["event", "item", "user"]},
+        "privacy": {"enum": ["non-pii", "pseudonymous", "pii", "sensitive", "unknown"]},
+        "cardinality": {"enum": ["low", "medium", "high", "unique", "unknown"]},
+        "reportingUse": {"type": ["string", "null"], "minLength": 1},
+        "registration": {"enum": ["none", "event-dimension", "user-dimension", "event-metric", "blocked"]}
+      }
+    },
+    "verificationV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["event", "method", "successCriterion", "productionDataSent"],
+      "properties": {
+        "event": {"type": "string", "minLength": 1},
+        "method": {"enum": ["local-test", "measurement-protocol-debug", "debugview", "realtime", "data-api", "manual"]},
+        "successCriterion": {"type": "string", "minLength": 1},
+        "productionDataSent": {"const": false}
+      }
+    },
+    "outcome": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "name", "class", "businessMeaning", "owner", "authoritativeState", "sourceOfTruth", "proxySignals", "decisionUse", "confirmed", "evidence"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]{1,63}$"},
+        "name": {"type": "string", "minLength": 1},
+        "class": {"enum": ["primary", "secondary", "diagnostic", "guardrail"]},
+        "businessMeaning": {"type": "string", "minLength": 1},
+        "owner": {"type": "string", "minLength": 1},
+        "authoritativeState": {"type": "string", "minLength": 1},
+        "sourceOfTruth": {"enum": ["backend", "payment", "crm", "application", "browser", "gtm", "unknown"]},
+        "proxySignals": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "decisionUse": {"type": "string", "minLength": 1},
+        "confirmed": {"type": "boolean"},
+        "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}}
+      }
+    },
+    "event": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "catalogClass", "customJustification", "businessOutcomeId", "businessMeaning", "trigger", "authoritativeSource", "collectionOwner", "keyEventRecommendation", "keyEventJustification", "parameters", "deduplication", "consentBehavior", "implementationTargets", "verificationChecks", "evidence", "limitations"],
+      "properties": {
+        "name": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]{0,39}$"},
+        "catalogClass": {"enum": ["automatic", "enhanced", "recommended", "custom"]},
+        "customJustification": {"type": ["string", "null"], "minLength": 1},
+        "businessOutcomeId": {"type": "string", "pattern": "^[a-z][a-z0-9-]{1,63}$"},
+        "businessMeaning": {"type": "string", "minLength": 1},
+        "trigger": {"type": "string", "minLength": 1},
+        "authoritativeSource": {"enum": ["backend", "payment", "crm", "application", "browser", "gtm", "unknown"]},
+        "collectionOwner": {"enum": ["browser-gtag", "browser-gtm", "backend-mp", "crm-mp", "payment-webhook-mp", "existing", "unknown"]},
+        "keyEventRecommendation": {"type": "boolean"},
+        "keyEventJustification": {"type": "string", "minLength": 1},
+        "parameters": {"type": "array", "items": {"$ref": "#/$defs/parameter"}},
+        "deduplication": {"type": "string", "minLength": 1},
+        "consentBehavior": {"type": "string", "minLength": 1},
+        "implementationTargets": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "verificationChecks": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/verificationV2"}},
+        "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}},
+        "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "funnel": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "businessQuestion", "steps", "open", "directlyFollowed", "timeWindow", "crossSession", "authoritativeCompletion", "breakdownIntent", "limitations", "stage10Ready"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]{1,63}$"},
+        "businessQuestion": {"type": "string", "minLength": 1},
+        "steps": {"type": "array", "minItems": 2, "items": {"type": "string", "minLength": 1}},
+        "open": {"type": "boolean"}, "directlyFollowed": {"type": "boolean"},
+        "timeWindow": {"type": "string", "minLength": 1}, "crossSession": {"type": "boolean"},
+        "authoritativeCompletion": {"type": "string", "minLength": 1},
+        "breakdownIntent": {"type": ["string", "null"], "minLength": 1},
+        "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "stage10Ready": {"type": "boolean"}
+      }
+    },
+    "customDefinition": {
+      "type": "object", "additionalProperties": false,
+      "required": ["parameter", "registration", "reportingUse", "cardinality", "budgetAvailable"],
+      "properties": {
+        "parameter": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]{0,39}$"},
+        "registration": {"enum": ["event-dimension", "user-dimension", "event-metric"]},
+        "reportingUse": {"type": "string", "minLength": 1},
+        "cardinality": {"enum": ["low", "medium", "high"]},
+        "budgetAvailable": {"type": "boolean"}
+      }
+    },
+    "v2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["schemaVersion", "artifactType", "generatedAt", "planId", "projectProfileId", "projectProfileSha256", "property", "webStream", "site", "status", "supersedes", "contentSha256", "approvedAt", "approvalSha256", "sourceEvidence", "propertyCapacity", "businessContext", "outcomes", "events", "funnels", "ecommerce", "identity", "consent", "customDefinitions", "verification", "assumptions", "openQuestions", "limitations", "stageBoundaries"],
+      "properties": {
+        "schemaVersion": {"const": 2}, "artifactType": {"const": "measurement-plan"},
+        "generatedAt": {"type": "string", "format": "date-time"},
+        "planId": {"type": "string", "pattern": "^measure-[A-Za-z0-9-]{12,128}$"},
+        "projectProfileId": {"type": "string", "minLength": 1},
+        "projectProfileSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "property": {"type": ["string", "null"], "pattern": "^properties/[0-9]+$"},
+        "webStream": {"type": ["string", "null"], "pattern": "^properties/[0-9]+/dataStreams/[0-9]+$"},
+        "site": {"type": "string", "minLength": 1},
+        "status": {"enum": ["draft", "blocked", "approved", "superseded"]},
+        "supersedes": {"type": ["string", "null"], "pattern": "^measure-[A-Za-z0-9-]{12,128}$"},
+        "contentSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "approvedAt": {"type": ["string", "null"], "format": "date-time"},
+        "approvalSha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+        "sourceEvidence": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/evidence"}},
+        "propertyCapacity": {"$ref": "#/$defs/propertyCapacity"},
+        "businessContext": {
+          "type": "object", "additionalProperties": false,
+          "required": ["businessModel", "timezone", "currency", "confirmedByUser"],
+          "properties": {
+            "businessModel": {"type": "string", "minLength": 1},
+            "timezone": {"type": ["string", "null"], "minLength": 1},
+            "currency": {"type": ["string", "null"], "pattern": "^[A-Z]{3}$"},
+            "confirmedByUser": {"type": "boolean"}
+          }
+        },
+        "outcomes": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/outcome"}},
+        "events": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/event"}},
+        "funnels": {"type": "array", "items": {"$ref": "#/$defs/funnel"}},
+        "ecommerce": {"$ref": "#/$defs/ecommerceV2"},
+        "identity": {"$ref": "#/$defs/identity"},
+        "consent": {"$ref": "#/$defs/consentV2"},
+        "customDefinitions": {"type": "array", "items": {"$ref": "#/$defs/customDefinition"}},
+        "verification": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/verificationV2"}},
+        "assumptions": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "openQuestions": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "stageBoundaries": {"$ref": "#/$defs/stageBoundaries"}
+      }
+    },
+    "ecommerceV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["enabled", "reason", "events", "itemIdentity", "valueRule", "currencySource", "multiCurrencyPolicy", "transactionIdSource", "transactionIdUniqueness", "purchaseState", "refundState", "deduplication", "refundSemantics"],
+      "properties": {
+        "enabled": {"type": "boolean"}, "reason": {"type": "string", "minLength": 1},
+        "events": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "itemIdentity": {"type": ["string", "null"], "minLength": 1},
+        "valueRule": {"type": ["string", "null"], "minLength": 1},
+        "currencySource": {"type": ["string", "null"], "minLength": 1},
+        "multiCurrencyPolicy": {"type": ["string", "null"], "minLength": 1},
+        "transactionIdSource": {"type": ["string", "null"], "minLength": 1},
+        "transactionIdUniqueness": {"type": ["string", "null"], "minLength": 1},
+        "purchaseState": {"type": ["string", "null"], "minLength": 1},
+        "refundState": {"type": ["string", "null"], "minLength": 1},
+        "deduplication": {"type": ["string", "null"], "minLength": 1},
+        "refundSemantics": {"type": ["string", "null"], "minLength": 1}
+      }
+    },
+    "propertyCapacity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["keyEventsUsed", "eventDimensionsUsed", "userDimensionsUsed", "eventMetricsUsed"],
+      "properties": {
+        "keyEventsUsed": {"type": "integer", "minimum": 0},
+        "eventDimensionsUsed": {"type": "integer", "minimum": 0},
+        "userDimensionsUsed": {"type": "integer", "minimum": 0},
+        "eventMetricsUsed": {"type": "integer", "minimum": 0}
+      }
+    },
+    "identity": {
+      "type": "object", "additionalProperties": false,
+      "required": ["userIdPlanned", "userIdSource", "measurementProtocolPlanned", "clientSessionLinkage", "lateArrivalPolicy"],
+      "properties": {
+        "userIdPlanned": {"type": "boolean"}, "userIdSource": {"type": ["string", "null"], "minLength": 1},
+        "measurementProtocolPlanned": {"type": "boolean"}, "clientSessionLinkage": {"type": ["string", "null"], "minLength": 1},
+        "lateArrivalPolicy": {"type": ["string", "null"], "minLength": 1}
+      }
+    },
+    "consentV2": {
+      "type": "object", "additionalProperties": false,
+      "required": ["mode", "policyConfirmed", "policySource", "cmp", "defaults", "regions", "updateTrigger", "persistence", "waitForUpdateMs", "revocationFlow", "legalGuarantee"],
+      "properties": {
+        "mode": {"enum": ["basic", "advanced", "unresolved"]}, "policyConfirmed": {"type": "boolean"},
+        "policySource": {"type": ["string", "null"], "minLength": 1}, "cmp": {"type": ["string", "null"], "minLength": 1},
+        "defaults": {"$ref": "#/$defs/consentDefaults"},
+        "regions": {"type": "array", "items": {"type": "string", "pattern": "^[A-Z]{2}(?:-[A-Z0-9]{1,3})?$"}, "uniqueItems": true},
+        "updateTrigger": {"type": ["string", "null"], "minLength": 1}, "persistence": {"type": ["string", "null"], "minLength": 1},
+        "waitForUpdateMs": {"type": ["integer", "null"], "minimum": 0}, "revocationFlow": {"type": ["string", "null"], "minLength": 1},
+        "legalGuarantee": {"const": false}
+      }
+    },
+    "stageBoundaries": {
+      "type": "object", "additionalProperties": false,
+      "required": ["ga4Changed", "gtmChanged", "siteChanged", "productionEventsSent", "mutationApprovalGranted"],
+      "properties": {
+        "ga4Changed": {"const": false}, "gtmChanged": {"const": false}, "siteChanged": {"const": false},
+        "productionEventsSent": {"const": false}, "mutationApprovalGranted": {"const": false}
       }
     }
-  }
+  },
+  "oneOf": [{"$ref": "#/$defs/v1"}, {"$ref": "#/$defs/v2"}]
 }

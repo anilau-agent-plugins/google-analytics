@@ -78,6 +78,8 @@ $start = [System.Diagnostics.ProcessStartInfo]::new()
 $start.FileName = "python"
 $start.UseShellExecute = $false
 $start.WorkingDirectory = (Get-Location).Path
+$start.Environment["PYTHONDONTWRITEBYTECODE"] = "1"
+$start.ArgumentList.Add("-B")
 foreach ($argument in $PythonArgs) {
     $start.ArgumentList.Add($argument)
 }

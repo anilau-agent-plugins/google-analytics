@@ -22,14 +22,14 @@ foreach ($candidate in $candidates) {
     $prefix = @($candidate.Prefix)
     $previousPreference = $ErrorActionPreference
     $ErrorActionPreference = 'SilentlyContinue'
-    & $executable @prefix -I -X utf8 -c $probe *> $null
+    & $executable @prefix -I -B -X utf8 -c $probe *> $null
     $probeExitCode = $LASTEXITCODE
     $ErrorActionPreference = $previousPreference
     if ($probeExitCode -eq 0) {
-        & $executable @prefix -I -X utf8 $entrypoint @args
+        & $executable @prefix -I -B -X utf8 $entrypoint @args
         exit $LASTEXITCODE
     }
 }
 
-[Console]::Out.WriteLine('{"schemaVersion":1,"cliVersion":"0.5.0","ok":false,"command":"bootstrap","status":"error","data":{},"warnings":[],"errors":[{"code":"PYTHON_RUNTIME_UNAVAILABLE","message":"Supported CPython 3.10-3.13 was not found.","retryable":false,"details":{},"nextAction":"Install a standard 64-bit CPython from https://www.python.org/downloads/windows/ after explicit consent, then run again."}]}')
+[Console]::Out.WriteLine('{"schemaVersion":1,"cliVersion":"0.6.0","ok":false,"command":"bootstrap","status":"error","data":{},"warnings":[],"errors":[{"code":"PYTHON_RUNTIME_UNAVAILABLE","message":"Supported CPython 3.10-3.13 was not found.","retryable":false,"details":{},"nextAction":"Install a standard 64-bit CPython from https://www.python.org/downloads/windows/ after explicit consent, then run again."}]}')
 exit 2

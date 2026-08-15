@@ -25,6 +25,12 @@ class ContractTests(unittest.TestCase):
                     validate_artifact(name, FIXTURES / "invalid" / f"{name}.json")
                 self.assertEqual(caught.exception.exit_code, 4)
 
+    def test_measurement_plan_v2_fixtures(self) -> None:
+        self.assertTrue(validate_artifact("measurement-plan", FIXTURES / "valid" / "measurement-plan-v2.json")["valid"])
+        with self.assertRaises(AdvisorError) as caught:
+            validate_artifact("measurement-plan", FIXTURES / "invalid" / "measurement-plan-v2.json")
+        self.assertIn("PII", caught.exception.details["reason"])
+
 
 if __name__ == "__main__":
     unittest.main()

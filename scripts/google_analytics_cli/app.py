@@ -102,6 +102,31 @@ def build_parser() -> Parser:
     baseline.add_argument("--gtm-container")
     baseline.add_argument("--experimental-admin-alpha", action="store_true")
     baseline.add_argument("--json", action="store_true")
+    measurement = sub.add_parser("measurement")
+    measurement_sub = measurement.add_subparsers(dest="measurement_command", required=True, parser_class=Parser)
+    measurement_context = measurement_sub.add_parser("context")
+    measurement_context.add_argument("--project-root", required=True, type=Path)
+    measurement_context.add_argument("--profile", required=True)
+    baseline_choice = measurement_context.add_mutually_exclusive_group(required=True)
+    baseline_choice.add_argument("--baseline", type=Path)
+    baseline_choice.add_argument("--without-baseline", action="store_true")
+    measurement_context.add_argument("--answers", type=Path)
+    measurement_context.add_argument("--json", action="store_true")
+    measurement_draft = measurement_sub.add_parser("draft")
+    measurement_draft.add_argument("--context", required=True, type=Path)
+    measurement_draft.add_argument("--output-dir", required=True, type=Path)
+    measurement_draft.add_argument("--json", action="store_true")
+    measurement_show = measurement_sub.add_parser("show")
+    measurement_show.add_argument("--input", required=True, type=Path)
+    measurement_show.add_argument("--format", choices=["plain", "json"], default="plain")
+    measurement_show.add_argument("--json", action="store_true")
+    measurement_approve = measurement_sub.add_parser("approve")
+    measurement_approve.add_argument("--input", required=True, type=Path)
+    measurement_approve.add_argument("--confirm-sha256", required=True)
+    measurement_approve.add_argument("--json", action="store_true")
+    measurement_migrate = measurement_sub.add_parser("migrate")
+    measurement_migrate.add_argument("--input", required=True, type=Path)
+    measurement_migrate.add_argument("--json", action="store_true")
     return parser
 
 
@@ -184,4 +209,26 @@ def dispatch(argv: list[str]) -> tuple[str, str, Any]:
             experimental_alpha=args.experimental_admin_alpha,
         )
         return "audit baseline", result["audit"]["completeness"], result
+    if args.group == "measurement":
+        from .measurement_service import MeasurementService
+
+        service = MeasurementService()
+        if args.measurement_command == "context":
+            result = service.context(
+                args.project_root, args.profile, baseline_path=args.baseline,
+                without_baseline=args.without_baseline, answers_path=args.answers,
+            )
+            return "measurement context", result["status"], result
+        if args.measurement_command == "draft":
+            result = service.draft(args.context, args.output_dir)
+            return "measurement draft", result["plan"]["status"], result
+        if args.measurement_command == "show":
+            result = service.show(args.input, args.format)
+            return "measurement show", result["status"], result
+        if args.measurement_command == "approve":
+            result = service.approve(args.input, args.confirm_sha256)
+            return "measurement approve", "approved", result
+        if args.measurement_command == "migrate":
+            result = service.migrate(args.input)
+            return "measurement migrate", "blocked", result
     raise AdvisorError("INVALID_ARGUMENTS", "Unsupported command.", EXIT_INPUT)

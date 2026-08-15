@@ -16,7 +16,7 @@ ENTRY = ROOT / "scripts" / "google_analytics.py"
 class CliTests(unittest.TestCase):
     def run_cli(self, *args: str, env: dict[str, str] | None = None) -> tuple[int, dict]:
         result = subprocess.run(
-            [sys.executable, "-I", "-X", "utf8", str(ENTRY), *args],
+            [sys.executable, "-I", "-B", "-X", "utf8", str(ENTRY), *args],
             capture_output=True,
             text=True,
             encoding="utf-8",
@@ -30,7 +30,7 @@ class CliTests(unittest.TestCase):
         code, payload = self.run_cli("version", "--json")
         self.assertEqual(code, 0)
         self.assertTrue(payload["ok"])
-        self.assertEqual(payload["cliVersion"], "0.5.0")
+        self.assertEqual(payload["cliVersion"], "0.6.0")
 
     def test_version_check_is_offline_without_configuration(self) -> None:
         code, payload = self.run_cli("version", "--check", "--json")
@@ -82,6 +82,24 @@ class CliTests(unittest.TestCase):
             code, payload = self.run_cli("audit", "baseline", "--profile", "profile-fixture", "--project-root", str(root), "--json", env=env)
             self.assertEqual(code, 4)
             self.assertEqual(payload["errors"][0]["code"], "SELECTION_REQUIRED")
+
+    def test_measurement_context_and_blocked_draft_are_local_only(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp).resolve()
+            code, context = self.run_cli(
+                "measurement", "context", "--project-root", str(root), "--profile", "profile-test",
+                "--without-baseline", "--json",
+            )
+            self.assertEqual(code, 0)
+            self.assertEqual(context["status"], "action_required")
+            self.assertFalse(context["data"]["mutationPerformed"])
+            code, draft = self.run_cli(
+                "measurement", "draft", "--context", context["data"]["artifact"]["path"],
+                "--output-dir", str(root / ".google-analytics-advisor"), "--json",
+            )
+            self.assertEqual(code, 0)
+            self.assertEqual(draft["status"], "blocked")
+            self.assertFalse(draft["data"]["mutationPerformed"])
 
     @unittest.skipUnless(os.name == "nt", "CLI DPAPI import is Windows-only")
     def test_client_import_uses_protected_storage_and_does_not_echo_secret(self) -> None:

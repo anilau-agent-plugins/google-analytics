@@ -187,20 +187,34 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
         for index, period in enumerate(data["periods"]):
             if date.fromisoformat(period["from"]) > date.fromisoformat(period["to"]):
                 _fail(f"$.periods[{index}]", "period starts after it ends")
-    elif name == "measurement-plan" and data["ecommerce"]["enabled"]:
-        for field in ("currencySource", "valueRule", "transactionIdSource"):
-            if not data["ecommerce"][field]:
-                _fail(f"$.ecommerce.{field}", "is required when ecommerce is enabled")
-        if "purchase" not in {item["name"] for item in data["events"]}:
-            _fail("$.events", "enabled ecommerce requires purchase")
+    elif name == "measurement-plan":
+        if data["ecommerce"]["enabled"]:
+            for field in ("currencySource", "valueRule", "transactionIdSource"):
+                if not data["ecommerce"][field]:
+                    _fail(f"$.ecommerce.{field}", "is required when ecommerce is enabled")
+            if "purchase" not in {item["name"] for item in data["events"]}:
+                _fail("$.events", "enabled ecommerce requires purchase")
+        if data.get("schemaVersion") == 2:
+            from .measurement_policy import evaluate_plan, pii_issues, plan_content_sha256
+
+            if data["contentSha256"] != plan_content_sha256(data):
+                _fail("$.contentSha256", "does not match canonical plan content")
+            unsafe = pii_issues(data)
+            if unsafe:
+                _fail("$", f"PII-shaped content is prohibited: {'; '.join(unsafe)}")
+            if data["status"] == "approved":
+                evaluation = evaluate_plan(data)
+                if evaluation["blockers"]:
+                    _fail("$", f"approved plan has blockers: {'; '.join(evaluation['blockers'])}")
+                if not data["approvedAt"] or not data["approvalSha256"]:
+                    _fail("$", "approved plan requires approval evidence")
 
 
-def validate_artifact(name: str, input_path: Path) -> dict[str, Any]:
+def validate_artifact_data(name: str, data: dict[str, Any], *, path_label: str = "<memory>") -> dict[str, Any]:
     if name not in ARTIFACTS:
         raise AdvisorError("UNKNOWN_ARTIFACT_TYPE", f"Unknown artifact type: {name}", EXIT_INPUT)
     try:
         schema = json.loads((source_root() / "contracts" / f"{name}.schema.json").read_text(encoding="utf-8"))
-        data = json.loads(input_path.read_text(encoding="utf-8"))
         if not isinstance(schema, dict) or not isinstance(data, dict):
             raise ValidationFailure("schema and artifact must be JSON objects")
         _check_schema_keywords(schema)
@@ -211,7 +225,20 @@ def validate_artifact(name: str, input_path: Path) -> dict[str, Any]:
             "ARTIFACT_VALIDATION_FAILED",
             "Artifact validation failed.",
             EXIT_INPUT,
+            details={"artifactType": name, "path": path_label, "reason": str(exc)},
+            next_action="Correct the artifact and validate it again.",
+        ) from exc
+    return {"artifactType": name, "path": path_label, "valid": True}
+
+
+def validate_artifact(name: str, input_path: Path) -> dict[str, Any]:
+    try:
+        data = json.loads(input_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise AdvisorError(
+            "ARTIFACT_VALIDATION_FAILED", "Artifact validation failed.", EXIT_INPUT,
             details={"artifactType": name, "path": str(input_path), "reason": str(exc)},
             next_action="Correct the artifact and validate it again.",
         ) from exc
-    return {"artifactType": name, "path": str(input_path.resolve()), "valid": True}
+    result = validate_artifact_data(name, data, path_label=str(input_path.resolve()))
+    return result

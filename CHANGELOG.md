@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.0 - 2026-08-15
+
+- Added evidence-first local measurement contexts and immutable version 2 measurement plans while
+  preserving read compatibility for version 1 plans.
+- Added outcome/source-of-truth, event/key-event, parameter, custom-definition, ecommerce,
+  Measurement Protocol, consent, funnel, privacy, cardinality, and verification policy checks.
+- Added local `measurement context`, `draft`, `show`, `approve`, and `migrate` commands with exact
+  SHA-256 approval and no GA4, GTM, website, secret, or production-event mutations.
+- Added plain-language rendering, protected project artifact indexes, Stage 6 guidance, and Windows
+  synthetic workflow tests.
+
 ## 0.5.0 - 2026-08-15
 
 - Added an exact read-operation registry, bounded pagination and safe retries for only allowlisted

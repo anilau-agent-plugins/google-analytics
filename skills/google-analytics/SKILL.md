@@ -1,6 +1,6 @@
 ---
 name: google-analytics
-description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, local website tag inspection, baseline audits, measurement strategy, events, key events, ecommerce, data quality, customer-owned Desktop OAuth setup, and plain-language recommendations. Use when a user asks about GA4 setup, analytics code, conversions, GTM, an analytics audit, interpreting analytics, connecting Google, creating a Google Cloud OAuth application, or checking Python. Version 0.5.0 adds bounded read-only baseline audits; it does not implement GA4/GTM/site mutations or full performance reports.
+description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, local website tag inspection, baseline audits, measurement strategy, events, key events, ecommerce, data quality, customer-owned Desktop OAuth setup, and plain-language recommendations. Use when a user asks about GA4 setup, analytics code, conversions, GTM, an analytics audit, interpreting analytics, connecting Google, creating a Google Cloud OAuth application, or checking Python. Version 0.6.0 adds immutable local measurement-plan design and approval; it does not implement GA4/GTM/site mutations or full performance reports.
 ---
 
 # Google Analytics Advisor
@@ -14,16 +14,16 @@ explanation, but keep exact product names, event names, metric names, commands a
 
 ## Current capability boundary
 
-Treat version 0.5.0 as the read-only baseline release. It can discover GA4 accounts, properties,
+Treat version 0.6.0 as the read-only baseline and local measurement-design release. It can discover GA4 accounts, properties,
 website streams and core settings; inspect selected GTM resources; statically inspect a local website
 project; run one bounded 28-day event diagnostic; correlate public tag IDs; and write immutable
-snapshots plus a baseline report. Only claim findings returned by the CLI, and preserve every
+snapshots plus a baseline report; create, validate, render, approve, and migrate immutable local
+measurement plans. Only claim findings returned by the CLI, and preserve every
 reported limitation. Never describe a source-code match alone as proof that production collection
 works.
 
 The following functionality is not implemented yet:
 
-- Measurement plans — planned for stage 6.
 - GA4, website, and GTM changes — planned for stages 7–9.
 - Data API reports and evidence-backed recommendations — planned for stage 10.
 
@@ -50,7 +50,7 @@ using it. The check sends no credentials, analytics data or identifiers, caches 
 metadata outside the plugin source for 30 days, never updates automatically, and can be disabled with
 `version --disable-check --json`.
 
-Use `contracts validate --schema <artifact-type> --input <absolute-path> --json` only for the six
+Use `contracts validate --schema <artifact-type> --input <absolute-path> --json` only for the seven
 project artifacts. Do not describe this validator as a general JSON Schema implementation.
 
 ## Google authorization workflow
@@ -149,6 +149,22 @@ acceptance without separate permission to access the user's live Google data.
 6. Require an exact plan and separate confirmation before any future GA4, GTM, website, publication,
    or production-deployment change. Authorization scopes never count as mutation approval.
 
+## Measurement design workflow
+
+Read [references/measurement-design.md](references/measurement-design.md) before creating, reviewing,
+approving, or migrating a measurement plan. Use an explicit baseline or the explicit new-setup path,
+inspect local evidence first, and let the agent prepare the structured answers. Do not make a
+non-specialist write JSON or choose GA4 terminology without explanation.
+
+Treat payment/order/CRM/backend completion as stronger evidence than clicks, form submits, or success
+pages. Prefer automatic/enhanced/recommended events before custom events. Block PII, unjustified
+custom definitions, unsafe cardinality, unresolved consent, weak ecommerce identity, and
+browser/server duplication without a deduplication design.
+
+Draft and approved plans are append-only. Show the exact content SHA-256 before local approval.
+Approval creates design evidence only: it never authorizes or performs a GA4, GTM, website, publish,
+deployment, Measurement Protocol secret, or production-event operation.
+
 ## Safe preview responses
 
 For planning questions that do not require live evidence, provide a provisional explanation and
@@ -159,6 +175,6 @@ For full performance reports, site-tag installation, or mutation requests, retur
 
 - what the user is trying to achieve;
 - why live access or runtime support is required;
-- that version 0.5.0 can perform only the bounded read-only baseline portion;
+- that version 0.6.0 can perform only the bounded read-only baseline and local measurement-design portions;
 - the implementation stage that will add it;
 - a safe next step that does not expose secrets or pretend the operation succeeded.

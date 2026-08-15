@@ -129,3 +129,37 @@ class ArtifactStore:
             index["audits"].append({"auditId": audit_id, "path": relative.as_posix(), "generatedAt": audit["generatedAt"]})
             self._atomic_write(index_path, index)
         return {"auditId": audit_id, "path": str(destination), "indexPath": str(index_path)}
+
+    def write_measurement_context(self, context: dict[str, Any]) -> dict[str, Any]:
+        context_id = str(context["contextId"])
+        relative = Path("measurement-contexts") / f"{context_id}.json"
+        destination = self.root / relative
+        with self._lock():
+            if destination.exists():
+                raise AdvisorError("ARTIFACT_WRITE_FAILED", "Measurement context identifiers are immutable.", EXIT_CONFIGURATION)
+            self._atomic_write(destination, context)
+        return {"contextId": context_id, "path": str(destination)}
+
+    def write_measurement_plan(self, plan: dict[str, Any]) -> dict[str, Any]:
+        plan_id = str(plan["planId"])
+        relative = Path("measurement-plans") / f"{plan_id}.json"
+        destination = self.root / relative
+        index_path = self.root / "measurement-plans" / "index.json"
+        with self._lock():
+            if destination.exists():
+                raise AdvisorError("ARTIFACT_WRITE_FAILED", "Measurement plan identifiers are immutable.", EXIT_CONFIGURATION)
+            self._atomic_write(destination, plan)
+            index = {"schemaVersion": 1, "plans": []}
+            if index_path.exists():
+                try:
+                    loaded = json.loads(index_path.read_text(encoding="utf-8"))
+                    if isinstance(loaded, dict) and isinstance(loaded.get("plans"), list):
+                        index = loaded
+                except (OSError, json.JSONDecodeError):
+                    pass
+            index["plans"].append({
+                "planId": plan_id, "path": relative.as_posix(), "generatedAt": plan["generatedAt"],
+                "status": plan["status"], "contentSha256": plan["contentSha256"],
+            })
+            self._atomic_write(index_path, index)
+        return {"planId": plan_id, "path": str(destination), "indexPath": str(index_path)}

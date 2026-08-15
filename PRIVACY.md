@@ -2,7 +2,7 @@
 
 ## Current version
 
-Google Analytics Advisor 0.5.0 runs locally in the user's environment. It does not collect telemetry
+Google Analytics Advisor 0.6.0 runs locally in the user's environment. It does not collect telemetry
 and does not send prompts, credentials, project files or analytics data to Anilau. Google
 authorization and connection diagnostics communicate directly from the user's computer to Google;
 they do not pass through Anilau infrastructure.
@@ -33,13 +33,19 @@ The customer supplies a Desktop OAuth client from the customer's own Google Clou
 CLI sends the browser authorization request, authorization-code exchange, token refresh, optional
 revocation, read-only discovery and bounded diagnostics directly to Google over HTTPS. The requested scopes cover
 identity, GA4 read/edit and GTM read/edit/version/publish. No analytics or GTM mutation is implemented
-in 0.5.0, and authorization does not approve future mutations.
+in 0.6.0, and authorization does not approve future mutations.
 
 Read-only baseline audits can request selected GA4 configuration, a bounded event-name/count report,
 and selected GTM configuration directly from Google. The CLI does not request Measurement Protocol
 secret resources. Normalized snapshots and a baseline report are stored inside the selected project
 under `.google-analytics-advisor/`; credentials remain in OS-protected storage and are never written
 to those artifacts. The user controls retention by retaining or deleting that project directory.
+
+Measurement contexts and plans are also stored under `.google-analytics-advisor/`. They contain
+structural business outcomes, evidence references, hashes, event definitions, consent decisions, and
+verification rules. The planner rejects credential-shaped and PII-shaped input and must use synthetic
+examples rather than customer records. Measurement design is local-only and sends no production
+event or measurement-plan data to Google or Anilau.
 
 The imported OAuth client and durable refresh token are retained until the user removes them. Windows
 protects them for the current user with DPAPI; macOS uses Keychain; Linux uses Secret Service through

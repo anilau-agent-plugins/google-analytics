@@ -19,7 +19,7 @@ class BootstrapTests(unittest.TestCase):
             check=False,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(json.loads(result.stdout)["cliVersion"], "0.5.0")
+        self.assertEqual(json.loads(result.stdout)["cliVersion"], "0.6.0")
 
     def test_launchers_do_not_install(self) -> None:
         text = ((ROOT / "scripts" / "google-analytics.ps1").read_text(encoding="utf-8") +

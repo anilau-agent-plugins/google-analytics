@@ -1,6 +1,6 @@
 # Support
 
-Google Analytics Advisor 0.5.0 is a read-only baseline release and is not yet available for commercial
+Google Analytics Advisor 0.6.0 is a read-only baseline and local measurement-design release and is not yet available for commercial
 installation. Questions about the product can be submitted through the contact channel on
 [anilau.com](https://anilau.com).
 
