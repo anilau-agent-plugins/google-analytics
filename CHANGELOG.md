@@ -12,6 +12,9 @@
   and the `resources list`, `site inspect`, and `audit baseline` commands.
 - Kept Measurement Protocol secret endpoints, remote mutations, production browser checks and full
   analytics reporting outside this release.
+- Live Windows smoke hardened large-account discovery, rejected short false-positive measurement
+  IDs, classified compiled/minified/tooling evidence as non-runtime, and protected project audit
+  artifacts from accidental Git commits.
 
 ## 0.4.3 - 2026-08-15
 

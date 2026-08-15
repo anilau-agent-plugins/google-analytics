@@ -22,15 +22,22 @@ class SiteScannerTests(unittest.TestCase):
             (root / "oauth-token.json").write_text("G-SECRET999", encoding="utf-8")
             (root / "docs").mkdir()
             (root / "docs" / "example.md").write_text("G-EXAMPLE1", encoding="utf-8")
+            (root / "generated.min.js").write_text("G-MINIFIED1", encoding="utf-8")
+            (root / "fragment.php").write_text("$value = 'G-I';", encoding="utf-8")
+            (root / "storage" / "framework" / "views").mkdir(parents=True)
+            (root / "storage" / "framework" / "views" / "compiled.php").write_text("G-COMPILED1", encoding="utf-8")
             result = inspect_site(root.resolve())
         self.assertEqual(result["publicIds"], ["G-ABC123", "GTM-XYZ99"])
         self.assertIn("POSSIBLE_DOUBLE_COLLECTION", {item["code"] for item in result["findings"]})
         rendered = repr(result)
         self.assertNotIn("never-read", rendered)
         self.assertNotIn("G-SECRET999", rendered)
+        self.assertNotIn("G-I", result["publicIds"])
         self.assertNotIn("<script", rendered)
         docs = [item for item in result["evidence"] if item["path"].startswith("docs/")]
         self.assertTrue(docs and all(item["classification"] == "non-runtime" for item in docs))
+        generated = [item for item in result["evidence"] if item["publicId"] in {"G-MINIFIED1", "G-COMPILED1"}]
+        self.assertTrue(generated and all(item["classification"] == "non-runtime" for item in generated))
 
     def test_requires_absolute_existing_root(self) -> None:
         with self.assertRaises(AdvisorError) as caught:

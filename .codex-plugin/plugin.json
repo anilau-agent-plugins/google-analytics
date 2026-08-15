@@ -1,6 +1,6 @@
 {
   "name": "google-analytics",
-  "version": "0.5.0+codex.20260815141002",
+  "version": "0.5.0+codex.20260815144205",
   "description": "Plain-language, read-only GA4, GTM and website baseline audits.",
   "author": {
     "name": "Eduard Volkov",

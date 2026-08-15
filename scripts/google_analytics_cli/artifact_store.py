@@ -48,9 +48,19 @@ class ArtifactStore:
     def __init__(self, project_root: Path) -> None:
         self.root = project_data_path(project_root)
 
+    def _ensure_private_runtime_directory(self) -> None:
+        self.root.mkdir(parents=True, exist_ok=True)
+        ignore = self.root / ".gitignore"
+        if not ignore.exists():
+            try:
+                with ignore.open("x", encoding="utf-8", newline="\n") as handle:
+                    handle.write("*\n")
+            except FileExistsError:
+                pass
+
     @contextmanager
     def _lock(self):
-        self.root.mkdir(parents=True, exist_ok=True)
+        self._ensure_private_runtime_directory()
         lock_path = self.root / ".artifact.lock"
         try:
             descriptor = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)

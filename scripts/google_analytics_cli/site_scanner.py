@@ -41,7 +41,7 @@ PATTERNS = {
     "consent_update": re.compile(r"['\"]consent['\"]\s*,\s*['\"]update['\"]", re.I),
     "measurement_protocol": re.compile(r"google-analytics\.com/(?:mp/collect|g/collect)", re.I),
 }
-ID_PATTERN = re.compile(r"\b(?:GTM-[A-Z0-9]+|G-[A-Z0-9]+|GT-[A-Z0-9]+)\b", re.I)
+ID_PATTERN = re.compile(r"\b(?:GTM-[A-Z0-9]{4,}|G-[A-Z0-9]{5,}|GT-[A-Z0-9]{5,})\b", re.I)
 CONSENT_SIGNALS = ("analytics_storage", "ad_storage", "ad_user_data", "ad_personalization")
 
 
@@ -57,7 +57,13 @@ def _is_link_or_reparse(path: Path) -> bool:
 
 def _classification(relative: Path) -> str:
     parts = {part.lower() for part in relative.parts}
-    if parts & {"test", "tests", "spec", "specs", "docs", "documentation", "examples", "fixtures"}:
+    portable = relative.as_posix().lower()
+    if (
+        parts & {"test", "tests", "spec", "specs", "docs", "documentation", "examples", "fixtures"}
+        or portable.startswith("storage/framework/views/")
+        or portable.startswith(".codex-")
+        or relative.name.lower().endswith(".min.js")
+    ):
         return "non-runtime"
     return "runtime"
 

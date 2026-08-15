@@ -23,6 +23,7 @@ class ArtifactStoreTests(unittest.TestCase):
             with self.assertRaises(AdvisorError):
                 store.write_audit(audit)
             self.assertEqual(list((root / ".google-analytics-advisor").rglob("*.tmp")), [])
+            self.assertEqual((root / ".google-analytics-advisor" / ".gitignore").read_text(encoding="utf-8"), "*\n")
 
     def test_secret_shaped_data_is_blocked_before_write(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
