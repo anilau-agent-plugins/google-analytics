@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "artifactType": "mutation-plan",
+  "generatedAt": "2026-08-09T10:00:00Z",
+  "expiresAt": "2026-08-09T10:15:00Z",
+  "planId": "mutation-20260809-001",
+  "planSha256": "2222222222222222222222222222222222222222222222222222222222222222",
+  "target": "analytics-admin",
+  "riskClass": "REMOTE_CONFIG_CHANGE",
+  "preconditions": [{"resource": "properties/200", "snapshotId": "snapshot-20260809-001", "stateSha256": "1111111111111111111111111111111111111111111111111111111111111111"}],
+  "operations": [{"method": "PATCH", "resource": "properties/200", "fieldMask": ["displayName"], "body": {"displayName": "Example Store"}}],
+  "expectedReadback": ["displayName equals Example Store"]
+}

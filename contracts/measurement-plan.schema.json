@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:anilau:google-analytics:measurement-plan:v1",
+  "title": "Google Analytics Advisor measurement plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "artifactType", "generatedAt", "planId", "projectProfileSha256", "status", "events", "ecommerce", "consent", "verification"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "artifactType": {"const": "measurement-plan"},
+    "generatedAt": {"type": "string", "format": "date-time"},
+    "planId": {"type": "string", "pattern": "^[A-Za-z0-9._-]{8,128}$"},
+    "projectProfileSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "status": {"enum": ["draft", "approved", "superseded"]},
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "businessOutcome", "sourceOfTruth", "keyEvent", "parameters", "evidence"],
+        "properties": {
+          "name": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]{0,39}$"},
+          "businessOutcome": {"type": "string", "minLength": 1},
+          "sourceOfTruth": {"enum": ["browser", "backend", "payment", "crm", "gtm", "unknown"]},
+          "keyEvent": {"type": "boolean"},
+          "parameters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "required", "meaning"],
+              "properties": {
+                "name": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]{0,39}$"},
+                "required": {"type": "boolean"},
+                "meaning": {"type": "string", "minLength": 1}
+              }
+            }
+          },
+          "evidence": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "ecommerce": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled", "currencySource", "valueRule", "transactionIdSource", "itemsRequired", "deduplication"],
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "currencySource": {"type": ["string", "null"], "minLength": 1},
+        "valueRule": {"type": ["string", "null"], "minLength": 1},
+        "transactionIdSource": {"type": ["string", "null"], "minLength": 1},
+        "itemsRequired": {"type": "boolean"},
+        "deduplication": {"type": "string", "minLength": 1}
+      }
+    },
+    "consent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "policyConfirmed", "defaults", "regions", "updateTrigger", "persistence"],
+      "properties": {
+        "mode": {"enum": ["basic", "advanced", "unknown"]},
+        "policyConfirmed": {"type": "boolean"},
+        "defaults": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["analytics_storage", "ad_storage", "ad_user_data", "ad_personalization"],
+          "properties": {
+            "analytics_storage": {"enum": ["granted", "denied", "policy-dependent"]},
+            "ad_storage": {"enum": ["granted", "denied", "policy-dependent"]},
+            "ad_user_data": {"enum": ["granted", "denied", "policy-dependent"]},
+            "ad_personalization": {"enum": ["granted", "denied", "policy-dependent"]}
+          }
+        },
+        "regions": {"type": "array", "items": {"type": "string", "pattern": "^[A-Z]{2}(?:-[A-Z0-9]{1,3})?$"}, "uniqueItems": true},
+        "updateTrigger": {"type": "string", "minLength": 1},
+        "persistence": {"type": "string", "minLength": 1}
+      }
+    },
+    "verification": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["event", "method", "successCriterion"],
+        "properties": {
+          "event": {"type": "string"},
+          "method": {"enum": ["local-test", "measurement-protocol-debug", "realtime", "data-api", "manual"]},
+          "successCriterion": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

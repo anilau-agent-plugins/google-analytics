@@ -1,0 +1,4 @@
+interface:
+  display_name: "Google Analytics Advisor"
+  short_description: "Guided or browser-assisted GA4 setup"
+  default_prompt: "Use $google-analytics to connect GA4 and let me choose between detailed instructions and browser-assisted OAuth setup."

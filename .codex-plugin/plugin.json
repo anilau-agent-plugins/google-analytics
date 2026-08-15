@@ -1,0 +1,38 @@
+{
+  "name": "google-analytics",
+  "version": "0.4.3+codex.20260815130512",
+  "description": "Plain-language GA4 guidance with self-service or browser-assisted OAuth onboarding.",
+  "author": {
+    "name": "Eduard Volkov",
+    "url": "https://anilau.com"
+  },
+  "homepage": "https://anilau.com",
+  "repository": "https://github.com/anilau-agent-plugins/google-analytics",
+  "license": "LicenseRef-Anilau-Commercial",
+  "keywords": [
+    "google-analytics",
+    "ga4",
+    "analytics",
+    "measurement"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Google Analytics Advisor",
+    "shortDescription": "Plain-language GA4 guidance for websites.",
+    "longDescription": "Helps non-specialists plan and understand GA4 safely, with a choice between detailed self-service and explicitly authorized browser-assisted Desktop OAuth setup.",
+    "developerName": "Anilau",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Local diagnostics",
+      "Measurement planning",
+      "Google OAuth"
+    ],
+    "websiteURL": "https://anilau.com",
+    "defaultPrompt": [
+      "Help me plan analytics for my website.",
+      "Explain which conversions my project needs.",
+      "Connect my Google account safely for a future GA4 audit."
+    ]
+  }
+}

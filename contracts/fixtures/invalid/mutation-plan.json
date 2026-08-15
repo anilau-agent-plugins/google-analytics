@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "artifactType": "mutation-plan",
+  "generatedAt": "2026-08-09T10:00:00Z",
+  "expiresAt": "2026-08-09T10:15:00Z",
+  "planId": "mutation-20260809-001",
+  "planSha256": "2222222222222222222222222222222222222222222222222222222222222222",
+  "target": "website",
+  "riskClass": "GTM_PUBLISH",
+  "preconditions": [{"resource": "accounts/1/containers/2", "snapshotId": "snapshot-20260809-001", "stateSha256": "1111111111111111111111111111111111111111111111111111111111111111"}],
+  "operations": [{"method": "FILE_PATCH", "resource": "src/analytics.js", "fieldMask": [], "body": {}}],
+  "expectedReadback": ["file contains the approved patch"]
+}

@@ -11,4 +11,6 @@ venv/
 .env.*
 !.env.example
 *.log
-
+*.zip
+dist/
+build/

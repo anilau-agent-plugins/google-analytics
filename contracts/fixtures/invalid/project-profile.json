@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "artifactType": "project-profile",
+  "generatedAt": "2026-08-09T10:00:00Z",
+  "project": {"id": "shop-example", "root": "C:/projects/shop", "language": "ru", "refreshToken": "forbidden-secret"},
+  "website": {"url": "https://shop.example", "stack": null, "productionDeployAuthorized": false},
+  "analytics": {"account": null, "property": null, "webStream": null, "gtm": null},
+  "businessContext": {"timezone": null, "currency": null, "outcomes": [], "confirmedByUser": false}
+}
