@@ -63,6 +63,13 @@ class HttpTests(unittest.TestCase):
         with self.assertRaises(AdvisorError):
             JsonTransport(opener=SequenceOpener([Response(b"12345")]), max_response_bytes=4).request("GET", "https://example.test")
 
+    def test_malformed_json_is_not_retried(self) -> None:
+        opener = SequenceOpener([Response(b"not-json"), Response(b"{}")])
+        with self.assertRaises(AdvisorError) as caught:
+            JsonTransport(opener=opener, sleep=lambda _: None).request("GET", "https://example.test")
+        self.assertEqual(caught.exception.code, "MALFORMED_HTTP_RESPONSE")
+        self.assertEqual(opener.calls, 1)
+
 
 if __name__ == "__main__":
     unittest.main()

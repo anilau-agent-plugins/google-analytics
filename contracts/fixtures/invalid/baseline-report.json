@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "artifactType": "baseline-report",
+  "generatedAt": "not-a-date",
+  "auditId": "bad",
+  "profileRef": "profile-example",
+  "projectRoot": "C:\\projects\\example",
+  "targets": {},
+  "scope": {},
+  "completeness": "unknown",
+  "snapshots": [],
+  "facts": {},
+  "findings": [],
+  "limitations": [],
+  "recommendations": [],
+  "questions": [],
+  "requestEvidence": {},
+  "partial": false,
+  "truncated": false,
+  "experimental": false
+}

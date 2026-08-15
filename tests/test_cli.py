@@ -30,7 +30,7 @@ class CliTests(unittest.TestCase):
         code, payload = self.run_cli("version", "--json")
         self.assertEqual(code, 0)
         self.assertTrue(payload["ok"])
-        self.assertEqual(payload["cliVersion"], "0.4.3")
+        self.assertEqual(payload["cliVersion"], "0.5.0")
 
     def test_version_check_is_offline_without_configuration(self) -> None:
         code, payload = self.run_cli("version", "--check", "--json")
@@ -69,6 +69,19 @@ class CliTests(unittest.TestCase):
             code, payload = self.run_cli("auth", "profiles", "list", "--json", env=env)
         self.assertEqual(code, 0)
         self.assertEqual(payload["data"], {"activeProfileId": None, "profiles": []})
+
+    def test_site_inspect_is_local_and_baseline_requires_selection_before_auth(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp).resolve()
+            (root / "index.html").write_text("G-TEST123", encoding="utf-8")
+            code, payload = self.run_cli("site", "inspect", "--project-root", str(root), "--json")
+            self.assertEqual(code, 0)
+            self.assertFalse(payload["data"]["networkUsed"])
+            env = dict(os.environ)
+            env["GOOGLE_ANALYTICS_ADVISOR_HOME"] = str(root / "runtime")
+            code, payload = self.run_cli("audit", "baseline", "--profile", "profile-fixture", "--project-root", str(root), "--json", env=env)
+            self.assertEqual(code, 4)
+            self.assertEqual(payload["errors"][0]["code"], "SELECTION_REQUIRED")
 
     @unittest.skipUnless(os.name == "nt", "CLI DPAPI import is Windows-only")
     def test_client_import_uses_protected_storage_and_does_not_echo_secret(self) -> None:

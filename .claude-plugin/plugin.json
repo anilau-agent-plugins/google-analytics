@@ -1,8 +1,8 @@
 {
   "name": "google-analytics",
   "displayName": "Google Analytics Advisor",
-  "version": "0.4.3",
-  "description": "Plain-language GA4 guidance with self-service or browser-assisted OAuth onboarding.",
+  "version": "0.5.0",
+  "description": "Plain-language, read-only GA4, GTM and website baseline audits.",
   "author": {
     "name": "Eduard Volkov",
     "url": "https://anilau.com"

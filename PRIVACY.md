@@ -2,7 +2,7 @@
 
 ## Current version
 
-Google Analytics Advisor 0.4.3 runs locally in the user's environment. It does not collect telemetry
+Google Analytics Advisor 0.5.0 runs locally in the user's environment. It does not collect telemetry
 and does not send prompts, credentials, project files or analytics data to Anilau. Google
 authorization and connection diagnostics communicate directly from the user's computer to Google;
 they do not pass through Anilau infrastructure.
@@ -18,8 +18,9 @@ advisor must not request, read or enter passwords, recovery codes or 2FA codes. 
 choose detailed self-service instructions or withdraw browser permission at any time.
 
 Runtime diagnostics inspect the local operating system, Python candidates, filesystem writability and
-TLS availability. Their JSON output remains local unless the user chooses to share it. Project
-artifact validation reads only the file explicitly supplied by the user.
+TLS availability. Their JSON output remains local unless the user chooses to share it. A local site
+inspection reads bounded supported source files below the explicitly selected project root, excludes
+secret-bearing files and directory links, and neither executes code nor uses the network.
 
 The optional version check requests a user-disclosed trusted HTTPS manifest containing public release
 metadata. It sends no installation identifier, credentials, analytics data or project data. The local
@@ -30,9 +31,15 @@ not configured by default and can be disabled from the CLI.
 
 The customer supplies a Desktop OAuth client from the customer's own Google Cloud project. The local
 CLI sends the browser authorization request, authorization-code exchange, token refresh, optional
-revocation and minimal read-only API probes directly to Google over HTTPS. The requested scopes cover
+revocation, read-only discovery and bounded diagnostics directly to Google over HTTPS. The requested scopes cover
 identity, GA4 read/edit and GTM read/edit/version/publish. No analytics or GTM mutation is implemented
-in 0.4.3, and authorization does not approve future mutations.
+in 0.5.0, and authorization does not approve future mutations.
+
+Read-only baseline audits can request selected GA4 configuration, a bounded event-name/count report,
+and selected GTM configuration directly from Google. The CLI does not request Measurement Protocol
+secret resources. Normalized snapshots and a baseline report are stored inside the selected project
+under `.google-analytics-advisor/`; credentials remain in OS-protected storage and are never written
+to those artifacts. The user controls retention by retaining or deleting that project directory.
 
 The imported OAuth client and durable refresh token are retained until the user removes them. Windows
 protects them for the current user with DPAPI; macOS uses Keychain; Linux uses Secret Service through

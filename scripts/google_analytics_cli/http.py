@@ -83,9 +83,12 @@ class JsonTransport:
         headers: dict[str, str] | None = None,
         payload: Any = None,
         max_attempts: int | None = None,
+        retry_mode: str | None = None,
     ) -> JsonResponse:
         normalized = method.upper()
-        safe_read = normalized in {"GET", "HEAD"}
+        if retry_mode not in {None, "allowlisted-read"}:
+            raise AdvisorError("UNSAFE_RETRY_POLICY", "Unknown retry policy.", EXIT_NETWORK)
+        safe_read = normalized in {"GET", "HEAD"} or (normalized == "POST" and retry_mode == "allowlisted-read")
         attempts = max_attempts if max_attempts is not None else (3 if safe_read else 1)
         if attempts > 1 and not safe_read:
             raise AdvisorError("UNSAFE_RETRY_POLICY", "Retries are disabled for mutation requests.", EXIT_NETWORK)
@@ -115,7 +118,13 @@ class JsonTransport:
                     retryable=exc.code in RETRYABLE,
                     details=redact({"status": exc.code, "requestId": self._request_id(exc.headers), "body": raw.decode("utf-8", "replace")[:2048]}),
                 ) from exc
-            except (OSError, urllib.error.URLError, TimeoutError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+            except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+                raise AdvisorError(
+                    "MALFORMED_HTTP_RESPONSE",
+                    "The server returned malformed JSON.", EXIT_NETWORK,
+                    retryable=False, details={"reason": type(exc).__name__},
+                ) from exc
+            except (OSError, urllib.error.URLError, TimeoutError) as exc:
                 if safe_read and attempt < attempts:
                     self.sleep(min(8.0, (2 ** (attempt - 1)) + self.random_value()))
                     continue

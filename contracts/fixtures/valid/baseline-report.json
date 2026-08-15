@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "artifactType": "baseline-report",
+  "generatedAt": "2026-08-15T12:00:00Z",
+  "auditId": "baseline-20260815T120000Z-abcdef123456",
+  "profileRef": "profile-example",
+  "projectRoot": "C:\\projects\\example",
+  "targets": {"property": "properties/123", "webStream": null, "gtmContainer": null},
+  "scope": {"readOnly": true, "siteScan": "local-static"},
+  "completeness": "complete",
+  "snapshots": [{"snapshotId": "snapshot-a"}, {"snapshotId": "snapshot-b"}, {"snapshotId": "snapshot-c"}],
+  "facts": {"streamCount": 1},
+  "findings": [],
+  "limitations": [],
+  "recommendations": [],
+  "questions": [],
+  "requestEvidence": {"operations": [], "authorizationHeaderStored": false},
+  "partial": false,
+  "truncated": false,
+  "experimental": false
+}

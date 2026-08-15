@@ -82,6 +82,26 @@ def build_parser() -> Parser:
     forget.add_argument("--profile", required=True)
     forget.add_argument("--confirm-profile", required=True)
     forget.add_argument("--json", action="store_true")
+    resources = sub.add_parser("resources")
+    resources_sub = resources.add_subparsers(dest="resources_command", required=True, parser_class=Parser)
+    resources_list = resources_sub.add_parser("list")
+    resources_list.add_argument("--profile", required=True)
+    resources_list.add_argument("--json", action="store_true")
+    site = sub.add_parser("site")
+    site_sub = site.add_subparsers(dest="site_command", required=True, parser_class=Parser)
+    site_inspect = site_sub.add_parser("inspect")
+    site_inspect.add_argument("--project-root", required=True, type=Path)
+    site_inspect.add_argument("--json", action="store_true")
+    audit = sub.add_parser("audit")
+    audit_sub = audit.add_subparsers(dest="audit_command", required=True, parser_class=Parser)
+    baseline = audit_sub.add_parser("baseline")
+    baseline.add_argument("--profile", required=True)
+    baseline.add_argument("--project-root", required=True, type=Path)
+    baseline.add_argument("--property", dest="property_name")
+    baseline.add_argument("--stream", dest="stream_name")
+    baseline.add_argument("--gtm-container")
+    baseline.add_argument("--experimental-admin-alpha", action="store_true")
+    baseline.add_argument("--json", action="store_true")
     return parser
 
 
@@ -145,4 +165,23 @@ def dispatch(argv: list[str]) -> tuple[str, str, Any]:
             return "auth revoke", "revoked", service.revoke(args.profile, args.confirm_profile)
         if args.auth_command == "forget-local":
             return "auth forget-local", "removed", service.forget_local(args.profile, args.confirm_profile)
+    if args.group == "site" and args.site_command == "inspect":
+        from .site_scanner import inspect_site
+
+        result = inspect_site(args.project_root)
+        return "site inspect", "partial" if result["truncated"] else "ready", result
+    if args.group == "resources" and args.resources_command == "list":
+        from .baseline_audit import BaselineService
+
+        result = BaselineService().resources(args.profile)
+        return "resources list", "partial" if result["limitations"] else "ready", result
+    if args.group == "audit" and args.audit_command == "baseline":
+        from .baseline_audit import BaselineService
+
+        result = BaselineService().audit(
+            args.profile, args.project_root, property_name=args.property_name,
+            stream_name=args.stream_name, gtm_container=args.gtm_container,
+            experimental_alpha=args.experimental_admin_alpha,
+        )
+        return "audit baseline", result["audit"]["completeness"], result
     raise AdvisorError("INVALID_ARGUMENTS", "Unsupported command.", EXIT_INPUT)

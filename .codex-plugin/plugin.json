@@ -1,7 +1,7 @@
 {
   "name": "google-analytics",
-  "version": "0.4.3+codex.20260815130512",
-  "description": "Plain-language GA4 guidance with self-service or browser-assisted OAuth onboarding.",
+  "version": "0.5.0+codex.20260815140201",
+  "description": "Plain-language, read-only GA4, GTM and website baseline audits.",
   "author": {
     "name": "Eduard Volkov",
     "url": "https://anilau.com"
@@ -19,20 +19,21 @@
   "interface": {
     "displayName": "Google Analytics Advisor",
     "shortDescription": "Plain-language GA4 guidance for websites.",
-    "longDescription": "Helps non-specialists plan and understand GA4 safely, with a choice between detailed self-service and explicitly authorized browser-assisted Desktop OAuth setup.",
+    "longDescription": "Helps non-specialists inspect GA4, GTM and local website tagging safely, with customer-owned OAuth and evidence-backed baseline findings.",
     "developerName": "Anilau",
     "category": "Productivity",
     "capabilities": [
       "Interactive",
       "Local diagnostics",
-      "Measurement planning",
-      "Google OAuth"
+      "Read-only baseline audit",
+      "Google OAuth",
+      "Local tag inspection"
     ],
     "websiteURL": "https://anilau.com",
     "defaultPrompt": [
       "Help me plan analytics for my website.",
       "Explain which conversions my project needs.",
-      "Connect my Google account safely for a future GA4 audit."
+      "Run a read-only baseline audit of my GA4 setup and website code."
     ]
   }
 }

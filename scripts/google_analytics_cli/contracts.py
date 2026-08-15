@@ -12,7 +12,7 @@ from .errors import AdvisorError, EXIT_INPUT
 from .paths import source_root
 
 
-ARTIFACTS = {"project-profile", "measurement-plan", "snapshot", "mutation-plan", "report", "journal-entry"}
+ARTIFACTS = {"project-profile", "measurement-plan", "snapshot", "mutation-plan", "report", "journal-entry", "baseline-report"}
 ALLOWED = {
     "$schema", "$id", "$defs", "$ref", "title", "type", "const", "enum", "required",
     "properties", "propertyNames", "additionalProperties", "items", "minItems", "uniqueItems",

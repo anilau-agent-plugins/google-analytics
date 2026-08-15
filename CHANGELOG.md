@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.5.0 - 2026-08-15
+
+- Added an exact read-operation registry, bounded pagination and safe retries for only allowlisted
+  Data API read POST requests.
+- Added read-only Analytics Admin, Analytics Data and serialized GTM discovery with explicit safety
+  limits and stable error classification.
+- Added a bounded local site scanner for Google tag, GTM, dataLayer and Consent Mode evidence that
+  excludes secret-bearing files, dependencies, generated output and directory links.
+- Added immutable project snapshots, an additive `baseline-report` contract, correlation findings
+  and the `resources list`, `site inspect`, and `audit baseline` commands.
+- Kept Measurement Protocol secret endpoints, remote mutations, production browser checks and full
+  analytics reporting outside this release.
+
 ## 0.4.3 - 2026-08-15
 
 - Accepted Google's canonical `userinfo.email` scope identifier as equivalent to the requested

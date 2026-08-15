@@ -4,7 +4,7 @@ Google Analytics Advisor is an Anilau plugin for people who want to understand w
 without becoming analytics specialists. It explains Google Analytics 4 in plain language and helps
 turn business goals into a clear measurement plan in Codex or Claude Code.
 
-## What version 0.4.3 can do
+## What version 0.5.0 can do
 
 - explain events, key events, ecommerce, funnels, Google tag and Google Tag Manager;
 - help prepare a provisional measurement plan without pretending that live settings were inspected;
@@ -16,11 +16,16 @@ turn business goals into a clear measurement plan in Codex or Claude Code.
 - request the complete v1 permission set once through PKCE and a local loopback callback;
 - keep OAuth clients and refresh tokens in the operating system's protected credential store;
 - manage multiple authorization profiles and run minimal read-only connection diagnostics.
+- list accessible GA4 and GTM resources without changing them;
+- inspect a selected GA4 property, website stream and GTM container through allowlisted reads;
+- statically inspect local website source for Google tag, GTM, `dataLayer`, Consent Mode and likely
+  duplicate collection without executing project code;
+- run one bounded 28-day event diagnostic and write immutable baseline snapshots and a plain-language
+  report under `.google-analytics-advisor/`.
 
-This authorization release cannot yet perform a full GA4/GTM/site audit, inspect website code,
-produce analytics reports, or change GA4, GTM, website code or production. The connection diagnostic
-uses only minimal read-only API calls. Those later capabilities are not advertised as working until
-their implementation stages pass acceptance. Firebase/mobile analytics, Google Ads, user
+This release does not create a measurement plan, produce full performance reports, or change GA4,
+GTM, website code or production. Static source evidence does not prove that production collection
+works, and partial/truncated audits are labelled explicitly. Firebase/mobile analytics, Google Ads, user
 administration, account deletion and automatic production deployment are outside v1.
 
 ## How to install
@@ -45,8 +50,9 @@ Google terms, mutation confirmations and OAuth consent.
 - Windows, macOS, or Ubuntu/Debian Linux;
 - Google Analytics 4 terminology and configuration information supplied by the user.
 
-Internet access is required only for Google authorization, Google connection diagnostics, and an
-explicitly requested version check. Local runtime and contract checks remain offline.
+Internet access is required for Google authorization, connection diagnostics, resource discovery,
+baseline API reads, and an explicitly requested version check. Local runtime, contract and site
+source checks remain offline.
 
 <details>
 <summary>Manual installation commands</summary>

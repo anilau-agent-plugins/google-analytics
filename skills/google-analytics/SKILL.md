@@ -1,6 +1,6 @@
 ---
 name: google-analytics
-description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including measurement strategy, site tagging, events, key events, ecommerce, Google Tag Manager, data quality, reports, customer-owned Google Desktop OAuth setup in either detailed self-service or authorized browser-control mode, secure authorization, and plain-language recommendations. Use when a user asks about GA4 setup, analytics code on a website, conversions, tracking plans, GTM, analytics audits, interpreting Google Analytics results, connecting a Google account, creating the required Google Cloud OAuth application, or checking the Python runtime required by this plugin. Version 0.4.3 adds an explicit OAuth onboarding mode choice and read-only connection diagnostics but not live analytics audits or GA4/GTM/site mutations.
+description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, local website tag inspection, baseline audits, measurement strategy, events, key events, ecommerce, data quality, customer-owned Desktop OAuth setup, and plain-language recommendations. Use when a user asks about GA4 setup, analytics code, conversions, GTM, an analytics audit, interpreting analytics, connecting Google, creating a Google Cloud OAuth application, or checking Python. Version 0.5.0 adds bounded read-only baseline audits; it does not implement GA4/GTM/site mutations or full performance reports.
 ---
 
 # Google Analytics Advisor
@@ -14,24 +14,21 @@ explanation, but keep exact product names, event names, metric names, commands a
 
 ## Current capability boundary
 
-Treat version 0.4.3 as an authorization foundation release. It can help create a customer-owned
-Google Desktop OAuth client, import it into OS-protected storage, authorize the complete v1 permission set, manage
-local authorization profiles, and run minimal read-only connection probes. Do not claim to have
-audited Google Analytics, Google Tag Manager, Google Cloud, or the user's website. Do not invent
-current settings, traffic, events, conversions, reports, credentials, API responses, or validation
-results.
+Treat version 0.5.0 as the read-only baseline release. It can discover GA4 accounts, properties,
+website streams and core settings; inspect selected GTM resources; statically inspect a local website
+project; run one bounded 28-day event diagnostic; correlate public tag IDs; and write immutable
+snapshots plus a baseline report. Only claim findings returned by the CLI, and preserve every
+reported limitation. Never describe a source-code match alone as proof that production collection
+works.
 
 The following functionality is not implemented yet:
 
-- Read-only GA4, GTM, and website audits — planned for stage 5.
 - Measurement plans — planned for stage 6.
 - GA4, website, and GTM changes — planned for stages 7–9.
 - Data API reports and evidence-backed recommendations — planned for stage 10.
 
-When a request requires one of these capabilities, say plainly that the installed preview cannot
-perform it yet. Explain what the capability will do, identify only safe preparation the user can do
-now, and never ask the user to paste tokens, client secrets, passwords, private keys, or
-Authorization headers into chat.
+When a request requires a later capability, explain the boundary and a safe preparation step. Never
+ask the user to paste tokens, client secrets, passwords, private keys, or Authorization headers.
 
 ## Local runtime workflow
 
@@ -120,6 +117,25 @@ Keychain. On Linux they require Secret Service through `secret-tool`; there is n
 Access tokens live only in process memory. Never direct the user to credential files or suggest
 copying protected state between computers.
 
+## Read-only baseline workflow
+
+Read [references/baseline-audit.md](references/baseline-audit.md) before a live discovery or audit.
+First run `resources list --profile <profile-id> --json`; never choose among multiple properties or
+containers by display name alone. Ask the user to select the exact resource name. Run
+`site inspect --project-root <absolute-path> --json` without Google authorization when only local
+tag evidence is needed.
+
+Run `audit baseline` only with an explicit property and absolute project root. Add `--stream` and
+`--gtm-container` only for resources selected by the user. Leave experimental Admin alpha reads off
+unless the user explicitly requests them. The audit is read-only, but it accesses the selected
+Google resources and creates `.google-analytics-advisor/` artifacts in the project.
+
+Explain the result in this order: verdict, importance, evidence coverage, confirmed facts,
+limitations, prioritized safe next steps, and remaining business questions. Preserve the technical
+resource names beside plain-language explanations. If the audit is partial or truncated, never
+present it as complete. Do not call `resources list` or `audit baseline` during plugin development
+acceptance without separate permission to access the user's live Google data.
+
 ## Advisory workflow
 
 1. Identify the user's business goal and website context before introducing metrics.
@@ -139,11 +155,10 @@ For planning questions that do not require live evidence, provide a provisional 
 label any project-specific conclusion as unverified. Ask only for business facts that cannot be
 derived later from the project or connected systems.
 
-For live GA4/GTM/website audit, report, site-tag installation, or mutation
-requests, return:
+For full performance reports, site-tag installation, or mutation requests, return:
 
 - what the user is trying to achieve;
 - why live access or runtime support is required;
-- that version 0.4.3 cannot perform the operation beyond authorization and connection diagnostics;
+- that version 0.5.0 can perform only the bounded read-only baseline portion;
 - the implementation stage that will add it;
 - a safe next step that does not expose secrets or pretend the operation succeeded.
