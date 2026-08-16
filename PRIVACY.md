@@ -2,7 +2,7 @@
 
 ## Current version
 
-Google Analytics Advisor 0.7.0 runs locally in the user's environment. It does not collect telemetry
+Google Analytics Advisor 0.8.0 runs locally in the user's environment. It does not collect telemetry
 and does not send prompts, credentials, project files or analytics data to Anilau. Google
 authorization and connection diagnostics communicate directly from the user's computer to Google;
 they do not pass through Anilau infrastructure.
@@ -32,9 +32,10 @@ not configured by default and can be disabled from the CLI.
 The customer supplies a Desktop OAuth client from the customer's own Google Cloud project. The local
 CLI sends the browser authorization request, authorization-code exchange, token refresh, optional
 revocation, read-only discovery and bounded diagnostics directly to Google over HTTPS. The requested scopes cover
-identity, GA4 read/edit and GTM read/edit/version/publish. Version 0.7.0 can perform only allowlisted
-GA4 Admin configuration after an immutable expiring plan and exact SHA-256 confirmation. GTM and
-website mutations are not implemented, and authorization does not approve any mutation.
+identity, GA4 read/edit and GTM read/edit/version/publish. Version 0.8.0 can perform allowlisted GA4
+Admin configuration and local website source changes after separate immutable expiring plans and
+exact SHA-256 confirmations. Remote GTM changes are not implemented, and authorization does not
+approve any mutation.
 
 Read-only baseline audits can request selected GA4 configuration, a bounded event-name/count report,
 and selected GTM configuration directly from Google. The CLI does not request Measurement Protocol
@@ -57,8 +58,14 @@ Measurement Protocol credential values.
 When a Measurement Protocol credential is created, its provider value is handled in process memory
 and immediately placed in DPAPI, Keychain, or Secret Service. Only an opaque credential reference is
 written to output and journals. If protected storage cannot be confirmed, the operation is reported
-as ambiguous and is not retried automatically. Version 0.7.0 does not send Measurement Protocol
-events.
+as ambiguous and is not retried automatically. Version 0.8.0 can send only an event bound to a
+separate immutable one-shot delivery plan and new exact confirmation. Debug and production endpoints
+are never mixed; an uncertain production response is not retried.
+
+Website contexts, content-addressed patches, mutation plans and journals are stored under the selected
+project's `.google-analytics-advisor/` directory. They contain paths, hashes, public tag/container IDs,
+typed intentions and credential-free validation evidence, but no file bodies in JSON journals and no
+secret values. Local apply does not execute project verification commands or perform a deployment.
 
 The imported OAuth client and durable refresh token are retained until the user removes them. Windows
 protects them for the current user with DPAPI; macOS uses Keychain; Linux uses Secret Service through

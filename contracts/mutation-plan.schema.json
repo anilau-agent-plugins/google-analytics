@@ -38,7 +38,7 @@
   ],
   "required": ["schemaVersion", "artifactType", "generatedAt", "expiresAt", "planId", "planSha256", "target", "riskClass", "preconditions", "operations", "expectedReadback"],
   "properties": {
-    "schemaVersion": {"enum": [1, 2]},
+    "schemaVersion": {"enum": [1, 2, 3]},
     "artifactType": {"const": "mutation-plan"},
     "generatedAt": {"type": "string", "format": "date-time"},
     "expiresAt": {"type": "string", "format": "date-time"},
@@ -91,5 +91,13 @@
     "profileId": {"type": "string", "minLength": 1},
     "measurementPlan": {"type": "object", "$ref": "#/$defs/safeValue"},
     "executionPolicy": {"type": "object", "$ref": "#/$defs/safeValue"}
+    ,"contextId": {"type": "string", "minLength": 1}
+    ,"contextSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+    ,"patchPath": {"type": "string", "minLength": 1}
+    ,"patchSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+    ,"patchFormat": {"const": "unified-diff-v1"}
+    ,"route": {"enum": ["direct", "gtm"]}
+    ,"verificationCommands": {"type": "array", "items": {"type": "object"}}
+    ,"deploymentApproved": {"const": false}
   }
 }

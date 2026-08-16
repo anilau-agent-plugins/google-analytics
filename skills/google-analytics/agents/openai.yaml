@@ -1,4 +1,4 @@
 interface:
   display_name: "Google Analytics Advisor"
-  short_description: "GA4 audit, planning, and safe configuration"
-  default_prompt: "Use $google-analytics to audit my website analytics, explain the findings, and safely plan any supported GA4 configuration changes."
+  short_description: "GA4 audit, setup, and safe site installation"
+  default_prompt: "Use $google-analytics to audit my website analytics, explain the findings, and safely plan GA4 or local measurement-code changes."

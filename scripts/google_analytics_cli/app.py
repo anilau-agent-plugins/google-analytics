@@ -92,6 +92,29 @@ def build_parser() -> Parser:
     site_inspect = site_sub.add_parser("inspect")
     site_inspect.add_argument("--project-root", required=True, type=Path)
     site_inspect.add_argument("--json", action="store_true")
+    site_context = site_sub.add_parser("context")
+    site_context.add_argument("--project-root", required=True, type=Path)
+    site_context.add_argument("--measurement-plan", required=True, type=Path)
+    site_context.add_argument("--baseline", type=Path)
+    site_context.add_argument("--json", action="store_true")
+    site_plan = site_sub.add_parser("plan")
+    site_plan.add_argument("--context", required=True, type=Path)
+    site_plan.add_argument("--changes", required=True, type=Path)
+    site_plan.add_argument("--patch", required=True, type=Path)
+    site_plan.add_argument("--json", action="store_true")
+    site_show = site_sub.add_parser("show")
+    site_show.add_argument("--plan", required=True, type=Path)
+    site_show.add_argument("--json", action="store_true")
+    site_apply = site_sub.add_parser("apply")
+    site_apply.add_argument("--plan", required=True, type=Path)
+    site_apply.add_argument("--confirm-sha256", required=True)
+    site_apply.add_argument("--json", action="store_true")
+    site_verify = site_sub.add_parser("verify")
+    site_verify.add_argument("--journal", required=True, type=Path)
+    site_verify.add_argument("--json", action="store_true")
+    site_reconcile = site_sub.add_parser("reconcile")
+    site_reconcile.add_argument("--journal", required=True, type=Path)
+    site_reconcile.add_argument("--json", action="store_true")
     audit = sub.add_parser("audit")
     audit_sub = audit.add_subparsers(dest="audit_command", required=True, parser_class=Parser)
     baseline = audit_sub.add_parser("baseline")
@@ -148,6 +171,26 @@ def build_parser() -> Parser:
     ga4_reconcile = ga4_sub.add_parser("reconcile")
     ga4_reconcile.add_argument("--journal", required=True, type=Path)
     ga4_reconcile.add_argument("--json", action="store_true")
+    mp = sub.add_parser("mp")
+    mp_sub = mp.add_subparsers(dest="mp_command", required=True, parser_class=Parser)
+    mp_plan = mp_sub.add_parser("delivery-plan")
+    mp_plan.add_argument("--measurement-plan", required=True, type=Path)
+    mp_plan.add_argument("--payload", required=True, type=Path)
+    mp_plan.add_argument("--credential-ref", required=True)
+    mp_plan.add_argument("--measurement-id", required=True)
+    mp_plan.add_argument("--endpoint-class", required=True, choices=["debug", "production"])
+    mp_plan.add_argument("--json", action="store_true")
+    mp_validate = mp_sub.add_parser("validate")
+    mp_validate.add_argument("--plan", required=True, type=Path)
+    mp_validate.add_argument("--confirm-sha256", required=True)
+    mp_validate.add_argument("--json", action="store_true")
+    mp_send = mp_sub.add_parser("send")
+    mp_send.add_argument("--plan", required=True, type=Path)
+    mp_send.add_argument("--confirm-sha256", required=True)
+    mp_send.add_argument("--json", action="store_true")
+    mp_reconcile = mp_sub.add_parser("reconcile")
+    mp_reconcile.add_argument("--journal", required=True, type=Path)
+    mp_reconcile.add_argument("--json", action="store_true")
     return parser
 
 
@@ -211,11 +254,33 @@ def dispatch(argv: list[str]) -> tuple[str, str, Any]:
             return "auth revoke", "revoked", service.revoke(args.profile, args.confirm_profile)
         if args.auth_command == "forget-local":
             return "auth forget-local", "removed", service.forget_local(args.profile, args.confirm_profile)
-    if args.group == "site" and args.site_command == "inspect":
-        from .site_scanner import inspect_site
+    if args.group == "site":
+        if args.site_command == "inspect":
+            from .site_scanner import inspect_site
 
-        result = inspect_site(args.project_root)
-        return "site inspect", "partial" if result["truncated"] else "ready", result
+            result = inspect_site(args.project_root)
+            return "site inspect", "partial" if result["truncated"] else "ready", result
+        from .website_service import WebsiteService
+
+        service = WebsiteService()
+        if args.site_command == "context":
+            result = service.context(args.project_root, args.measurement_plan, args.baseline)
+            return "site context", result["status"], result
+        if args.site_command == "plan":
+            result = service.plan(args.context, args.changes, args.patch)
+            return "site plan", result["status"], result
+        if args.site_command == "show":
+            result = service.show(args.plan)
+            return "site show", result["status"], result
+        if args.site_command == "apply":
+            result = service.apply(args.plan, args.confirm_sha256)
+            return "site apply", result["status"], result
+        if args.site_command == "verify":
+            result = service.verify(args.journal)
+            return "site verify", result["status"], result
+        if args.site_command == "reconcile":
+            result = service.reconcile(args.journal)
+            return "site reconcile", result["status"], result
     if args.group == "resources" and args.resources_command == "list":
         from .baseline_audit import BaselineService
 
@@ -270,4 +335,20 @@ def dispatch(argv: list[str]) -> tuple[str, str, Any]:
         if args.ga4_command == "reconcile":
             result = service.reconcile(args.journal)
             return "ga4 reconcile", result["status"], result
+    if args.group == "mp":
+        from .measurement_protocol_service import MeasurementProtocolService
+
+        service = MeasurementProtocolService()
+        if args.mp_command == "delivery-plan":
+            result = service.delivery_plan(args.measurement_plan, args.payload, args.credential_ref, args.measurement_id, args.endpoint_class)
+            return "mp delivery-plan", result["status"], result
+        if args.mp_command == "validate":
+            result = service.validate(args.plan, args.confirm_sha256)
+            return "mp validate", result["status"], result
+        if args.mp_command == "send":
+            result = service.send(args.plan, args.confirm_sha256)
+            return "mp send", result["status"], result
+        if args.mp_command == "reconcile":
+            result = service.reconcile(args.journal)
+            return "mp reconcile", result["status"], result
     raise AdvisorError("INVALID_ARGUMENTS", "Unsupported command.", EXIT_INPUT)

@@ -1,7 +1,7 @@
 {
   "name": "google-analytics",
-  "version": "0.7.0+codex.20260816130103",
-  "description": "Plain-language GA4 audits, measurement planning, and confirmed Admin API configuration.",
+  "version": "0.8.0+codex.20260816134649",
+  "description": "Plain-language GA4 audits, safe configuration, and confirmed local measurement installation.",
   "author": {
     "name": "Eduard Volkov",
     "url": "https://anilau.com"
@@ -19,7 +19,7 @@
   "interface": {
     "displayName": "Google Analytics Advisor",
     "shortDescription": "Plain-language GA4 guidance for websites.",
-    "longDescription": "Helps non-specialists inspect GA4, GTM and local website tagging, design an immutable measurement plan, and safely configure supported GA4 Admin resources through separately confirmed SHA-bound mutation plans.",
+    "longDescription": "Helps non-specialists inspect GA4, GTM and local website tagging, design an immutable measurement plan, configure supported GA4 resources, and safely install local measurement code through separately confirmed SHA-bound plans.",
     "developerName": "Anilau",
     "category": "Productivity",
     "capabilities": [
@@ -28,6 +28,9 @@
       "Read-only baseline audit",
       "Measurement planning",
       "Confirmed GA4 configuration",
+      "Confirmed local site installation",
+      "Consent and ecommerce safeguards",
+      "Measurement Protocol validation",
       "Google OAuth",
       "Local tag inspection"
     ],
@@ -35,7 +38,7 @@
     "defaultPrompt": [
       "Help me plan analytics for my website.",
       "Explain which conversions my project needs.",
-      "Run a read-only baseline audit of my GA4 setup and website code."
+      "Safely plan analytics-code installation for my local website."
     ]
   }
 }

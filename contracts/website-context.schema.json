@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:anilau:google-analytics:website-context:v1",
+  "title": "Google Analytics Advisor website context",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "artifactType", "generatedAt", "contextId", "contextSha256", "projectRoot", "projectContentSha256", "measurementPlan", "stack", "integrationCandidates", "analytics", "policy", "blockers", "limitations", "questions", "codeExecuted", "networkUsed"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "artifactType": {"const": "website-context"},
+    "generatedAt": {"type": "string", "format": "date-time"},
+    "contextId": {"type": "string", "pattern": "^site-context-[A-Za-z0-9-]{12,128}$"},
+    "contextSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "projectRoot": {"type": "string", "minLength": 1},
+    "projectContentSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "measurementPlan": {"type": "object"},
+    "baseline": {"type": ["object", "null"]},
+    "stack": {"type": "object"},
+    "integrationCandidates": {"type": "array", "items": {"type": "object"}},
+    "analytics": {"type": "object"},
+    "policy": {"type": "object"},
+    "blockers": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "questions": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "codeExecuted": {"const": false},
+    "networkUsed": {"const": false}
+  }
+}

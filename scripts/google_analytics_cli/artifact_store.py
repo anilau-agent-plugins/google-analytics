@@ -194,6 +194,43 @@ class ArtifactStore:
             self._atomic_write(destination, journal)
         return {"journalId": journal_id, "path": str(destination)}
 
+    def write_named_artifact(self, folder: str, artifact_id: str, value: dict[str, Any], *, suffix: str = ".json") -> dict[str, Any]:
+        """Write an immutable, secret-free artifact into a fixed safe folder."""
+        if not re.fullmatch(r"[a-z0-9-]{2,64}", folder) or not re.fullmatch(r"[A-Za-z0-9._-]{8,160}", artifact_id):
+            raise AdvisorError("ARTIFACT_WRITE_FAILED", "The artifact location is invalid.", EXIT_CONFIGURATION)
+        relative = Path(folder) / f"{artifact_id}{suffix}"
+        destination = self.root / relative
+        with self._lock():
+            if destination.exists():
+                raise AdvisorError("ARTIFACT_WRITE_FAILED", "Artifact identifiers are immutable.", EXIT_CONFIGURATION)
+            self._atomic_write(destination, value)
+        return {"artifactId": artifact_id, "path": str(destination)}
+
+    def write_content_artifact(self, folder: str, digest: str, content: bytes, *, suffix: str) -> dict[str, Any]:
+        if not re.fullmatch(r"[a-z0-9-]{2,64}", folder) or not re.fullmatch(r"[a-f0-9]{64}", digest):
+            raise AdvisorError("ARTIFACT_WRITE_FAILED", "The content artifact location is invalid.", EXIT_CONFIGURATION)
+        if suffix not in {".patch"}:
+            raise AdvisorError("ARTIFACT_WRITE_FAILED", "The content artifact suffix is not allowed.", EXIT_CONFIGURATION)
+        relative = Path(folder) / f"{digest}{suffix}"
+        destination = self.root / relative
+        with self._lock():
+            if destination.exists():
+                if hashlib.sha256(destination.read_bytes()).hexdigest() != digest:
+                    raise AdvisorError("ARTIFACT_WRITE_FAILED", "The content-addressed artifact is corrupt.", EXIT_CONFIGURATION)
+            else:
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                temporary = destination.with_name(f".{destination.name}.{uuid.uuid4().hex}.tmp")
+                try:
+                    with temporary.open("xb") as handle:
+                        handle.write(content)
+                        handle.flush()
+                        os.fsync(handle.fileno())
+                    os.replace(temporary, destination)
+                except OSError as exc:
+                    temporary.unlink(missing_ok=True)
+                    raise AdvisorError("ARTIFACT_WRITE_FAILED", "Could not write the patch artifact.", EXIT_CONFIGURATION) from exc
+        return {"artifactId": digest, "path": str(destination), "sha256": digest}
+
     def plan_was_consumed(self, plan_sha256: str) -> bool:
         journal_root = self.root / "journals"
         if not journal_root.exists():

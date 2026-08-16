@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.8.0 - 2026-08-16
+
+- Added bounded website context discovery for static HTML, Laravel Blade, React/Vite and Next.js App
+  Router without executing project code.
+- Added restricted UTF-8 unified-diff parsing, content-addressed patch artifacts, immutable 30-minute
+  local mutation plans, exact SHA-256 confirmation, stale-file/replay protection, safe recovery,
+  independent hash readback, and no-deploy journals.
+- Added direct Google tag and website-side GTM route safeguards, Consent Mode v2 ordering/signals,
+  one-owner event policy, one SPA page-view strategy, and ecommerce identity checks.
+- Added separate one-shot Measurement Protocol debug and production delivery plans using protected
+  credential references; debug uses `ENFORCE_RECOMMENDATIONS`, and uncertain production sends are
+  never retried.
+- Added synthetic fixtures and Windows acceptance coverage without real websites, GTM mutations,
+  deployments, or production events.
+
 ## 0.7.0 - 2026-08-16
 
 - Added a closed Analytics Admin API mutation registry for supported property/web-stream fields, key

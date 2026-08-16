@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:anilau:google-analytics:mp-delivery-plan:v1",
+  "title": "Google Analytics Advisor Measurement Protocol delivery plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "artifactType", "generatedAt", "expiresAt", "planId", "planSha256", "projectRoot", "measurementPlan", "measurementId", "credentialRef", "endpointClass", "payload", "payloadSha256", "oneShot", "productionEventsSent"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "artifactType": {"const": "mp-delivery-plan"},
+    "generatedAt": {"type": "string", "format": "date-time"},
+    "expiresAt": {"type": "string", "format": "date-time"},
+    "planId": {"type": "string", "pattern": "^mp-delivery-[A-Za-z0-9-]{12,128}$"},
+    "planSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "projectRoot": {"type": "string", "minLength": 1},
+    "measurementPlan": {"type": "object"},
+    "measurementId": {"type": "string", "pattern": "^G-[A-Z0-9]{5,}$"},
+    "credentialRef": {"type": "string", "pattern": "^[A-Za-z0-9._:/-]{3,200}$"},
+    "endpointClass": {"enum": ["debug", "production"]},
+    "payload": {"type": "object"},
+    "payloadSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "oneShot": {"const": true},
+    "productionEventsSent": {"const": false}
+  }
+}

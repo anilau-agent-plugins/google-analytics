@@ -12,7 +12,11 @@ from .errors import AdvisorError, EXIT_INPUT
 from .paths import source_root
 
 
-ARTIFACTS = {"project-profile", "measurement-plan", "snapshot", "mutation-plan", "report", "journal-entry", "baseline-report", "ga4-change-request"}
+ARTIFACTS = {
+    "project-profile", "measurement-plan", "snapshot", "mutation-plan", "report",
+    "journal-entry", "baseline-report", "ga4-change-request", "website-context",
+    "website-change-request", "mp-delivery-plan",
+}
 ALLOWED = {
     "$schema", "$id", "$defs", "$ref", "title", "type", "const", "enum", "required",
     "properties", "propertyNames", "additionalProperties", "items", "minItems", "uniqueItems",
@@ -184,6 +188,16 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
             resource = operation["resource"]
             if not any(resource == item or resource.startswith(item + "/") for item in guarded):
                 _fail(f"$.operations[{index}].resource", "lacks a covering precondition")
+        if data.get("schemaVersion") == 3 and data.get("target") != "website":
+            _fail("$.target", "mutation-plan v3 is reserved for website changes")
+    elif name == "website-context":
+        if data.get("codeExecuted") is not False or data.get("networkUsed") is not False:
+            _fail("$", "website context must be produced by local static inspection")
+    elif name == "mp-delivery-plan":
+        generated = datetime.fromisoformat(data["generatedAt"].replace("Z", "+00:00"))
+        expires = datetime.fromisoformat(data["expiresAt"].replace("Z", "+00:00"))
+        if generated >= expires:
+            _fail("$.expiresAt", "must be later than generatedAt")
     elif name == "report":
         for index, period in enumerate(data["periods"]):
             if date.fromisoformat(period["from"]) > date.fromisoformat(period["to"]):

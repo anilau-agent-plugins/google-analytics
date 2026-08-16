@@ -1,6 +1,6 @@
 ---
 name: google-analytics
-description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, local website tag inspection, baseline audits, measurement strategy, events, key events, ecommerce, data quality, customer-owned Desktop OAuth setup, confirmed GA4 Admin API configuration, and plain-language recommendations. Use when a user asks about GA4 setup, analytics code, conversions, GTM, an analytics audit, interpreting analytics, connecting Google, creating a Google Cloud OAuth application, or checking Python. Version 0.7.0 adds immutable SHA-confirmed GA4 configuration; it does not implement GTM/site mutations or full performance reports.
+description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, baseline audits, measurement strategy, customer-owned Desktop OAuth, confirmed GA4 configuration, safe local Google tag or GTM snippet installation, Consent Mode, SPA/ecommerce events, Measurement Protocol validation, and plain-language recommendations. Use when a user asks about GA4 setup, analytics code, conversions, GTM, an analytics audit, interpreting analytics, connecting Google, creating a Google Cloud OAuth application, checking Python, or installing measurement code. Version 0.8.0 adds immutable SHA-confirmed local website changes; it does not implement remote GTM changes, production deploy, or full performance reports.
 ---
 
 # Google Analytics Advisor
@@ -14,19 +14,22 @@ explanation, but keep exact product names, event names, metric names, commands a
 
 ## Current capability boundary
 
-Treat version 0.7.0 as the read-only baseline, measurement-design, and confirmed GA4 configuration release. It can discover GA4 accounts, properties,
+Treat version 0.8.0 as the read-only baseline, measurement-design, confirmed GA4 configuration, and safe local website-installation release. It can discover GA4 accounts, properties,
 website streams and core settings; inspect selected GTM resources; statically inspect a local website
 project; run one bounded 28-day event diagnostic; correlate public tag IDs; and write immutable
 snapshots plus a baseline report; create, validate, render, approve, and migrate immutable local
 measurement plans; and plan/apply supported GA4 Admin API configuration through immutable expiring
 mutation plans, exact SHA-256 confirmation, fresh preconditions, one-shot writes, and independent
-readback. Only claim findings returned by the CLI, and preserve every
+readback; and prepare/apply exact local source patches for an approved measurement plan with separate
+SHA-256 confirmation, stale-file checks, safe recovery, and readback. It can validate a protected
+Measurement Protocol design against Google's debug endpoint and send only a separately planned,
+one-shot production request. Only claim findings returned by the CLI, and preserve every
 reported limitation. Never describe a source-code match alone as proof that production collection
 works.
 
 The following functionality is not implemented yet:
 
-- Website and GTM changes — planned for stages 8–9.
+- Remote GTM workspace/version/publish changes — planned for stage 9.
 - Data API reports and evidence-backed recommendations — planned for stage 10.
 
 When a request requires a later capability, explain the boundary and a safe preparation step. Never
@@ -52,7 +55,7 @@ using it. The check sends no credentials, analytics data or identifiers, caches 
 metadata outside the plugin source for 30 days, never updates automatically, and can be disabled with
 `version --disable-check --json`.
 
-Use `contracts validate --schema <artifact-type> --input <absolute-path> --json` only for the eight
+Use `contracts validate --schema <artifact-type> --input <absolute-path> --json` only for the eleven
 project artifacts. Do not describe this validator as a general JSON Schema implementation.
 
 ## Google authorization workflow
@@ -197,16 +200,41 @@ Do not run a live Stage 7 plan or mutation during plugin-development acceptance 
 permission to access the user's Google resources. A live apply always needs the concrete generated
 plan and its new exact hash confirmation, preferably for a disposable/test resource.
 
+## Website installation workflow
+
+Read [references/website-installation.md](references/website-installation.md) before planning,
+applying, verifying, or reconciling a site change or using Measurement Protocol. Require an approved
+measurement-plan v2 and an exact absolute project root. Run `site context` first; it performs bounded
+static inspection only. Resolve every blocker, especially mixed direct/GTM routes, unresolved consent,
+missing integration points, or incomplete scans.
+
+Prepare the typed website-change request and restricted unified diff for the user. Never ask a
+non-specialist to write either artifact. Run `site plan`, explain the exact files, reason, risks,
+verification commands, no-deploy boundary, and full `planSha256`, then ask for that exact hash. Only
+after exact confirmation run `site apply`. Do not install packages, execute migrations, publish GTM,
+deploy, or infer that a source match proves production collection. Report `pending_gtm_configuration`
+when the website has a GTM snippet/dataLayer contract but the remote container still needs Stage 9.
+
+Preserve one authoritative route, one loader, one SPA page-view strategy, and one event owner. Bind
+outcome events to confirmed application/backend state, not generic clicks. Require all four Consent
+Mode v2 signals and confirmed policy; never invent legal policy or claim compliance. Keep purchase
+identity non-PII, unique, stable, and authoritative.
+
+For Measurement Protocol, keep `api_secret` only in protected OS storage. Create separate debug or
+production delivery plans. Debug validation uses `ENFORCE_RECOMMENDATIONS`; non-empty validation
+messages block production. A production plan requires a new exact SHA confirmation, sends once, never
+retries an uncertain result, and never treats an HTTP success as proof that GA4 processed the event.
+
 ## Safe preview responses
 
 For planning questions that do not require live evidence, provide a provisional explanation and
 label any project-specific conclusion as unverified. Ask only for business facts that cannot be
 derived later from the project or connected systems.
 
-For full performance reports, site-tag installation, or mutation requests, return:
+For full performance reports or unsupported remote mutation requests, return:
 
 - what the user is trying to achieve;
 - why live access or runtime support is required;
-- that version 0.7.0 can perform the bounded baseline, local measurement design, and separately confirmed supported GA4 Admin configuration portions;
+- that version 0.8.0 can perform the bounded baseline, local measurement design, separately confirmed supported GA4 configuration, and separately confirmed local website installation portions;
 - the implementation stage that will add it;
 - a safe next step that does not expose secrets or pretend the operation succeeded.

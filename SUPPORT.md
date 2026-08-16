@@ -1,7 +1,8 @@
 # Support
 
-Google Analytics Advisor 0.7.0 adds separately confirmed supported GA4 Admin API configuration to the
-read-only baseline and local measurement-design workflow. It is not yet available for commercial
+Google Analytics Advisor 0.8.0 adds separately confirmed local website measurement installation and
+Measurement Protocol validation to the read-only baseline, measurement design, and supported GA4
+configuration workflow. It is not yet available for commercial
 installation. Questions about the product can be submitted through the contact channel on
 [anilau.com](https://anilau.com).
 
@@ -18,6 +19,12 @@ substitute for resource permissions.
 For GA4 configuration issues, include only the redacted error code, operation kind, plan ID, journal
 status, and whether readback was complete. Never send Measurement Protocol credential values. If a
 result is `ambiguous` or `partial`, run read-only reconciliation and do not repeat the write.
+
+For website installation issues, include only the redacted error code, plan ID, relative target path,
+expected/observed hash and journal status. Do not send source files, patches containing customer data,
+environment files, or secrets. `pending_gtm_configuration` means the local snippet/dataLayer work is
+complete but the remote GTM container still needs a separately planned Stage 9 operation. Never
+deploy a site merely to diagnose a local Stage 8 failure.
 
 Google Cloud CLI is optional. When it is absent, OAuth onboarding continues through Google Cloud
 Console. Do not install `gcloud` merely to create a Desktop client. If console labels change, use the

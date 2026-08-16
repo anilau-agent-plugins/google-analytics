@@ -31,5 +31,5 @@ foreach ($candidate in $candidates) {
     }
 }
 
-[Console]::Out.WriteLine('{"schemaVersion":1,"cliVersion":"0.7.0","ok":false,"command":"bootstrap","status":"error","data":{},"warnings":[],"errors":[{"code":"PYTHON_RUNTIME_UNAVAILABLE","message":"Supported CPython 3.10-3.13 was not found.","retryable":false,"details":{},"nextAction":"Install a standard 64-bit CPython from https://www.python.org/downloads/windows/ after explicit consent, then run again."}]}')
+[Console]::Out.WriteLine('{"schemaVersion":1,"cliVersion":"0.8.0","ok":false,"command":"bootstrap","status":"error","data":{},"warnings":[],"errors":[{"code":"PYTHON_RUNTIME_UNAVAILABLE","message":"Supported CPython 3.10-3.13 was not found.","retryable":false,"details":{},"nextAction":"Install a standard 64-bit CPython from https://www.python.org/downloads/windows/ after explicit consent, then run again."}]}')
 exit 2

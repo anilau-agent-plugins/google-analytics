@@ -4,7 +4,7 @@ Google Analytics Advisor is an Anilau plugin for people who want to understand w
 without becoming analytics specialists. It explains Google Analytics 4 in plain language and helps
 turn business goals into a clear measurement plan in Codex or Claude Code.
 
-## What version 0.7.0 can do
+## What version 0.8.0 can do
 
 - explain events, key events, ecommerce, funnels, Google tag and Google Tag Manager;
 - create an evidence-backed measurement context from an explicit baseline, local source, and
@@ -32,10 +32,20 @@ turn business goals into a clear measurement plan in Codex or Claude Code.
   and protected Measurement Protocol credentials with fresh preconditions, one-shot writes,
   independent readback, and append-only journals;
 - keep enhanced measurement and data redaction behind explicit experimental v1alpha gates.
+- detect static HTML, Laravel Blade, React/Vite SPA and Next.js App Router integration points without
+  executing project code;
+- prepare an immutable restricted unified diff, require its exact SHA-256, apply only confirmed local
+  UTF-8 source changes, recover safely when possible, and independently verify file hashes;
+- install one direct Google tag or the website side of a GTM/dataLayer integration while blocking
+  mixed routes, duplicate loaders, incomplete Consent Mode v2 signals and conflicting SPA pageviews;
+- validate approved server-owned Measurement Protocol events against the debug endpoint and keep a
+  separately confirmed production request one-shot and non-retrying.
 
-This release does not produce full performance reports or change GTM, website code, deployments, or
-production events. Supported GA4 changes require a separate exact plan-hash confirmation; OAuth and
-measurement-plan approval do not authorize them. Static source evidence does not prove that production collection
+This release does not produce full performance reports, change remote GTM resources, or deploy a
+website. A production Measurement Protocol event is possible only through its own explicit immutable
+delivery plan and new exact confirmation; it is never part of installation acceptance. Supported GA4
+and local website changes require separate exact plan-hash confirmation; OAuth and measurement-plan
+approval do not authorize them. Static source evidence does not prove that production collection
 works, and partial/truncated audits are labelled explicitly. Firebase/mobile analytics, Google Ads, user
 administration, account deletion and automatic production deployment are outside v1.
 
@@ -62,8 +72,9 @@ Google terms, mutation confirmations and OAuth consent.
 - Google Analytics 4 terminology and configuration information supplied by the user.
 
 Internet access is required for Google authorization, connection diagnostics, resource discovery,
-baseline API reads, GA4 mutation planning/apply/readback, and an explicitly requested version check.
-Local runtime, contract and site source checks and measurement-plan design remain offline.
+baseline API reads, GA4 mutation planning/apply/readback, Measurement Protocol debug/production
+delivery, and an explicitly requested version check. Local runtime, contracts, source context,
+site patch planning/apply/readback, and measurement-plan design remain offline.
 
 ## Design a measurement plan
 
@@ -87,6 +98,23 @@ Every write is sent once. `applied` is reported only when a separate read matche
 fields. Ambiguous outcomes are reconciled read-only and never retried automatically. Delete, archive,
 user management, Analytics-account creation, Google terms, GTM, website changes, deployment, and
 production-event delivery remain outside this workflow.
+
+## Install measurement code locally
+
+The agent statically detects the stack and integration points, binds the change to an approved
+measurement plan, and prepares an exact local diff. It explains direct Google tag versus GTM,
+Consent Mode, events, SPA pageviews, ecommerce identity, risks, and verification in ordinary language.
+No source file changes until the user confirms the exact expiring plan SHA-256.
+
+Apply touches only the confirmed UTF-8 source files under the selected project root. It blocks linked,
+generated, dependency, environment, credential, binary, delete, rename, and path-escape targets. It
+does not install dependencies, run project code, publish GTM, or deploy. GTM website installations are
+reported as `pending_gtm_configuration` until Stage 9 configures and separately publishes the remote
+container.
+
+Measurement Protocol secrets stay in protected OS storage. Debug validation and production delivery
+use separate one-shot plans and exact confirmations. A timeout is `ambiguous` and is not retried; an
+HTTP success is not presented as proof that GA4 processed the event.
 
 <details>
 <summary>Manual installation commands</summary>
