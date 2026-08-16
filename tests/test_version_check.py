@@ -37,7 +37,7 @@ class VersionCheckTests(unittest.TestCase):
     def test_update_available_and_thirty_day_cache(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             env = self.environment(Path(temp))
-            transport = Transport({"product": "google-analytics", "latestVersion": "0.7.0", "releaseUrl": "https://anilau.com"})
+            transport = Transport({"product": "google-analytics", "latestVersion": "0.8.0", "releaseUrl": "https://anilau.com"})
             now = datetime(2026, 8, 10, tzinfo=timezone.utc)
             first = check_version(endpoint="https://updates.test/version.json", env=env, now=now,
                                   transport=transport, trusted_hosts={"updates.test"})

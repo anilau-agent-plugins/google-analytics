@@ -1,8 +1,8 @@
 {
   "name": "google-analytics",
   "displayName": "Google Analytics Advisor",
-  "version": "0.6.0",
-  "description": "Plain-language GA4/GTM audits and immutable measurement planning.",
+  "version": "0.7.0",
+  "description": "Plain-language GA4 audits, measurement planning, and confirmed Admin API configuration.",
   "author": {
     "name": "Eduard Volkov",
     "url": "https://anilau.com"

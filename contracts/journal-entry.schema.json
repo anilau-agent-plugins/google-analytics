@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": ["schemaVersion", "artifactType", "generatedAt", "journalId", "planId", "planSha256", "confirmationSha256", "startedAt", "finishedAt", "status", "requestIds", "readback"],
   "properties": {
-    "schemaVersion": {"const": 1},
+    "schemaVersion": {"enum": [1, 2]},
     "artifactType": {"const": "journal-entry"},
     "generatedAt": {"type": "string", "format": "date-time"},
     "journalId": {"type": "string", "pattern": "^[A-Za-z0-9._-]{8,128}$"},
@@ -26,6 +26,10 @@
         "observedStateSha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
         "message": {"type": "string", "minLength": 1}
       }
-    }
+    },
+    "operations": {"type": "array", "items": {"type": "object"}},
+    "projectRoot": {"type": "string", "minLength": 1},
+    "profileId": {"type": "string", "minLength": 1},
+    "planPath": {"type": "string", "minLength": 1}
   }
 }

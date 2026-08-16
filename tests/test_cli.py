@@ -30,7 +30,7 @@ class CliTests(unittest.TestCase):
         code, payload = self.run_cli("version", "--json")
         self.assertEqual(code, 0)
         self.assertTrue(payload["ok"])
-        self.assertEqual(payload["cliVersion"], "0.6.0")
+        self.assertEqual(payload["cliVersion"], "0.7.0")
 
     def test_version_check_is_offline_without_configuration(self) -> None:
         code, payload = self.run_cli("version", "--check", "--json")

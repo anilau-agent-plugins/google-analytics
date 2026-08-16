@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.7.0 - 2026-08-16
+
+- Added a closed Analytics Admin API mutation registry for supported property/web-stream fields, key
+  events, custom dimensions/metrics, retention, and Measurement Protocol credential metadata.
+- Added fresh v2 snapshots, immutable 30-minute mutation plans, exact SHA-256 confirmation,
+  precondition refresh, replay protection, one-shot writes, independent readback, and append-only
+  journals with explicit applied/partial/ambiguous/failed outcomes.
+- Added credential-aware Measurement Protocol handling that moves provider values directly to DPAPI,
+  Keychain, or Secret Service and excludes them from output and artifacts.
+- Added experimental fail-closed gates for v1alpha enhanced measurement and data redaction.
+- Added `ga4 capabilities`, `plan`, `show`, `apply`, and `reconcile` commands, plain-language guidance,
+  and synthetic tests that never call live mutation endpoints.
+
 ## 0.6.0 - 2026-08-15
 
 - Added evidence-first local measurement contexts and immutable version 2 measurement plans while

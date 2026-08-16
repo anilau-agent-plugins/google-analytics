@@ -15,7 +15,7 @@
   "additionalProperties": false,
   "required": ["schemaVersion", "artifactType", "generatedAt", "snapshotId", "provider", "apiChannel", "resource", "stateSha256", "state", "requestIds"],
   "properties": {
-    "schemaVersion": {"const": 1},
+    "schemaVersion": {"enum": [1, 2]},
     "artifactType": {"const": "snapshot"},
     "generatedAt": {"type": "string", "format": "date-time"},
     "snapshotId": {"type": "string", "pattern": "^[A-Za-z0-9._-]{8,128}$"},
@@ -24,6 +24,8 @@
     "resource": {"type": "string", "minLength": 1},
     "stateSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
     "state": {"type": "object", "$ref": "#/$defs/safeValue"},
-    "requestIds": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+    "requestIds": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "profileId": {"type": "string", "minLength": 1},
+    "complete": {"type": "boolean"}
   }
 }

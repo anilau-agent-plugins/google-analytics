@@ -4,7 +4,7 @@ Google Analytics Advisor is an Anilau plugin for people who want to understand w
 without becoming analytics specialists. It explains Google Analytics 4 in plain language and helps
 turn business goals into a clear measurement plan in Codex or Claude Code.
 
-## What version 0.6.0 can do
+## What version 0.7.0 can do
 
 - explain events, key events, ecommerce, funnels, Google tag and Google Tag Manager;
 - create an evidence-backed measurement context from an explicit baseline, local source, and
@@ -26,10 +26,16 @@ turn business goals into a clear measurement plan in Codex or Claude Code.
   duplicate collection without executing project code;
 - run one bounded 28-day event diagnostic and write immutable baseline snapshots and a plain-language
   report under `.google-analytics-advisor/`.
+- prepare allowlisted GA4 Admin API changes from an approved measurement plan and require the exact
+  SHA-256 of an immutable 30-minute mutation plan;
+- create or update supported property/web-stream fields, key events, custom definitions, retention,
+  and protected Measurement Protocol credentials with fresh preconditions, one-shot writes,
+  independent readback, and append-only journals;
+- keep enhanced measurement and data redaction behind explicit experimental v1alpha gates.
 
-This release does not implement a measurement plan, produce full performance reports, or change GA4,
-GTM, website code or production. It designs the plan only; implementation belongs to later separately
-confirmed stages. Static source evidence does not prove that production collection
+This release does not produce full performance reports or change GTM, website code, deployments, or
+production events. Supported GA4 changes require a separate exact plan-hash confirmation; OAuth and
+measurement-plan approval do not authorize them. Static source evidence does not prove that production collection
 works, and partial/truncated audits are labelled explicitly. Firebase/mobile analytics, Google Ads, user
 administration, account deletion and automatic production deployment are outside v1.
 
@@ -56,8 +62,8 @@ Google terms, mutation confirmations and OAuth consent.
 - Google Analytics 4 terminology and configuration information supplied by the user.
 
 Internet access is required for Google authorization, connection diagnostics, resource discovery,
-baseline API reads, and an explicitly requested version check. Local runtime, contract and site
-source checks and measurement-plan design remain offline.
+baseline API reads, GA4 mutation planning/apply/readback, and an explicitly requested version check.
+Local runtime, contract and site source checks and measurement-plan design remain offline.
 
 ## Design a measurement plan
 
@@ -69,6 +75,18 @@ language. The user does not need to write JSON or know GA4 terminology.
 Drafts and approvals are immutable. Local approval requires the exact plan SHA-256 and creates a new
 artifact under `.google-analytics-advisor/`. Approval does not change GA4, GTM, website code, consent,
 or production events and does not authorize those future changes.
+
+## Configure supported GA4 settings
+
+The agent converts an approved measurement plan and the requested outcome into a strict local change
+request, refreshes the selected GA4 state, and creates an immutable preview. The user sees the exact
+resource, before/after fields, reason, risk, expiry, readback, and SHA-256. GA4 is changed only after
+the user confirms that exact hash.
+
+Every write is sent once. `applied` is reported only when a separate read matches the requested
+fields. Ambiguous outcomes are reconciled read-only and never retried automatically. Delete, archive,
+user management, Analytics-account creation, Google terms, GTM, website changes, deployment, and
+production-event delivery remain outside this workflow.
 
 <details>
 <summary>Manual installation commands</summary>

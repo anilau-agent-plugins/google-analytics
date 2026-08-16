@@ -127,6 +127,27 @@ def build_parser() -> Parser:
     measurement_migrate = measurement_sub.add_parser("migrate")
     measurement_migrate.add_argument("--input", required=True, type=Path)
     measurement_migrate.add_argument("--json", action="store_true")
+    ga4 = sub.add_parser("ga4")
+    ga4_sub = ga4.add_subparsers(dest="ga4_command", required=True, parser_class=Parser)
+    ga4_capabilities = ga4_sub.add_parser("capabilities")
+    ga4_capabilities.add_argument("--profile", required=True)
+    ga4_capabilities.add_argument("--property", dest="property_name", required=True)
+    ga4_capabilities.add_argument("--json", action="store_true")
+    ga4_plan = ga4_sub.add_parser("plan")
+    ga4_plan.add_argument("--profile", required=True)
+    ga4_plan.add_argument("--measurement-plan", required=True, type=Path)
+    ga4_plan.add_argument("--changes", required=True, type=Path)
+    ga4_plan.add_argument("--json", action="store_true")
+    ga4_show = ga4_sub.add_parser("show")
+    ga4_show.add_argument("--plan", required=True, type=Path)
+    ga4_show.add_argument("--json", action="store_true")
+    ga4_apply = ga4_sub.add_parser("apply")
+    ga4_apply.add_argument("--plan", required=True, type=Path)
+    ga4_apply.add_argument("--confirm-sha256", required=True)
+    ga4_apply.add_argument("--json", action="store_true")
+    ga4_reconcile = ga4_sub.add_parser("reconcile")
+    ga4_reconcile.add_argument("--journal", required=True, type=Path)
+    ga4_reconcile.add_argument("--json", action="store_true")
     return parser
 
 
@@ -231,4 +252,22 @@ def dispatch(argv: list[str]) -> tuple[str, str, Any]:
         if args.measurement_command == "migrate":
             result = service.migrate(args.input)
             return "measurement migrate", "blocked", result
+    if args.group == "ga4":
+        from .ga4_mutation_service import Ga4MutationService
+
+        service = Ga4MutationService()
+        if args.ga4_command == "capabilities":
+            return "ga4 capabilities", "ready", service.capabilities(args.profile, args.property_name)
+        if args.ga4_command == "plan":
+            result = service.plan(args.profile, args.measurement_plan, args.changes)
+            return "ga4 plan", result["status"], result
+        if args.ga4_command == "show":
+            result = service.show(args.plan)
+            return "ga4 show", result["status"], result
+        if args.ga4_command == "apply":
+            result = service.apply(args.plan, args.confirm_sha256)
+            return "ga4 apply", result["status"], result
+        if args.ga4_command == "reconcile":
+            result = service.reconcile(args.journal)
+            return "ga4 reconcile", result["status"], result
     raise AdvisorError("INVALID_ARGUMENTS", "Unsupported command.", EXIT_INPUT)

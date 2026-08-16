@@ -1,6 +1,7 @@
 # Support
 
-Google Analytics Advisor 0.6.0 is a read-only baseline and local measurement-design release and is not yet available for commercial
+Google Analytics Advisor 0.7.0 adds separately confirmed supported GA4 Admin API configuration to the
+read-only baseline and local measurement-design workflow. It is not yet available for commercial
 installation. Questions about the product can be submitted through the contact channel on
 [anilau.com](https://anilau.com).
 
@@ -13,6 +14,10 @@ share the downloaded OAuth client. If `auth doctor` reports `api_disabled`, enab
 the customer's own Cloud project. If it reports `access_denied`, first verify that the connected
 Google account has access to the intended GA4 property or GTM account; broader scopes are not a
 substitute for resource permissions.
+
+For GA4 configuration issues, include only the redacted error code, operation kind, plan ID, journal
+status, and whether readback was complete. Never send Measurement Protocol credential values. If a
+result is `ambiguous` or `partial`, run read-only reconciliation and do not repeat the write.
 
 Google Cloud CLI is optional. When it is absent, OAuth onboarding continues through Google Cloud
 Console. Do not install `gcloud` merely to create a Desktop client. If console labels change, use the

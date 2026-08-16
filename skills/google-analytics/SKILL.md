@@ -1,6 +1,6 @@
 ---
 name: google-analytics
-description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, local website tag inspection, baseline audits, measurement strategy, events, key events, ecommerce, data quality, customer-owned Desktop OAuth setup, and plain-language recommendations. Use when a user asks about GA4 setup, analytics code, conversions, GTM, an analytics audit, interpreting analytics, connecting Google, creating a Google Cloud OAuth application, or checking Python. Version 0.6.0 adds immutable local measurement-plan design and approval; it does not implement GA4/GTM/site mutations or full performance reports.
+description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, local website tag inspection, baseline audits, measurement strategy, events, key events, ecommerce, data quality, customer-owned Desktop OAuth setup, confirmed GA4 Admin API configuration, and plain-language recommendations. Use when a user asks about GA4 setup, analytics code, conversions, GTM, an analytics audit, interpreting analytics, connecting Google, creating a Google Cloud OAuth application, or checking Python. Version 0.7.0 adds immutable SHA-confirmed GA4 configuration; it does not implement GTM/site mutations or full performance reports.
 ---
 
 # Google Analytics Advisor
@@ -14,17 +14,19 @@ explanation, but keep exact product names, event names, metric names, commands a
 
 ## Current capability boundary
 
-Treat version 0.6.0 as the read-only baseline and local measurement-design release. It can discover GA4 accounts, properties,
+Treat version 0.7.0 as the read-only baseline, measurement-design, and confirmed GA4 configuration release. It can discover GA4 accounts, properties,
 website streams and core settings; inspect selected GTM resources; statically inspect a local website
 project; run one bounded 28-day event diagnostic; correlate public tag IDs; and write immutable
 snapshots plus a baseline report; create, validate, render, approve, and migrate immutable local
-measurement plans. Only claim findings returned by the CLI, and preserve every
+measurement plans; and plan/apply supported GA4 Admin API configuration through immutable expiring
+mutation plans, exact SHA-256 confirmation, fresh preconditions, one-shot writes, and independent
+readback. Only claim findings returned by the CLI, and preserve every
 reported limitation. Never describe a source-code match alone as proof that production collection
 works.
 
 The following functionality is not implemented yet:
 
-- GA4, website, and GTM changes — planned for stages 7–9.
+- Website and GTM changes — planned for stages 8–9.
 - Data API reports and evidence-backed recommendations — planned for stage 10.
 
 When a request requires a later capability, explain the boundary and a safe preparation step. Never
@@ -50,7 +52,7 @@ using it. The check sends no credentials, analytics data or identifiers, caches 
 metadata outside the plugin source for 30 days, never updates automatically, and can be disabled with
 `version --disable-check --json`.
 
-Use `contracts validate --schema <artifact-type> --input <absolute-path> --json` only for the seven
+Use `contracts validate --schema <artifact-type> --input <absolute-path> --json` only for the eight
 project artifacts. Do not describe this validator as a general JSON Schema implementation.
 
 ## Google authorization workflow
@@ -165,6 +167,36 @@ Draft and approved plans are append-only. Show the exact content SHA-256 before 
 Approval creates design evidence only: it never authorizes or performs a GA4, GTM, website, publish,
 deployment, Measurement Protocol secret, or production-event operation.
 
+## GA4 configuration workflow
+
+Read [references/ga4-configuration.md](references/ga4-configuration.md) before planning, applying, or
+reconciling a GA4 change. First identify the exact approved measurement plan and selected Google
+resources. Prepare the strict change-request JSON for the user; never require a non-specialist to
+write provider JSON, choose an update mask, or infer a resource from its display name.
+
+Run `ga4 plan` first. Explain the current state, requested state, reason, risk, expiry, expected
+readback, and full `planSha256`. Planning performs bounded reads and local artifact writes only. Ask
+the user to confirm the exact SHA-256; an approved measurement plan, OAuth consent, broad request such
+as “configure analytics,” or an earlier confirmation is not sufficient.
+
+Only after exact confirmation run `ga4 apply --plan <path> --confirm-sha256 <hash> --json`. Never add
+`--force`, retry a write, alter the immutable plan, or convert an incomplete readback into success.
+Report `applied`, `no_op`, `partial`, `ambiguous`, `failed`, or `blocked` exactly. For an ambiguous or
+partial result, use only the read-only `ga4 reconcile` command and review the evidence before a new
+plan is created.
+
+Stable v1beta configuration covers supported property/web-stream fields, key events, custom
+dimensions/metrics, retention, and Measurement Protocol credential metadata. Credential values go
+directly to the operating system credential store and must never appear in chat, output, plans,
+snapshots, journals, or logs. Enhanced measurement and data redaction use v1alpha and remain off
+unless both experimental gates and the explicit alpha warning are accepted. Never delete/archive
+resources, manage users, create an Analytics account, accept Google terms, send production events,
+mutate GTM, edit a website, publish, or deploy as part of this workflow.
+
+Do not run a live Stage 7 plan or mutation during plugin-development acceptance without separate
+permission to access the user's Google resources. A live apply always needs the concrete generated
+plan and its new exact hash confirmation, preferably for a disposable/test resource.
+
 ## Safe preview responses
 
 For planning questions that do not require live evidence, provide a provisional explanation and
@@ -175,6 +207,6 @@ For full performance reports, site-tag installation, or mutation requests, retur
 
 - what the user is trying to achieve;
 - why live access or runtime support is required;
-- that version 0.6.0 can perform only the bounded read-only baseline and local measurement-design portions;
+- that version 0.7.0 can perform the bounded baseline, local measurement design, and separately confirmed supported GA4 Admin configuration portions;
 - the implementation stage that will add it;
 - a safe next step that does not expose secrets or pretend the operation succeeded.

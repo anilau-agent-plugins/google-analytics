@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "changeRequestType": "ga4-change-request",
+  "projectRoot": "/absolute/project/path",
+  "profileId": "profile-example",
+  "operations": [
+    {
+      "kind": "PROPERTY_PATCH",
+      "resource": "properties/123",
+      "fieldMask": ["displayName"],
+      "body": {"displayName": "Main website"},
+      "rationale": "Use a clear property name."
+    }
+  ]
+}

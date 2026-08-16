@@ -12,7 +12,7 @@ from .errors import AdvisorError, EXIT_INPUT
 from .paths import source_root
 
 
-ARTIFACTS = {"project-profile", "measurement-plan", "snapshot", "mutation-plan", "report", "journal-entry", "baseline-report"}
+ARTIFACTS = {"project-profile", "measurement-plan", "snapshot", "mutation-plan", "report", "journal-entry", "baseline-report", "ga4-change-request"}
 ALLOWED = {
     "$schema", "$id", "$defs", "$ref", "title", "type", "const", "enum", "required",
     "properties", "propertyNames", "additionalProperties", "items", "minItems", "uniqueItems",
@@ -171,8 +171,9 @@ def _scan_secrets(value: Any, path: str = "$") -> None:
 
 def _semantics(name: str, data: dict[str, Any]) -> None:
     _scan_secrets(data)
-    if data.get("artifactType") != name:
-        _fail("$.artifactType", f"does not match requested schema {name}")
+    discriminator = data.get("changeRequestType") if name == "ga4-change-request" else data.get("artifactType")
+    if discriminator != name:
+        _fail("$.changeRequestType" if name == "ga4-change-request" else "$.artifactType", f"does not match requested schema {name}")
     if name == "mutation-plan":
         generated = datetime.fromisoformat(data["generatedAt"].replace("Z", "+00:00"))
         expires = datetime.fromisoformat(data["expiresAt"].replace("Z", "+00:00"))

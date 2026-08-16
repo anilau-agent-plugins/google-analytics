@@ -163,3 +163,46 @@ class ArtifactStore:
             })
             self._atomic_write(index_path, index)
         return {"planId": plan_id, "path": str(destination), "indexPath": str(index_path)}
+
+    def write_mutation_snapshot(self, snapshot: dict[str, Any]) -> dict[str, Any]:
+        snapshot_id = str(snapshot["snapshotId"])
+        relative = Path("mutation-snapshots") / f"{snapshot_id}.json"
+        destination = self.root / relative
+        with self._lock():
+            if destination.exists():
+                raise AdvisorError("ARTIFACT_WRITE_FAILED", "Mutation snapshot identifiers are immutable.", EXIT_CONFIGURATION)
+            self._atomic_write(destination, snapshot)
+        return {"snapshotId": snapshot_id, "path": str(destination)}
+
+    def write_mutation_plan(self, plan: dict[str, Any]) -> dict[str, Any]:
+        plan_id = str(plan["planId"])
+        relative = Path("mutation-plans") / f"{plan_id}.json"
+        destination = self.root / relative
+        with self._lock():
+            if destination.exists():
+                raise AdvisorError("ARTIFACT_WRITE_FAILED", "Mutation plan identifiers are immutable.", EXIT_CONFIGURATION)
+            self._atomic_write(destination, plan)
+        return {"planId": plan_id, "path": str(destination)}
+
+    def write_journal(self, journal: dict[str, Any]) -> dict[str, Any]:
+        journal_id = str(journal["journalId"])
+        relative = Path("journals") / f"{journal_id}.json"
+        destination = self.root / relative
+        with self._lock():
+            if destination.exists():
+                raise AdvisorError("ARTIFACT_WRITE_FAILED", "Journal identifiers are immutable.", EXIT_CONFIGURATION)
+            self._atomic_write(destination, journal)
+        return {"journalId": journal_id, "path": str(destination)}
+
+    def plan_was_consumed(self, plan_sha256: str) -> bool:
+        journal_root = self.root / "journals"
+        if not journal_root.exists():
+            return False
+        for path in journal_root.glob("*.json"):
+            try:
+                item = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, json.JSONDecodeError):
+                continue
+            if isinstance(item, dict) and item.get("planSha256") == plan_sha256:
+                return True
+        return False

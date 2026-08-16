@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:anilau:google-analytics:ga4-change-request:v1",
+  "title": "Google Analytics Advisor typed GA4 change request",
+  "$defs": {
+    "safeValue": {
+      "oneOf": [
+        {"type": ["string", "number", "boolean", "null"]},
+        {"type": "array", "items": {"$ref": "#/$defs/safeValue"}},
+        {"type": "object", "propertyNames": {"pattern": "^(?!.*(?:[Ss][Ee][Cc][Rr][Ee][Tt]|[Tt][Oo][Kk][Ee][Nn]|[Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd]|[Cc][Rr][Ee][Dd][Ee][Nn][Tt][Ii][Aa][Ll][Ss]?|[Pp][Rr][Ii][Vv][Aa][Tt][Ee][_-]?[Kk][Ee][Yy])(?:[Vv][Aa][Ll][Uu][Ee])?$).*$"}, "additionalProperties": {"$ref": "#/$defs/safeValue"}}
+      ]
+    }
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "changeRequestType", "projectRoot", "profileId", "operations"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "changeRequestType": {"const": "ga4-change-request"},
+    "projectRoot": {"type": "string", "minLength": 1},
+    "profileId": {"type": "string", "minLength": 1},
+    "experimentalAdminAlpha": {"type": "boolean"},
+    "alphaWarningAccepted": {"type": "boolean"},
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "resource", "fieldMask", "body"],
+        "properties": {
+          "kind": {"enum": ["PROPERTY_CREATE", "PROPERTY_PATCH", "WEB_STREAM_CREATE", "WEB_STREAM_PATCH", "KEY_EVENT_CREATE", "KEY_EVENT_PATCH", "CUSTOM_DIMENSION_CREATE", "CUSTOM_DIMENSION_PATCH", "CUSTOM_METRIC_CREATE", "CUSTOM_METRIC_PATCH", "RETENTION_UPDATE", "MP_SECRET_CREATE", "MP_SECRET_PATCH", "ENHANCED_MEASUREMENT_UPDATE", "DATA_REDACTION_UPDATE"]},
+          "resource": {"type": "string", "pattern": "^[A-Za-z0-9_-]+/[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+)*$"},
+          "fieldMask": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+          "body": {"type": "object", "$ref": "#/$defs/safeValue"},
+          "rationale": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}

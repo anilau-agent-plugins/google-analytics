@@ -38,7 +38,7 @@
   ],
   "required": ["schemaVersion", "artifactType", "generatedAt", "expiresAt", "planId", "planSha256", "target", "riskClass", "preconditions", "operations", "expectedReadback"],
   "properties": {
-    "schemaVersion": {"const": 1},
+    "schemaVersion": {"enum": [1, 2]},
     "artifactType": {"const": "mutation-plan"},
     "generatedAt": {"type": "string", "format": "date-time"},
     "expiresAt": {"type": "string", "format": "date-time"},
@@ -54,8 +54,10 @@
         "additionalProperties": false,
         "required": ["resource", "snapshotId", "stateSha256"],
         "properties": {
+          "operationId": {"type": "string", "minLength": 1},
           "resource": {"type": "string", "minLength": 1},
           "snapshotId": {"type": "string", "minLength": 8},
+          "snapshotPath": {"type": "string", "minLength": 1},
           "stateSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
         }
       }
@@ -68,13 +70,26 @@
         "additionalProperties": false,
         "required": ["method", "resource", "fieldMask", "body"],
         "properties": {
+          "operationId": {"type": "string", "minLength": 1},
+          "kind": {"type": "string", "minLength": 1},
+          "apiVersion": {"enum": ["v1beta", "v1alpha"]},
           "method": {"enum": ["POST", "PATCH", "PUT", "FILE_PATCH"]},
           "resource": {"type": "string", "minLength": 1},
           "fieldMask": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
-          "body": {"type": "object", "$ref": "#/$defs/safeValue"}
+          "providerFieldMask": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+          "body": {"type": "object", "$ref": "#/$defs/safeValue"},
+          "rationale": {"type": "string", "minLength": 1},
+          "expectedReadback": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+          "create": {"type": "boolean"},
+          "experimental": {"type": "boolean"},
+          "before": {"$ref": "#/$defs/safeValue"}
         }
       }
     },
-    "expectedReadback": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+    "expectedReadback": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "projectRoot": {"type": "string", "minLength": 1},
+    "profileId": {"type": "string", "minLength": 1},
+    "measurementPlan": {"type": "object", "$ref": "#/$defs/safeValue"},
+    "executionPolicy": {"type": "object", "$ref": "#/$defs/safeValue"}
   }
 }
