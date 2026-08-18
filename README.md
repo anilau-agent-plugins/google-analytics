@@ -140,9 +140,10 @@ exports, production datasets, or private website source into a public GitHub iss
 
 ## More Anilau plugins
 
-Google Analytics Advisor is the free, open-source demonstration plugin from
-[Anilau Agent Plugins](https://github.com/anilau-agent-plugins). Anilau also develops commercial
-plugins for Google Ads, Yandex Direct, and YouGile. See the
+Google Analytics Advisor is one of the free, open-source demonstration plugins from
+[Anilau Agent Plugins](https://github.com/anilau-agent-plugins), alongside
+[Yandex Metrica Advisor](https://github.com/anilau-agent-plugins/yandex-metrika). Anilau also
+develops commercial plugins for Google Ads, Yandex Direct, and YouGile. See the
 [English catalog](https://anilau.com/en/agent-plugins/) or
 [Russian catalog](https://anilau.com/ru/agent-plugins/) for current availability.
 
