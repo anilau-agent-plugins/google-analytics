@@ -27,6 +27,7 @@ class ReleaseHygieneTests(unittest.TestCase):
             "SUPPORT.md",
             "SECURITY.md",
             "CONTRIBUTING.md",
+            "CODE_OF_CONDUCT.md",
         )
         for relative in required:
             with self.subTest(relative=relative):
