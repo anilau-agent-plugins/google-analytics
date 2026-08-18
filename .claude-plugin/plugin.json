@@ -7,9 +7,9 @@
     "name": "Eduard Volkov",
     "url": "https://anilau.com"
   },
-  "homepage": "https://anilau.com",
+  "homepage": "https://github.com/anilau-agent-plugins/google-analytics",
   "repository": "https://github.com/anilau-agent-plugins/google-analytics",
-  "license": "LicenseRef-Anilau-Commercial",
+  "license": "MIT",
   "keywords": [
     "google-analytics",
     "ga4",

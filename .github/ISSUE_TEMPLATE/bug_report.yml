@@ -1,0 +1,53 @@
+name: Bug report
+description: Report a reproducible problem without sharing private data.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping. Never include OAuth files, tokens, passwords, customer Analytics data, or private source code.
+  - type: input
+    id: version
+    attributes:
+      label: Plugin version
+      placeholder: 0.8.0
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Agent platform
+      options:
+        - Codex
+        - Claude Code
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: Operating system and Python version
+      placeholder: Windows 11, Python 3.12
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Explain the expected and actual result using synthetic or redacted examples.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Safe reproduction steps
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Privacy check
+      options:
+        - label: I removed all credentials, customer data, Analytics exports, and private source code.
+          required: true

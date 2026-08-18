@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Private security report
+    url: mailto:admin@anilau.com
+    about: Report vulnerabilities without publishing sensitive details.
+  - name: Anilau plugin catalog
+    url: https://anilau.com/en/agent-plugins/
+    about: View current free and commercial plugins.

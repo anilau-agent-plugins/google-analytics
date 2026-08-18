@@ -1,14 +1,14 @@
 {
   "name": "google-analytics",
-  "version": "0.8.0+codex.20260816134649",
+  "version": "0.8.0",
   "description": "Plain-language GA4 audits, safe configuration, and confirmed local measurement installation.",
   "author": {
     "name": "Eduard Volkov",
     "url": "https://anilau.com"
   },
-  "homepage": "https://anilau.com",
+  "homepage": "https://github.com/anilau-agent-plugins/google-analytics",
   "repository": "https://github.com/anilau-agent-plugins/google-analytics",
-  "license": "LicenseRef-Anilau-Commercial",
+  "license": "MIT",
   "keywords": [
     "google-analytics",
     "ga4",

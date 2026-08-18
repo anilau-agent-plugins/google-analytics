@@ -1,0 +1,26 @@
+name: Feature request
+description: Suggest a useful and safe improvement.
+title: "[Feature]: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: What should become easier?
+      description: Describe the user outcome in plain language.
+    validations:
+      required: true
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Example workflow
+      description: Use synthetic data and explain what the plugin should say or do.
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Safety or privacy considerations
+      description: Note any permissions, credentials, data, or mutation risks.
+    validations:
+      required: true

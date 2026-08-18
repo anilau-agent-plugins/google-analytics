@@ -25,6 +25,8 @@ class ReleaseHygieneTests(unittest.TestCase):
             "LICENSE",
             "PRIVACY.md",
             "SUPPORT.md",
+            "SECURITY.md",
+            "CONTRIBUTING.md",
         )
         for relative in required:
             with self.subTest(relative=relative):
@@ -38,6 +40,22 @@ class ReleaseHygieneTests(unittest.TestCase):
         expected = "https://github.com/anilau-agent-plugins/google-analytics"
         self.assertEqual(codex["repository"], expected)
         self.assertEqual(claude["repository"], expected)
+        self.assertEqual(codex["version"], __version__)
+        self.assertEqual(codex["license"], "MIT")
+        self.assertEqual(claude["license"], "MIT")
+
+    def test_public_documentation_matches_open_source_release(self) -> None:
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        support = (ROOT / "SUPPORT.md").read_text(encoding="utf-8")
+        license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
+        self.assertIn("free, open-source", readme)
+        self.assertIn("Installation instructions", readme)
+        self.assertIn("How updates work", readme)
+        self.assertIn("GitHub Issues", support)
+        self.assertTrue(license_text.startswith("MIT License"))
+        for phrase in ("LicenseRef-Anilau-Commercial", "not yet available for commercial"):
+            self.assertNotIn(phrase, readme)
+            self.assertNotIn(phrase, support)
 
     def test_skill_frontmatter_is_minimal(self) -> None:
         text = (ROOT / "skills" / "google-analytics" / "SKILL.md").read_text(encoding="utf-8")

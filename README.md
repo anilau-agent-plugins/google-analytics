@@ -1,140 +1,69 @@
 # Google Analytics Advisor
 
-Google Analytics Advisor is an Anilau plugin for people who want to understand website statistics
-without becoming analytics specialists. It explains Google Analytics 4 in plain language and helps
-turn business goals into a clear measurement plan in Codex or Claude Code.
+[![Version 0.8.0](https://img.shields.io/badge/version-0.8.0-2563eb)](https://github.com/anilau-agent-plugins/google-analytics/releases/latest)
+[![MIT License](https://img.shields.io/badge/license-MIT-16a34a)](LICENSE)
+[![Codex and Claude Code](https://img.shields.io/badge/works_with-Codex%20%7C%20Claude%20Code-7c3aed)](#installation-instructions)
 
-## What version 0.8.0 can do
+Google Analytics Advisor is a free plugin that helps you understand and improve Google Analytics 4
+without becoming an analytics specialist. Talk to it in your own language. It explains what it finds
+in plain words, prepares a safe plan, and asks before making any important change.
 
-- explain events, key events, ecommerce, funnels, Google tag and Google Tag Manager;
-- create an evidence-backed measurement context from an explicit baseline, local source, and
-  owner-confirmed business facts;
-- design, validate, explain, approve, and migrate immutable measurement-plan artifacts locally;
-- block weak proxy key events, unsafe ecommerce identity, PII, unjustified custom definitions,
-  unsafe cardinality, unresolved consent, and incomplete server-side deduplication;
-- check whether the computer is ready and help install a suitable Python version;
-- check saved measurement files for common structural errors;
-- check whether a newer plugin version is available without sending user data;
-- offer either detailed screen-by-screen self-service instructions or explicitly authorized browser
-  control to create a Desktop OAuth app in the user's own Google Cloud project;
-- request the complete v1 permission set once through PKCE and a local loopback callback;
-- keep OAuth clients and refresh tokens in the operating system's protected credential store;
-- manage multiple authorization profiles and run minimal read-only connection diagnostics.
-- list accessible GA4 and GTM resources without changing them;
-- inspect a selected GA4 property, website stream and GTM container through allowlisted reads;
-- statically inspect local website source for Google tag, GTM, `dataLayer`, Consent Mode and likely
-  duplicate collection without executing project code;
-- run one bounded 28-day event diagnostic and write immutable baseline snapshots and a plain-language
-  report under `.google-analytics-advisor/`.
-- prepare allowlisted GA4 Admin API changes from an approved measurement plan and require the exact
-  SHA-256 of an immutable 30-minute mutation plan;
-- create or update supported property/web-stream fields, key events, custom definitions, retention,
-  and protected Measurement Protocol credentials with fresh preconditions, one-shot writes,
-  independent readback, and append-only journals;
-- keep enhanced measurement and data redaction behind explicit experimental v1alpha gates.
-- detect static HTML, Laravel Blade, React/Vite SPA and Next.js App Router integration points without
-  executing project code;
-- prepare an immutable restricted unified diff, require its exact SHA-256, apply only confirmed local
-  UTF-8 source changes, recover safely when possible, and independently verify file hashes;
-- install one direct Google tag or the website side of a GTM/dataLayer integration while blocking
-  mixed routes, duplicate loaders, incomplete Consent Mode v2 signals and conflicting SPA pageviews;
-- validate approved server-owned Measurement Protocol events against the debug endpoint and keep a
-  separately confirmed production request one-shot and non-retrying.
+It works with **Codex** and **Claude Code** on Windows, macOS, and Linux.
 
-This release does not produce full performance reports, change remote GTM resources, or deploy a
-website. A production Measurement Protocol event is possible only through its own explicit immutable
-delivery plan and new exact confirmation; it is never part of installation acceptance. Supported GA4
-and local website changes require separate exact plan-hash confirmation; OAuth and measurement-plan
-approval do not authorize them. Static source evidence does not prove that production collection
-works, and partial/truncated audits are labelled explicitly. Firebase/mobile analytics, Google Ads, user
-administration, account deletion and automatic production deployment are outside v1.
+## What it helps you do
 
-## How to install
+- understand what your website visitors do and which actions matter to the business;
+- check accessible GA4 properties, website streams, and Google Tag Manager containers;
+- find missing, duplicated, or conflicting analytics code in a local website project;
+- design useful events, key events, ecommerce tracking, funnels, and consent handling;
+- safely configure supported GA4 settings after showing you an exact change plan;
+- safely add Google tag or Google Tag Manager code to supported website projects;
+- check Measurement Protocol events before a separately confirmed production send;
+- create and protect the Google authorization needed for this work.
 
-1. Download and unpack the plugin folder.
-2. In Codex or Claude Code, point to that folder and say: “Install this plugin.”
-3. Start a new conversation and say: “Check my Google Analytics setup.”
+The plugin currently understands static HTML, Laravel Blade, React/Vite, and Next.js App Router
+projects. It does not publish Google Tag Manager containers, deploy websites, manage Analytics users,
+or promise business results.
 
-The plugin checks the computer and explains the next step in plain language. If a suitable Python
-version is missing, it offers the official installation method for Windows, macOS, or Linux and asks
-for permission before installing or changing anything. It also guides the user through creating the
-required Google application without asking them to paste secrets into chat. At the start, the user
-chooses either a detailed field-by-field guide with official links or browser-assisted setup in a
-browser where the intended Google account is already signed in. Browser use requires explicit
-permission. The user still personally handles sign-in/2FA, necessary account or organization choices,
-Google terms, mutation confirmations and OAuth consent.
+## Installation instructions
 
-### What the plugin uses
+You do not need to install or configure Python yourself. The plugin checks what is already on the
+computer and helps install a suitable version when needed. It uses:
 
 - Codex or Claude Code;
-- Python 3.10–3.13;
-- Windows, macOS, or Ubuntu/Debian Linux;
-- Google Analytics 4 terminology and configuration information supplied by the user.
+- Python 3.10, 3.11, 3.12, or 3.13;
+- a Google account that can access the Analytics resources you want to inspect.
 
-Internet access is required for Google authorization, connection diagnostics, resource discovery,
-baseline API reads, GA4 mutation planning/apply/readback, Measurement Protocol debug/production
-delivery, and an explicitly requested version check. Local runtime, contracts, source context,
-site patch planning/apply/readback, and measurement-plan design remain offline.
+To install:
 
-## Design a measurement plan
+1. Open the [latest release](https://github.com/anilau-agent-plugins/google-analytics/releases/latest).
+2. Download the file named `google-analytics-0.8.0.zip` and unpack it.
+3. In Codex or Claude Code, point to the unpacked folder and say: **“Install this plugin.”**
+4. Start a new task or conversation and say: **“Check my Google Analytics setup.”**
 
-The agent first inspects an explicitly selected baseline and the local project, then asks only for
-business facts it cannot derive. It prepares the structured input itself and explains outcomes,
-events, key events, ecommerce, consent, custom definitions, funnels, and verification in everyday
-language. The user does not need to write JSON or know GA4 terminology.
+The agent completes safe local setup itself. It pauses only when you need to sign in, complete 2FA,
+approve Google permissions, choose between genuinely different options, or confirm a change. It never
+needs you to paste a password, token, or downloaded Google OAuth file into chat.
 
-Drafts and approvals are immutable. Local approval requires the exact plan SHA-256 and creates a new
-artifact under `.google-analytics-advisor/`. Approval does not change GA4, GTM, website code, consent,
-or production events and does not authorize those future changes.
-
-## Configure supported GA4 settings
-
-The agent converts an approved measurement plan and the requested outcome into a strict local change
-request, refreshes the selected GA4 state, and creates an immutable preview. The user sees the exact
-resource, before/after fields, reason, risk, expiry, readback, and SHA-256. GA4 is changed only after
-the user confirms that exact hash.
-
-Every write is sent once. `applied` is reported only when a separate read matches the requested
-fields. Ambiguous outcomes are reconciled read-only and never retried automatically. Delete, archive,
-user management, Analytics-account creation, Google terms, GTM, website changes, deployment, and
-production-event delivery remain outside this workflow.
-
-## Install measurement code locally
-
-The agent statically detects the stack and integration points, binds the change to an approved
-measurement plan, and prepares an exact local diff. It explains direct Google tag versus GTM,
-Consent Mode, events, SPA pageviews, ecommerce identity, risks, and verification in ordinary language.
-No source file changes until the user confirms the exact expiring plan SHA-256.
-
-Apply touches only the confirmed UTF-8 source files under the selected project root. It blocks linked,
-generated, dependency, environment, credential, binary, delete, rename, and path-escape targets. It
-does not install dependencies, run project code, publish GTM, or deploy. GTM website installations are
-reported as `pending_gtm_configuration` until Stage 9 configures and separately publishes the remote
-container.
-
-Measurement Protocol secrets stay in protected OS storage. Debug validation and production delivery
-use separate one-shot plans and exact confirmations. A timeout is `ambiguous` and is not retried; an
-HTTP success is not presented as proof that GA4 processed the event.
+If your application cannot install directly from a folder, ask it to follow the manual instructions
+below.
 
 <details>
-<summary>Manual installation commands</summary>
+<summary>Manual installation for Codex and Claude Code</summary>
 
 ### Codex
 
-Add this plugin to the personal marketplace at `~/.agents/plugins/marketplace.json`, using a relative
-local source path, then run:
+Add the unpacked plugin folder as a local source in your personal marketplace, then run:
 
 ```text
 codex plugin add google-analytics@personal
 ```
 
-Start a new Codex task after installation or update. The current local package has been installed and
-loaded through this workflow.
+Start a new Codex task after installation.
 
 ### Claude Code
 
-From a parent directory containing `.claude-plugin/marketplace.json` with a relative entry for this
-plugin, run:
+From a local marketplace containing this repository, run:
 
 ```text
 claude plugin validate ./google-analytics --strict
@@ -142,107 +71,86 @@ claude plugin marketplace add <absolute-marketplace-directory>
 claude plugin install google-analytics@anilau-agent-plugins-local
 ```
 
-Restart Claude Code or run `/reload-plugins` when prompted. Invoke the installed skill as
+Run `/reload-plugins` or restart Claude Code when prompted. The skill name is
 `google-analytics:google-analytics`.
 
 </details>
 
-## Verify the installation
+## How updates work
 
-Windows:
+The safe update source is the [GitHub Releases page](https://github.com/anilau-agent-plugins/google-analytics/releases).
+The release version and files are public, so no GitHub token is required.
 
-```powershell
-.\scripts\google-analytics.ps1 version --json
-.\scripts\google-analytics.ps1 doctor --json
-```
+To update:
 
-macOS/Linux:
+1. Download and unpack the newest release.
+2. Point Codex or Claude Code to that folder and say: **“Update my Google Analytics plugin from this
+   folder.”**
+3. Start a new task or reload plugins when asked.
 
-```sh
-sh ./scripts/google-analytics.sh version --json
-sh ./scripts/google-analytics.sh doctor --json
-```
+An update replaces the installed plugin copy. It does not delete Google credentials or project
+reports because those are stored outside the plugin folder. Automatic updates are not enabled in
+version 0.8.0; this prevents an unverified file from silently changing installed code. The plugin can
+perform a telemetry-free version check when a trusted signed update manifest is configured, but it
+still asks before installation.
 
-These commands give the agent a detailed diagnostic result. Ordinary users can simply ask the
-plugin to check whether the installation works.
+## Your data and credentials
 
-## Update and uninstall
+Google Analytics Advisor runs on your computer. It sends no telemetry, prompts, credentials, project
+files, or Analytics data to Anilau. Google authorization and Analytics requests go directly from your
+computer to Google.
 
-Ask Codex or Claude Code: “Check whether Google Analytics Advisor has an update.” If a newer version
-is available, the agent explains it and asks before installing it. Restart the application when the
-agent requests it.
+OAuth clients and refresh tokens are stored in the operating system's protected credential storage:
+Windows DPAPI, macOS Keychain, or Linux Secret Service. There is no plaintext fallback. Local plans,
+reports, and change journals are stored in `.google-analytics-advisor/` inside the project you select.
+See [PRIVACY.md](PRIVACY.md) for the complete data flow.
 
-<details>
-<summary>Manual update commands</summary>
+## Safe changes by design
 
-For Codex, refresh the configured marketplace with `codex plugin marketplace upgrade`. For Claude
-Code, use `claude plugin update google-analytics@<marketplace>` and reload plugins.
+Reading data does not authorize a change. Before supported GA4 or website changes, the plugin shows
+an immutable plan with the exact target, intended result, risks, expiry time, and SHA-256 fingerprint.
+Nothing changes until you confirm that exact fingerprint. Afterward, the plugin reads the result back
+and reports `applied`, `partial`, `ambiguous`, or `failed` exactly.
 
-</details>
+It never treats a timeout as success, never automatically repeats an uncertain write or production
+event, and never deploys a website as part of local installation.
 
-Remove only the installed cache/configuration:
-
-```text
-codex plugin remove google-analytics@personal
-claude plugin uninstall google-analytics@anilau-agent-plugins-local
-```
-
-Uninstalling a plugin must not delete its canonical repository or future user credentials and project
-data. Those are deliberately stored outside source and plugin caches.
-
-## Version check
-
-Version checks are disabled until a release endpoint is configured. To inspect a disclosed trusted
-HTTPS version manifest without installing anything:
+## Try these requests
 
 ```text
-./scripts/google-analytics.sh version --check --endpoint <trusted-https-version-manifest> --json
+Explain what my Google Analytics setup measures today.
+Which conversions should this website track?
+Check this local website for duplicate Google tags.
+Prepare a safe plan to install analytics on this project.
+Show me what would change before configuring GA4.
 ```
 
-Only public version metadata is requested. A successful result is cached outside the plugin source
-for 30 days. The plugin sends no installation identifier, credentials, analytics data or project data,
-and never updates itself. On Windows use the `.ps1` launcher shown above. Disable checks with
-`version --disable-check --json` and re-enable them with `version --enable-check --json`.
+Ask in any language. The plugin should answer in the language you use, even though published product
+documentation and source files are written in English.
 
-## Google authorization and data
+## Help, security, and contributions
 
-The advisor helps create a Desktop OAuth application in the customer's own Google Cloud project. Only
-the customer's accounts, quotas and credentials are used; Anilau OAuth applications, proxies,
-servers and quotas are not used. The user supplies only the absolute local path to the downloaded
-client JSON. The agent must pass that path directly to the CLI and must never read, print, upload or
-ask the user to paste the file. It reuses suitable existing resources, can prepare a project and
-enable the three required APIs through an already installed `gcloud` after confirmation, and operates
-Cloud Console when browser control is available. Regular Google Auth Platform Desktop clients are
-created in Cloud Console; similarly named IAM/Workforce and IAP OAuth commands are not substitutes.
-Permission to control the browser is limited to OAuth onboarding and does not authorize later GA4,
-GTM, website, publish or deployment changes.
+- Read [SUPPORT.md](SUPPORT.md) before sharing diagnostic information.
+- Report security concerns privately as described in [SECURITY.md](SECURITY.md).
+- Bug reports and improvements are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md).
+- Release history is in [CHANGELOG.md](CHANGELOG.md).
 
-Before login, inspect the exact scopes and their plain-language purposes:
+Never put OAuth files, tokens, passwords, private keys, Authorization headers, customer Analytics
+exports, production datasets, or private website source into a public GitHub issue.
 
-```powershell
-.\scripts\google-analytics.ps1 auth consent-preview --json
-```
+## More Anilau plugins
 
-The user grants the complete v1 permission set once. It covers identity, GA4 read/edit, and GTM
-read/edit/version/publish. Possessing these scopes never authorizes a change: every later GA4, GTM,
-website or publish operation still requires its own plan and confirmation.
-
-Windows uses current-user DPAPI, macOS uses Keychain, and Linux uses Secret Service through
-`secret-tool`. There is no plaintext fallback. Access tokens remain in process memory; protected
-refresh tokens and imported OAuth clients are stored outside source and plugin caches. Use
-`auth forget-local` to remove only the local refresh token or `auth revoke` to revoke the Google grant
-and then remove it locally. Both require the exact confirmation shown by `auth status`.
-
-Never paste client secrets, tokens, passwords, private keys, Authorization headers or Analytics
-exports into agent chat. See the skill's customer-owned OAuth setup guide for the complete workflow.
-
-Runtime state/cache, future credentials and project data are separate from source. See
-[PRIVACY.md](PRIVACY.md) for the current data flow and [SUPPORT.md](SUPPORT.md) for support and release
-status.
+Google Analytics Advisor is the free, open-source demonstration plugin from
+[Anilau Agent Plugins](https://github.com/anilau-agent-plugins). Anilau also develops commercial
+plugins for Google Ads, Yandex Direct, and YouGile. See the
+[English catalog](https://anilau.com/en/agent-plugins/) or
+[Russian catalog](https://anilau.com/ru/agent-plugins/) for current availability.
 
 ## License and independence
 
-Use is governed by [LICENSE](LICENSE): one purchasing organization, perpetual internal use and
-internal modifications, with twelve months of repository updates unless the purchase agreement says
-otherwise. The plugin is an independent Anilau product and is not affiliated with, sponsored by or
-endorsed by Google. It provides technical assistance, not legal advice or guaranteed business results.
+The source code is available under the [MIT License](LICENSE). You may use, modify, and distribute it
+under the license terms.
+
+Google Analytics Advisor is an independent Anilau product. It is not affiliated with, sponsored by,
+or endorsed by Google. It provides technical assistance, not legal advice or guaranteed analytics or
+business results.

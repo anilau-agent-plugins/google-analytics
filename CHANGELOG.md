@@ -2,6 +2,9 @@
 
 ## 0.8.0 - 2026-08-16
 
+- Published Google Analytics Advisor as free, open-source software under the MIT License.
+- Added plain-language installation and update instructions plus public support, security, and
+  contribution guidance.
 - Added bounded website context discovery for static HTML, Laravel Blade, React/Vite and Next.js App
   Router without executing project code.
 - Added restricted UTF-8 unified-diff parsing, content-addressed patch artifacts, immutable 30-minute
