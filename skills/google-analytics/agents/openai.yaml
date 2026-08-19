@@ -1,4 +1,4 @@
 interface:
   display_name: "Google Analytics Advisor"
-  short_description: "GA4 audit, setup, and protected GTM publishing"
-  default_prompt: "Use $google-analytics to audit my website analytics and safely plan GA4, website, or Google Tag Manager changes."
+  short_description: "GA4 reports, audits, setup, and safe publishing"
+  default_prompt: "Use $google-analytics to explain my GA4 performance, data quality, and safest next steps."

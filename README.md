@@ -1,6 +1,6 @@
 # Google Analytics Advisor
 
-[![Version 0.9.0](https://img.shields.io/badge/version-0.9.0-2563eb)](https://github.com/anilau-agent-plugins/google-analytics/releases/latest)
+[![Version 0.10.0](https://img.shields.io/badge/version-0.10.0-2563eb)](https://github.com/anilau-agent-plugins/google-analytics/releases/latest)
 [![MIT License](https://img.shields.io/badge/license-MIT-16a34a)](LICENSE)
 [![Codex and Claude Code](https://img.shields.io/badge/works_with-Codex%20%7C%20Claude%20Code-7c3aed)](#installation-instructions)
 
@@ -13,6 +13,9 @@ It works with **Codex** and **Claude Code** on Windows, macOS, and Linux.
 ## What it helps you do
 
 - understand what your website visitors do and which actions matter to the business;
+- receive bounded overview, acquisition, content, audience, event, key-event, ecommerce, realtime,
+  and approved funnel reports with evidence and data-quality warnings;
+- compare complete periods and get up to five prioritized recommendations in everyday language;
 - check accessible GA4 properties, website streams, and Google Tag Manager containers;
 - find missing, duplicated, or conflicting analytics code in a local website project;
 - design useful events, key events, ecommerce tracking, funnels, and consent handling;
@@ -39,7 +42,7 @@ computer and helps install a suitable version when needed. It uses:
 To install:
 
 1. Open the [latest release](https://github.com/anilau-agent-plugins/google-analytics/releases/latest).
-2. Download the file named `google-analytics-0.9.0.zip` and unpack it.
+2. Download the file named `google-analytics-0.10.0.zip` and unpack it.
 3. In Codex or Claude Code, point to the unpacked folder and say: **“Install this plugin.”**
 4. Start a new task or conversation and say: **“Check my Google Analytics setup.”**
 
@@ -92,7 +95,7 @@ To update:
 
 An update replaces the installed plugin copy. It does not delete Google credentials or project
 reports because those are stored outside the plugin folder. Automatic updates are not enabled in
-version 0.9.0; this prevents an unverified file from silently changing installed code. The plugin can
+version 0.10.0; this prevents an unverified file from silently changing installed code. The plugin can
 perform a telemetry-free version check when a trusted signed update manifest is configured, but it
 still asks before installation.
 
@@ -123,6 +126,8 @@ publishes automatically, and never deploys a website as part of local installati
 
 ```text
 Explain what my Google Analytics setup measures today.
+Explain what changed in the last 28 complete days and whether the data is reliable.
+Show acquisition and key-event performance in plain language.
 Which conversions should this website track?
 Check this local website for duplicate Google tags.
 Prepare a safe plan to install analytics on this project.

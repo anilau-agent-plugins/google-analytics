@@ -20,9 +20,12 @@ class CapturingTransport:
 
 
 class ReadOperationTests(unittest.TestCase):
-    def test_registry_has_only_get_and_two_safe_posts(self) -> None:
+    def test_registry_has_only_get_and_allowlisted_safe_posts(self) -> None:
         posts = [item.operation_id for item in OPERATIONS.values() if item.method == "POST"]
-        self.assertEqual(posts, ["data.compatibility.check", "data.report.run"])
+        self.assertEqual(posts, [
+            "data.compatibility.check", "data.report.run", "data.report.batch",
+            "data.report.realtime", "data.report.funnel",
+        ])
         self.assertTrue(all(item.method in {"GET", "POST"} for item in OPERATIONS.values()))
         self.assertNotIn("secret", " ".join(OPERATIONS).lower())
 

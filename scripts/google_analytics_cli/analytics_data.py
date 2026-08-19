@@ -1,4 +1,4 @@
-"""Small Stage 5 Data API diagnostic; full reporting belongs to Stage 10."""
+"""Bounded Stage 5 event diagnostic, also reused by reporting metadata checks."""
 
 from __future__ import annotations
 

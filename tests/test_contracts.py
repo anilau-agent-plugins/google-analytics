@@ -31,6 +31,11 @@ class ContractTests(unittest.TestCase):
             validate_artifact("measurement-plan", FIXTURES / "invalid" / "measurement-plan-v2.json")
         self.assertIn("PII", caught.exception.details["reason"])
 
+    def test_report_v2_fixtures(self) -> None:
+        self.assertTrue(validate_artifact("report", FIXTURES / "valid" / "report-v2.json")["valid"])
+        with self.assertRaises(AdvisorError):
+            validate_artifact("report", FIXTURES / "invalid" / "report-v2.json")
+
 
 if __name__ == "__main__":
     unittest.main()

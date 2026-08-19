@@ -1,6 +1,6 @@
 ---
 name: google-analytics
-description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, baseline audits, measurement strategy, customer-owned Desktop OAuth, confirmed GA4 configuration, safe local measurement installation, Consent Mode, SPA/ecommerce events, Measurement Protocol validation, and separately confirmed GTM workspace, tag, trigger, variable, preview, version, and publish operations. Use when a user asks about GA4 setup, analytics code, conversions, GTM, an analytics audit, interpreting analytics, connecting Google, creating a Google Cloud OAuth application, checking Python, installing measurement code, or safely publishing a GTM version. Version 0.9.0 adds the protected GTM lifecycle; it does not deploy websites or implement full performance reports.
+description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, evidence-backed Data API reports, measurement strategy, customer-owned Desktop OAuth, confirmed GA4 configuration, safe local measurement installation, Consent Mode, SPA/ecommerce events, Measurement Protocol validation, and separately confirmed GTM operations. Use when a user asks about GA4 setup, performance, acquisition, content, events, key events, ecommerce, realtime, funnels, analytics code, conversions, GTM, an audit, connecting Google, creating a Google Cloud OAuth application, checking Python, installing measurement code, or safely publishing a GTM version. Version 0.10.0 adds bounded plain-language reports and prioritized recommendations; it does not deploy websites.
 ---
 
 # Google Analytics Advisor
@@ -14,7 +14,7 @@ explanation, but keep exact product names, event names, metric names, commands a
 
 ## Current capability boundary
 
-Treat version 0.9.0 as the read-only baseline, measurement-design, confirmed GA4 configuration, safe local website-installation, and protected GTM-lifecycle release. It can discover GA4 accounts, properties,
+Treat version 0.10.0 as the read-only reporting, baseline, measurement-design, confirmed GA4 configuration, safe local website-installation, and protected GTM-lifecycle release. It can discover GA4 accounts, properties,
 website streams and core settings; inspect selected GTM resources; statically inspect a local website
 project; run one bounded 28-day event diagnostic; correlate public tag IDs; and write immutable
 snapshots plus a baseline report; create, validate, render, approve, and migrate immutable local
@@ -24,14 +24,13 @@ readback; and prepare/apply exact local source patches for an approved measureme
 SHA-256 confirmation, stale-file checks, safe recovery, and readback. It can validate a protected
 Measurement Protocol design against Google's debug endpoint and send only a separately planned,
 one-shot production request; and manage a GTM web container through six separately confirmed
-workspace/entity/preview/version/publish stages with fresh fingerprints and independent readback.
+workspace/entity/preview/version/publish stages with fresh fingerprints and independent readback. It
+can run bounded overview, acquisition, landing/content, device/geo, events, key-events, ecommerce,
+realtime, approved custom-core, and separately gated experimental funnel reports; preserve source
+evidence, data-quality limitations, and prioritized plain-language recommendations.
 Only claim findings returned by the CLI, and preserve every
 reported limitation. Never describe a source-code match alone as proof that production collection
 works.
-
-The following functionality is not implemented yet:
-
-- Data API reports and evidence-backed recommendations — planned for stage 10.
 
 When a request requires a later capability, explain the boundary and a safe preparation step. Never
 ask the user to paste tokens, client secrets, passwords, private keys, or Authorization headers.
@@ -56,7 +55,7 @@ using it. The check sends no credentials, analytics data or identifiers, caches 
 metadata outside the plugin source for 30 days, never updates automatically, and can be disabled with
 `version --disable-check --json`.
 
-Use `contracts validate --schema <artifact-type> --input <absolute-path> --json` only for the thirteen
+Use `contracts validate --schema <artifact-type> --input <absolute-path> --json` only for the fifteen
 project artifacts. Do not describe this validator as a general JSON Schema implementation.
 
 ## Google authorization workflow
@@ -155,6 +154,24 @@ acceptance without separate permission to access the user's live Google data.
 6. Require an exact plan and separate confirmation before any future GA4, GTM, website, publication,
    or production-deployment change. Authorization scopes never count as mutation approval.
 
+## Reporting advisor workflow
+
+Read [references/reporting-advisor.md](references/reporting-advisor.md) before preparing or explaining
+a live report. Identify the exact property by resource name and the user's business question. Use
+`reports catalog` to inspect supported presets, then let the agent prepare a versioned report-request
+artifact; never make a non-specialist select raw GA4 dimensions and metrics without explanation.
+
+Run `reports plan` before any report queries. Explain the property-local periods, comparisons,
+presets, compatibility result, restrictions, row/page bounds, quota policy, limitations, and immutable
+`planSha256`. Running this read-only plan requires no mutation confirmation, but it does access the
+selected property and writes local artifacts. Run `reports run` only for an unexpired, unchanged plan.
+
+Present the result in this order: answer, data reliability, key facts and comparisons, limitations,
+recommendations, and unresolved business questions. Preserve technical metric names beside everyday
+explanations. Treat realtime as diagnostic, experimental funnels as directional, restricted metrics
+as unavailable rather than zero, and small samples as directional. Never infer causation from a
+comparison, claim missing rows were thresholded without evidence, or promise revenue impact.
+
 ## Measurement design workflow
 
 Read [references/measurement-design.md](references/measurement-design.md) before creating, reviewing,
@@ -245,10 +262,10 @@ For planning questions that do not require live evidence, provide a provisional 
 label any project-specific conclusion as unverified. Ask only for business facts that cannot be
 derived later from the project or connected systems.
 
-For full performance reports or unsupported remote mutation requests, return:
+For unsupported remote mutation or reporting requests, return:
 
 - what the user is trying to achieve;
 - why live access or runtime support is required;
-- that version 0.9.0 can perform the bounded baseline, local measurement design, separately confirmed supported GA4 configuration, local website installation, and protected GTM lifecycle portions;
+- that version 0.10.0 can perform bounded evidence-backed reports, the baseline, local measurement design, separately confirmed supported GA4 configuration, local website installation, and protected GTM lifecycle portions;
 - the implementation stage that will add it;
 - a safe next step that does not expose secrets or pretend the operation succeeded.

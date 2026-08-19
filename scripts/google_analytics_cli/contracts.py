@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from datetime import date, datetime
@@ -16,11 +17,12 @@ ARTIFACTS = {
     "project-profile", "measurement-plan", "snapshot", "mutation-plan", "report",
     "journal-entry", "baseline-report", "ga4-change-request", "website-context",
     "website-change-request", "mp-delivery-plan", "gtm-context", "gtm-change-request",
+    "report-request", "report-plan",
 }
 ALLOWED = {
     "$schema", "$id", "$defs", "$ref", "title", "type", "const", "enum", "required",
-    "properties", "propertyNames", "additionalProperties", "items", "minItems", "uniqueItems",
-    "minLength", "minimum", "pattern", "format", "oneOf", "allOf", "if", "then",
+    "properties", "propertyNames", "additionalProperties", "items", "minItems", "maxItems", "uniqueItems",
+    "minLength", "minimum", "maximum", "pattern", "format", "oneOf", "allOf", "if", "then",
 }
 SECRET_KEY = re.compile(r"(?:secret|token|password|credentials?|private[_-]?key)(?:value)?$", re.I)
 
@@ -114,9 +116,13 @@ def _validate(schema: dict[str, Any], value: Any, root: dict[str, Any], path: st
             _fail(path, f"invalid {fmt}")
     if isinstance(value, (int, float)) and not isinstance(value, bool) and "minimum" in schema and value < schema["minimum"]:
         _fail(path, "number is below minimum")
+    if isinstance(value, (int, float)) and not isinstance(value, bool) and "maximum" in schema and value > schema["maximum"]:
+        _fail(path, "number is above maximum")
     if isinstance(value, list):
         if len(value) < schema.get("minItems", 0):
             _fail(path, "array is shorter than minItems")
+        if "maxItems" in schema and len(value) > schema["maxItems"]:
+            _fail(path, "array is longer than maxItems")
         if schema.get("uniqueItems"):
             encoded = [json.dumps(item, sort_keys=True, separators=(",", ":")) for item in value]
             if len(encoded) != len(set(encoded)):
@@ -178,7 +184,36 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
     discriminator = data.get("changeRequestType") if name == "ga4-change-request" else data.get("artifactType")
     if discriminator != name:
         _fail("$.changeRequestType" if name == "ga4-change-request" else "$.artifactType", f"does not match requested schema {name}")
-    if name == "mutation-plan":
+    if name == "report-request":
+        from .artifact_store import canonical_json
+
+        expected = hashlib.sha256(canonical_json({key: value for key, value in data.items() if key != "contentSha256"})).hexdigest()
+        if data["contentSha256"] != expected:
+            _fail("$.contentSha256", "does not match canonical request content")
+        period = data["period"]
+        if period["mode"] == "last-complete-days" and (period.get("days") is None or period.get("from") is not None or period.get("to") is not None):
+            _fail("$.period", "last-complete-days requires days only")
+        if period["mode"] == "explicit" and (period.get("days") is not None or not period.get("from") or not period.get("to")):
+            _fail("$.period", "explicit requires from/to only")
+        if "custom-core" in data["presets"] and not data.get("customCore"):
+            _fail("$.customCore", "is required by custom-core")
+        if "custom-core" not in data["presets"] and data.get("customCore") is not None:
+            _fail("$.customCore", "is allowed only with custom-core")
+    elif name == "report-plan":
+        from .artifact_store import canonical_json
+
+        generated = datetime.fromisoformat(data["generatedAt"].replace("Z", "+00:00"))
+        expires = datetime.fromisoformat(data["expiresAt"].replace("Z", "+00:00"))
+        if generated >= expires:
+            _fail("$.expiresAt", "must be later than generatedAt")
+        expected = hashlib.sha256(canonical_json({key: value for key, value in data.items() if key != "planSha256"})).hexdigest()
+        if data["planSha256"] != expected:
+            _fail("$.planSha256", "does not match canonical plan content")
+        if data.get("mutationPerformed") is not False:
+            _fail("$.mutationPerformed", "report plans are read-only")
+        if not data.get("queries") and not data.get("blockers"):
+            _fail("$.queries", "an unblocked report plan requires at least one query")
+    elif name == "mutation-plan":
         generated = datetime.fromisoformat(data["generatedAt"].replace("Z", "+00:00"))
         expires = datetime.fromisoformat(data["expiresAt"].replace("Z", "+00:00"))
         if generated >= expires:
@@ -224,6 +259,20 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
         for index, period in enumerate(data["periods"]):
             if date.fromisoformat(period["from"]) > date.fromisoformat(period["to"]):
                 _fail(f"$.periods[{index}]", "period starts after it ends")
+        if data.get("schemaVersion") == 1:
+            allowed_limitations = {"sampling", "thresholding", "cardinality", "quota", "incomplete-period", "compatibility", "small-data", "other"}
+            for index, item in enumerate(data.get("limitations", [])):
+                if item.get("type") not in allowed_limitations:
+                    _fail(f"$.limitations[{index}].type", "unknown report v1 limitation type")
+        if data.get("schemaVersion") == 2:
+            from .artifact_store import canonical_json
+
+            for field in ("reportSha256", "profileId", "status", "qualityTier", "propertyContext", "datasets"):
+                if field not in data:
+                    _fail("$", f"report v2 requires {field}")
+            expected = hashlib.sha256(canonical_json({key: value for key, value in data.items() if key != "reportSha256"})).hexdigest()
+            if data["reportSha256"] != expected:
+                _fail("$.reportSha256", "does not match canonical report content")
     elif name == "measurement-plan":
         if data["ecommerce"]["enabled"]:
             for field in ("currencySource", "valueRule", "transactionIdSource"):

@@ -21,6 +21,7 @@ class ReleaseHygieneTests(unittest.TestCase):
             "skills/google-analytics/agents/openai.yaml",
             "skills/google-analytics/references/ga4-configuration.md",
             "skills/google-analytics/references/gtm-management.md",
+            "skills/google-analytics/references/reporting-advisor.md",
             "README.md",
             "CHANGELOG.md",
             "LICENSE",
@@ -120,6 +121,18 @@ class ReleaseHygieneTests(unittest.TestCase):
         self.assertNotIn('"DELETE"', service)
         self.assertNotIn("resolve_conflict", service)
         self.assertIn('"automaticPublish": False', service)
+
+    def test_reporting_advisor_is_bounded_and_read_only(self) -> None:
+        skill = (ROOT / "skills" / "google-analytics" / "SKILL.md").read_text(encoding="utf-8")
+        reference = (ROOT / "skills" / "google-analytics" / "references" / "reporting-advisor.md").read_text(encoding="utf-8")
+        registry = (ROOT / "scripts" / "google_analytics_cli" / "read_operation.py").read_text(encoding="utf-8")
+        service = (ROOT / "scripts" / "google_analytics_cli" / "report_service.py").read_text(encoding="utf-8")
+        self.assertIn("Reporting advisor workflow", skill)
+        self.assertIn("restricted metric is unavailable, not zero", reference)
+        for operation in ("data.report.run", "data.report.realtime", "data.report.funnel"):
+            self.assertIn(operation, registry)
+        for method in ('method="PATCH"', 'method="PUT"', 'method="DELETE"'):
+            self.assertNotIn(method, service)
 
     def test_working_material_and_local_paths_are_not_publishable(self) -> None:
         forbidden_names = {"planning", ".plugin-work", "DEVELOPMENT_PLAN.md"}

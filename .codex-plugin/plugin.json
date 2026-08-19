@@ -1,7 +1,7 @@
 {
   "name": "google-analytics",
-  "version": "0.9.0",
-  "description": "Plain-language GA4 guidance with protected GA4, website, and GTM changes.",
+  "version": "0.10.0",
+  "description": "Plain-language GA4 reports, recommendations, and protected analytics changes.",
   "author": {
     "name": "Eduard Volkov",
     "url": "https://anilau.com"
@@ -19,13 +19,15 @@
   "interface": {
     "displayName": "Google Analytics Advisor",
     "shortDescription": "Plain-language GA4 guidance for websites.",
-    "longDescription": "Helps non-specialists inspect GA4, GTM and local website tagging, design an immutable measurement plan, configure supported GA4 resources, install local measurement code, and manage the GTM workspace-to-publish lifecycle through separate SHA-bound plans.",
+    "longDescription": "Helps non-specialists inspect GA4, GTM and local website tagging, design measurement, safely configure supported resources, and receive evidence-backed GA4 reports with explicit data-quality limits.",
     "developerName": "Anilau",
     "category": "Productivity",
     "capabilities": [
       "Interactive",
       "Local diagnostics",
       "Read-only baseline audit",
+      "Evidence-backed GA4 reports",
+      "Plain-language recommendations",
       "Measurement planning",
       "Confirmed GA4 configuration",
       "Confirmed local site installation",
@@ -40,7 +42,8 @@
       "Help me plan analytics for my website.",
       "Explain which conversions my project needs.",
       "Safely plan analytics-code installation for my local website.",
-      "Prepare a safe Google Tag Manager workspace plan."
+      "Prepare a safe Google Tag Manager workspace plan.",
+      "Explain what changed in my GA4 data and what I should verify next."
     ]
   }
 }

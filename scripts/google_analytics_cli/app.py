@@ -194,6 +194,27 @@ def build_parser() -> Parser:
     gtm_reconcile = gtm_sub.add_parser("reconcile")
     gtm_reconcile.add_argument("--journal", required=True, type=Path)
     gtm_reconcile.add_argument("--json", action="store_true")
+    reports = sub.add_parser("reports")
+    reports_sub = reports.add_subparsers(dest="reports_command", required=True, parser_class=Parser)
+    reports_catalog = reports_sub.add_parser("catalog")
+    reports_catalog.add_argument("--profile", required=True)
+    reports_catalog.add_argument("--property", dest="property_name", required=True)
+    reports_catalog.add_argument("--json", action="store_true")
+    reports_plan = reports_sub.add_parser("plan")
+    reports_plan.add_argument("--profile", required=True)
+    reports_plan.add_argument("--property", dest="property_name", required=True)
+    reports_plan.add_argument("--request", required=True, type=Path)
+    reports_plan.add_argument("--json", action="store_true")
+    reports_show_plan = reports_sub.add_parser("show-plan")
+    reports_show_plan.add_argument("--plan", required=True, type=Path)
+    reports_show_plan.add_argument("--json", action="store_true")
+    reports_run = reports_sub.add_parser("run")
+    reports_run.add_argument("--plan", required=True, type=Path)
+    reports_run.add_argument("--json", action="store_true")
+    reports_show = reports_sub.add_parser("show")
+    reports_show.add_argument("--report", required=True, type=Path)
+    reports_show.add_argument("--language", choices=["auto", "ru", "en"], default="auto")
+    reports_show.add_argument("--json", action="store_true")
     mp = sub.add_parser("mp")
     mp_sub = mp.add_subparsers(dest="mp_command", required=True, parser_class=Parser)
     mp_plan = mp_sub.add_parser("delivery-plan")
@@ -377,6 +398,24 @@ def dispatch(argv: list[str]) -> tuple[str, str, Any]:
         if args.gtm_command == "reconcile":
             result = service.reconcile(args.journal)
             return "gtm reconcile", result["status"], result
+    if args.group == "reports":
+        from .report_service import ReportService
+
+        service = ReportService()
+        if args.reports_command == "catalog":
+            return "reports catalog", "ready", service.catalog(args.profile, args.property_name)
+        if args.reports_command == "plan":
+            result = service.plan(args.profile, args.property_name, args.request)
+            return "reports plan", result["status"], result
+        if args.reports_command == "show-plan":
+            result = service.show_plan(args.plan)
+            return "reports show-plan", result["status"], result
+        if args.reports_command == "run":
+            result = service.run(args.plan)
+            return "reports run", result["status"], result
+        if args.reports_command == "show":
+            result = service.show(args.report, args.language)
+            return "reports show", result["status"], result
     if args.group == "mp":
         from .measurement_protocol_service import MeasurementProtocolService
 

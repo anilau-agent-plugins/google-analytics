@@ -30,7 +30,7 @@ class CliTests(unittest.TestCase):
         code, payload = self.run_cli("version", "--json")
         self.assertEqual(code, 0)
         self.assertTrue(payload["ok"])
-        self.assertEqual(payload["cliVersion"], "0.9.0")
+        self.assertEqual(payload["cliVersion"], "0.10.0")
 
     def test_version_check_is_offline_without_configuration(self) -> None:
         code, payload = self.run_cli("version", "--check", "--json")
@@ -40,6 +40,11 @@ class CliTests(unittest.TestCase):
 
     def test_invalid_arguments_are_json(self) -> None:
         code, payload = self.run_cli("unknown")
+        self.assertEqual(code, 4)
+        self.assertEqual(payload["errors"][0]["code"], "INVALID_ARGUMENTS")
+
+    def test_reports_cli_requires_explicit_property_and_artifacts(self) -> None:
+        code, payload = self.run_cli("reports", "catalog", "--profile", "profile-test")
         self.assertEqual(code, 4)
         self.assertEqual(payload["errors"][0]["code"], "INVALID_ARGUMENTS")
 

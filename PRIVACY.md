@@ -2,7 +2,7 @@
 
 ## Current version
 
-Google Analytics Advisor 0.9.0 runs locally in the user's environment. It does not collect telemetry
+Google Analytics Advisor 0.10.0 runs locally in the user's environment. It does not collect telemetry
 and does not send prompts, credentials, project files or analytics data to Anilau. Google
 authorization and connection diagnostics communicate directly from the user's computer to Google;
 they do not pass through Anilau infrastructure.
@@ -32,7 +32,7 @@ not configured by default and can be disabled from the CLI.
 The customer supplies a Desktop OAuth client from the customer's own Google Cloud project. The local
 CLI sends the browser authorization request, authorization-code exchange, token refresh, optional
 revocation, read-only discovery and bounded diagnostics directly to Google over HTTPS. The requested scopes cover
-identity, GA4 read/edit and GTM read/edit/version/publish. Version 0.9.0 can perform allowlisted GA4
+identity, GA4 read/edit and GTM read/edit/version/publish. Version 0.10.0 can perform allowlisted GA4
 Admin configuration and local website source changes after separate immutable expiring plans and
 exact SHA-256 confirmations. It can also perform supported GTM web-container operations through
 separate workspace, sync, entity, compiler-preview, version, and publish plans. Authorization does
@@ -43,6 +43,14 @@ and selected GTM configuration directly from Google. The CLI does not request Me
 secret resources. Normalized snapshots and a baseline report are stored inside the selected project
 under `.google-analytics-advisor/`; credentials remain in OS-protected storage and are never written
 to those artifacts. The user controls retention by retaining or deleting that project directory.
+
+Read-only performance reporting can request bounded aggregate GA4 Data API results for explicitly
+selected properties, dates and closed report presets. The CLI stores only normalized typed rows,
+concise request/evidence metadata, Data API request IDs, quality indicators and derived advice in
+versioned local report artifacts. It does not store access tokens or unbounded raw provider responses.
+Potential email addresses, phone-like values, credential-like strings and URL query/fragment values
+are redacted before storage and display. Restricted metrics remain marked unavailable rather than
+being interpreted as zero. Reports and recommendations are not sent to Anilau.
 
 Measurement contexts and plans are also stored under `.google-analytics-advisor/`. They contain
 structural business outcomes, evidence references, hashes, event definitions, consent decisions, and
