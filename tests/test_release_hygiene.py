@@ -20,6 +20,7 @@ class ReleaseHygieneTests(unittest.TestCase):
             "skills/google-analytics/SKILL.md",
             "skills/google-analytics/agents/openai.yaml",
             "skills/google-analytics/references/ga4-configuration.md",
+            "skills/google-analytics/references/gtm-management.md",
             "README.md",
             "CHANGELOG.md",
             "LICENSE",
@@ -106,6 +107,19 @@ class ReleaseHygieneTests(unittest.TestCase):
         self.assertIn("do not retry", reference)
         self.assertNotIn('"DELETE"', registry)
         self.assertNotIn("delete.containers", registry)
+
+    def test_gtm_lifecycle_is_separate_and_never_automatic(self) -> None:
+        skill = (ROOT / "skills" / "google-analytics" / "SKILL.md").read_text(encoding="utf-8")
+        reference = (ROOT / "skills" / "google-analytics" / "references" / "gtm-management.md").read_text(encoding="utf-8")
+        service = (ROOT / "scripts" / "google_analytics_cli" / "gtm_mutation_service.py").read_text(encoding="utf-8")
+        for stage in ("WORKSPACE_CREATE", "WORKSPACE_SYNC", "ENTITY_BULK_UPDATE", "QUICK_PREVIEW", "VERSION_CREATE", "PUBLISH"):
+            self.assertIn(stage, reference)
+            self.assertIn(stage, service)
+        self.assertIn("Never resolve conflicts", skill)
+        self.assertIn("publish automatically", skill)
+        self.assertNotIn('"DELETE"', service)
+        self.assertNotIn("resolve_conflict", service)
+        self.assertIn('"automaticPublish": False', service)
 
     def test_working_material_and_local_paths_are_not_publishable(self) -> None:
         forbidden_names = {"planning", ".plugin-work", "DEVELOPMENT_PLAN.md"}

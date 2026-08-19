@@ -1,6 +1,6 @@
 # Google Analytics Advisor
 
-[![Version 0.8.0](https://img.shields.io/badge/version-0.8.0-2563eb)](https://github.com/anilau-agent-plugins/google-analytics/releases/latest)
+[![Version 0.9.0](https://img.shields.io/badge/version-0.9.0-2563eb)](https://github.com/anilau-agent-plugins/google-analytics/releases/latest)
 [![MIT License](https://img.shields.io/badge/license-MIT-16a34a)](LICENSE)
 [![Codex and Claude Code](https://img.shields.io/badge/works_with-Codex%20%7C%20Claude%20Code-7c3aed)](#installation-instructions)
 
@@ -18,12 +18,14 @@ It works with **Codex** and **Claude Code** on Windows, macOS, and Linux.
 - design useful events, key events, ecommerce tracking, funnels, and consent handling;
 - safely configure supported GA4 settings after showing you an exact change plan;
 - safely add Google tag or Google Tag Manager code to supported website projects;
+- safely create an isolated GTM workspace, configure supported tags/triggers/variables, compile a
+  preview, create a version, and separately publish that exact version;
 - check Measurement Protocol events before a separately confirmed production send;
 - create and protect the Google authorization needed for this work.
 
 The plugin currently understands static HTML, Laravel Blade, React/Vite, and Next.js App Router
-projects. It does not publish Google Tag Manager containers, deploy websites, manage Analytics users,
-or promise business results.
+projects. It does not deploy websites, manage Analytics/GTM users, delete containers, accept
+arbitrary Custom HTML, or promise business results.
 
 ## Installation instructions
 
@@ -37,7 +39,7 @@ computer and helps install a suitable version when needed. It uses:
 To install:
 
 1. Open the [latest release](https://github.com/anilau-agent-plugins/google-analytics/releases/latest).
-2. Download the file named `google-analytics-0.8.0.zip` and unpack it.
+2. Download the file named `google-analytics-0.9.0.zip` and unpack it.
 3. In Codex or Claude Code, point to the unpacked folder and say: **“Install this plugin.”**
 4. Start a new task or conversation and say: **“Check my Google Analytics setup.”**
 
@@ -90,7 +92,7 @@ To update:
 
 An update replaces the installed plugin copy. It does not delete Google credentials or project
 reports because those are stored outside the plugin folder. Automatic updates are not enabled in
-version 0.8.0; this prevents an unverified file from silently changing installed code. The plugin can
+version 0.9.0; this prevents an unverified file from silently changing installed code. The plugin can
 perform a telemetry-free version check when a trusted signed update manifest is configured, but it
 still asks before installation.
 
@@ -107,13 +109,15 @@ See [PRIVACY.md](PRIVACY.md) for the complete data flow.
 
 ## Safe changes by design
 
-Reading data does not authorize a change. Before supported GA4 or website changes, the plugin shows
+Reading data does not authorize a change. Before supported GA4, website, or GTM changes, the plugin shows
 an immutable plan with the exact target, intended result, risks, expiry time, and SHA-256 fingerprint.
 Nothing changes until you confirm that exact fingerprint. Afterward, the plugin reads the result back
 and reports `applied`, `partial`, `ambiguous`, or `failed` exactly.
 
-It never treats a timeout as success, never automatically repeats an uncertain write or production
-event, and never deploys a website as part of local installation.
+GTM workspace creation, sync, entity changes, compiler preview, version creation, and publish are six
+separate plans and confirmations. The plugin never treats a timeout as success, never automatically
+repeats an uncertain write or production event, never resolves GTM conflicts automatically, never
+publishes automatically, and never deploys a website as part of local installation.
 
 ## Try these requests
 
@@ -123,6 +127,7 @@ Which conversions should this website track?
 Check this local website for duplicate Google tags.
 Prepare a safe plan to install analytics on this project.
 Show me what would change before configuring GA4.
+Prepare an isolated GTM workspace and show me every change before applying it.
 ```
 
 Ask in any language. The plugin should answer in the language you use, even though published product

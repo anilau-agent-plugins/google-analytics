@@ -1,8 +1,8 @@
 {
   "name": "google-analytics",
   "displayName": "Google Analytics Advisor",
-  "version": "0.8.0",
-  "description": "Plain-language GA4 audits, safe configuration, and confirmed local measurement installation.",
+  "version": "0.9.0",
+  "description": "Plain-language GA4 guidance with protected GA4, website, and GTM changes.",
   "author": {
     "name": "Eduard Volkov",
     "url": "https://anilau.com"

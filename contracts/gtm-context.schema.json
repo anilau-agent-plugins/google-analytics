@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:anilau:google-analytics:gtm-context:v1",
+  "title": "Google Analytics Advisor GTM context",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "artifactType", "generatedAt", "expiresAt", "contextId", "contextSha256", "projectRoot", "profileId", "container", "measurementPlan", "siteContext", "remoteState", "blockers", "limitations", "networkUsed", "mutationPerformed"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "artifactType": {"const": "gtm-context"},
+    "generatedAt": {"type": "string", "format": "date-time"},
+    "expiresAt": {"type": "string", "format": "date-time"},
+    "contextId": {"type": "string", "pattern": "^gtm-context-[A-Za-z0-9-]{12,128}$"},
+    "contextSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "projectRoot": {"type": "string", "minLength": 1},
+    "profileId": {"type": "string", "minLength": 1},
+    "container": {"type": "string", "pattern": "^accounts/[A-Za-z0-9_-]+/containers/[A-Za-z0-9_-]+$"},
+    "measurementPlan": {"type": "object"},
+    "siteContext": {"type": ["object", "null"]},
+    "remoteState": {"type": "object"},
+    "blockers": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "networkUsed": {"const": true},
+    "mutationPerformed": {"const": false}
+  }
+}

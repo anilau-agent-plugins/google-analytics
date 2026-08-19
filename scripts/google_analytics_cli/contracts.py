@@ -15,7 +15,7 @@ from .paths import source_root
 ARTIFACTS = {
     "project-profile", "measurement-plan", "snapshot", "mutation-plan", "report",
     "journal-entry", "baseline-report", "ga4-change-request", "website-context",
-    "website-change-request", "mp-delivery-plan",
+    "website-change-request", "mp-delivery-plan", "gtm-context", "gtm-change-request",
 }
 ALLOWED = {
     "$schema", "$id", "$defs", "$ref", "title", "type", "const", "enum", "required",
@@ -190,6 +190,28 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
                 _fail(f"$.operations[{index}].resource", "lacks a covering precondition")
         if data.get("schemaVersion") == 3 and data.get("target") != "website":
             _fail("$.target", "mutation-plan v3 is reserved for website changes")
+        if data.get("schemaVersion") == 4 and data.get("target") != "tag-manager":
+            _fail("$.target", "mutation-plan v4 is reserved for Tag Manager changes")
+    elif name == "gtm-context":
+        generated = datetime.fromisoformat(data["generatedAt"].replace("Z", "+00:00"))
+        expires = datetime.fromisoformat(data["expiresAt"].replace("Z", "+00:00"))
+        if generated >= expires:
+            _fail("$.expiresAt", "must be later than generatedAt")
+    elif name == "gtm-change-request":
+        stage = data["stage"]
+        required = {
+            "WORKSPACE_CREATE": ("workspaceName",),
+            "WORKSPACE_SYNC": ("workspace",),
+            "ENTITY_BULK_UPDATE": ("workspace", "entities"),
+            "QUICK_PREVIEW": ("workspace",),
+            "VERSION_CREATE": ("workspace", "evidenceJournal", "versionName"),
+            "PUBLISH": ("version", "versionFingerprint", "evidenceJournal", "runtimeEvidence"),
+        }[stage]
+        missing = [key for key in required if not data.get(key)]
+        if missing:
+            _fail("$", f"{stage} requires: {', '.join(missing)}")
+        if stage != "ENTITY_BULK_UPDATE" and "entities" in data:
+            _fail("$.entities", "entities are allowed only for ENTITY_BULK_UPDATE")
     elif name == "website-context":
         if data.get("codeExecuted") is not False or data.get("networkUsed") is not False:
             _fail("$", "website context must be produced by local static inspection")

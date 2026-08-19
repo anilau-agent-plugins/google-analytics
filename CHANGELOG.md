@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.9.0 - 2026-08-19
+
+- Added a web-only Google Tag Manager lifecycle with six separately confirmed stages: isolated
+  workspace creation, sync, coherent entity bulk update, compiler preview, version creation, and
+  publish.
+- Added versioned GTM context and change-request contracts plus a closed template registry for data
+  layer variables, supported web triggers, Google tags, and GA4 event tags; arbitrary Custom HTML,
+  JavaScript, PII, deletes, mobile/AMP/server containers, and automatic conflict resolution remain
+  blocked.
+- Added immutable 30-minute mutation plans, exact SHA-256 confirmation, fresh workspace/entity/version
+  fingerprints, replay protection, one-shot writes, independent readback, and read-only reconciliation.
+- Bound version creation to an unchanged compiler-previewed workspace and publish to the exact created
+  version, unchanged live predecessor, and explicit runtime preview evidence. GTM is never published
+  automatically or by automated tests.
+- Preserved the public MIT license, public GitHub repository, community support model, and
+  customer-owned OAuth/Cloud architecture introduced in 0.8.0.
+
+## 0.9.0 - 2026-08-19
+
+- Added a web-only Google Tag Manager lifecycle with six separately confirmed stages: isolated
+  workspace creation, sync, coherent entity bulk update, compiler preview, version creation, and
+  publish.
+- Added versioned GTM context and change-request contracts plus a closed template registry for data
+  layer variables, supported web triggers, Google tags, and GA4 event tags; arbitrary Custom HTML,
+  JavaScript, PII, deletes, mobile/AMP/server containers, and automatic conflict resolution remain
+  blocked.
+- Added immutable 30-minute mutation plans, exact SHA-256 confirmation, fresh workspace/entity/version
+  fingerprints, replay protection, one-shot writes, independent readback, and read-only reconciliation.
+- Bound version creation to an unchanged compiler-previewed workspace and publish to the exact created
+  version, unchanged live predecessor, and explicit runtime preview evidence. GTM is never published
+  automatically or by automated tests.
+- Preserved the public MIT license, public GitHub repository, community support model, and
+  customer-owned OAuth/Cloud architecture introduced in 0.8.0.
+
 ## 0.8.0 - 2026-08-16
 
 - Published Google Analytics Advisor as free, open-source software under the MIT License.

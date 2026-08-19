@@ -171,6 +171,29 @@ def build_parser() -> Parser:
     ga4_reconcile = ga4_sub.add_parser("reconcile")
     ga4_reconcile.add_argument("--journal", required=True, type=Path)
     ga4_reconcile.add_argument("--json", action="store_true")
+    gtm = sub.add_parser("gtm")
+    gtm_sub = gtm.add_subparsers(dest="gtm_command", required=True, parser_class=Parser)
+    gtm_context = gtm_sub.add_parser("context")
+    gtm_context.add_argument("--profile", required=True)
+    gtm_context.add_argument("--container", required=True)
+    gtm_context.add_argument("--project-root", required=True, type=Path)
+    gtm_context.add_argument("--measurement-plan", required=True, type=Path)
+    gtm_context.add_argument("--site-context", type=Path)
+    gtm_context.add_argument("--json", action="store_true")
+    gtm_plan = gtm_sub.add_parser("plan")
+    gtm_plan.add_argument("--context", required=True, type=Path)
+    gtm_plan.add_argument("--changes", required=True, type=Path)
+    gtm_plan.add_argument("--json", action="store_true")
+    gtm_show = gtm_sub.add_parser("show")
+    gtm_show.add_argument("--plan", required=True, type=Path)
+    gtm_show.add_argument("--json", action="store_true")
+    gtm_apply = gtm_sub.add_parser("apply")
+    gtm_apply.add_argument("--plan", required=True, type=Path)
+    gtm_apply.add_argument("--confirm-sha256", required=True)
+    gtm_apply.add_argument("--json", action="store_true")
+    gtm_reconcile = gtm_sub.add_parser("reconcile")
+    gtm_reconcile.add_argument("--journal", required=True, type=Path)
+    gtm_reconcile.add_argument("--json", action="store_true")
     mp = sub.add_parser("mp")
     mp_sub = mp.add_subparsers(dest="mp_command", required=True, parser_class=Parser)
     mp_plan = mp_sub.add_parser("delivery-plan")
@@ -335,6 +358,25 @@ def dispatch(argv: list[str]) -> tuple[str, str, Any]:
         if args.ga4_command == "reconcile":
             result = service.reconcile(args.journal)
             return "ga4 reconcile", result["status"], result
+    if args.group == "gtm":
+        from .gtm_mutation_service import GtmMutationService
+
+        service = GtmMutationService()
+        if args.gtm_command == "context":
+            result = service.context(args.profile, args.container, args.project_root, args.measurement_plan, args.site_context)
+            return "gtm context", result["status"], result
+        if args.gtm_command == "plan":
+            result = service.plan(args.context, args.changes)
+            return "gtm plan", result["status"], result
+        if args.gtm_command == "show":
+            result = service.show(args.plan)
+            return "gtm show", result["status"], result
+        if args.gtm_command == "apply":
+            result = service.apply(args.plan, args.confirm_sha256)
+            return "gtm apply", result["status"], result
+        if args.gtm_command == "reconcile":
+            result = service.reconcile(args.journal)
+            return "gtm reconcile", result["status"], result
     if args.group == "mp":
         from .measurement_protocol_service import MeasurementProtocolService
 

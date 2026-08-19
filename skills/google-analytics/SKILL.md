@@ -1,6 +1,6 @@
 ---
 name: google-analytics
-description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, baseline audits, measurement strategy, customer-owned Desktop OAuth, confirmed GA4 configuration, safe local Google tag or GTM snippet installation, Consent Mode, SPA/ecommerce events, Measurement Protocol validation, and plain-language recommendations. Use when a user asks about GA4 setup, analytics code, conversions, GTM, an analytics audit, interpreting analytics, connecting Google, creating a Google Cloud OAuth application, checking Python, or installing measurement code. Version 0.8.0 adds immutable SHA-confirmed local website changes; it does not implement remote GTM changes, production deploy, or full performance reports.
+description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, baseline audits, measurement strategy, customer-owned Desktop OAuth, confirmed GA4 configuration, safe local measurement installation, Consent Mode, SPA/ecommerce events, Measurement Protocol validation, and separately confirmed GTM workspace, tag, trigger, variable, preview, version, and publish operations. Use when a user asks about GA4 setup, analytics code, conversions, GTM, an analytics audit, interpreting analytics, connecting Google, creating a Google Cloud OAuth application, checking Python, installing measurement code, or safely publishing a GTM version. Version 0.9.0 adds the protected GTM lifecycle; it does not deploy websites or implement full performance reports.
 ---
 
 # Google Analytics Advisor
@@ -14,7 +14,7 @@ explanation, but keep exact product names, event names, metric names, commands a
 
 ## Current capability boundary
 
-Treat version 0.8.0 as the read-only baseline, measurement-design, confirmed GA4 configuration, and safe local website-installation release. It can discover GA4 accounts, properties,
+Treat version 0.9.0 as the read-only baseline, measurement-design, confirmed GA4 configuration, safe local website-installation, and protected GTM-lifecycle release. It can discover GA4 accounts, properties,
 website streams and core settings; inspect selected GTM resources; statically inspect a local website
 project; run one bounded 28-day event diagnostic; correlate public tag IDs; and write immutable
 snapshots plus a baseline report; create, validate, render, approve, and migrate immutable local
@@ -23,13 +23,14 @@ mutation plans, exact SHA-256 confirmation, fresh preconditions, one-shot writes
 readback; and prepare/apply exact local source patches for an approved measurement plan with separate
 SHA-256 confirmation, stale-file checks, safe recovery, and readback. It can validate a protected
 Measurement Protocol design against Google's debug endpoint and send only a separately planned,
-one-shot production request. Only claim findings returned by the CLI, and preserve every
+one-shot production request; and manage a GTM web container through six separately confirmed
+workspace/entity/preview/version/publish stages with fresh fingerprints and independent readback.
+Only claim findings returned by the CLI, and preserve every
 reported limitation. Never describe a source-code match alone as proof that production collection
 works.
 
 The following functionality is not implemented yet:
 
-- Remote GTM workspace/version/publish changes — planned for stage 9.
 - Data API reports and evidence-backed recommendations — planned for stage 10.
 
 When a request requires a later capability, explain the boundary and a safe preparation step. Never
@@ -55,7 +56,7 @@ using it. The check sends no credentials, analytics data or identifiers, caches 
 metadata outside the plugin source for 30 days, never updates automatically, and can be disabled with
 `version --disable-check --json`.
 
-Use `contracts validate --schema <artifact-type> --input <absolute-path> --json` only for the eleven
+Use `contracts validate --schema <artifact-type> --input <absolute-path> --json` only for the thirteen
 project artifacts. Do not describe this validator as a general JSON Schema implementation.
 
 ## Google authorization workflow
@@ -225,6 +226,19 @@ production delivery plans. Debug validation uses `ENFORCE_RECOMMENDATIONS`; non-
 messages block production. A production plan requires a new exact SHA confirmation, sends once, never
 retries an uncertain result, and never treats an HTTP success as proof that GA4 processed the event.
 
+## Google Tag Manager workflow
+
+Read [references/gtm-management.md](references/gtm-management.md) before any GTM plan, apply,
+preview, version, publish, or reconciliation request. Require the exact approved measurement plan,
+web container, fresh GTM context, and Stage 8 website/dataLayer evidence before entity changes.
+
+Keep workspace creation, sync, entity bulk update, compiler preview, version creation, and publish as
+six independent immutable 30-minute plans. Show and obtain the full exact `planSha256` for every
+stage. Never resolve conflicts, delete resources, accept arbitrary Custom HTML/JavaScript, retry a
+write, or publish automatically. `quick_preview` is compiler evidence only; require separately
+recorded runtime preview evidence before publish. Version creation replaces its workspace, and
+publish replaces the live version, so explain those consequences before asking for confirmation.
+
 ## Safe preview responses
 
 For planning questions that do not require live evidence, provide a provisional explanation and
@@ -235,6 +249,6 @@ For full performance reports or unsupported remote mutation requests, return:
 
 - what the user is trying to achieve;
 - why live access or runtime support is required;
-- that version 0.8.0 can perform the bounded baseline, local measurement design, separately confirmed supported GA4 configuration, and separately confirmed local website installation portions;
+- that version 0.9.0 can perform the bounded baseline, local measurement design, separately confirmed supported GA4 configuration, local website installation, and protected GTM lifecycle portions;
 - the implementation stage that will add it;
 - a safe next step that does not expose secrets or pretend the operation succeeded.

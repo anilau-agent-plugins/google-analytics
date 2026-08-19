@@ -38,7 +38,7 @@
   ],
   "required": ["schemaVersion", "artifactType", "generatedAt", "expiresAt", "planId", "planSha256", "target", "riskClass", "preconditions", "operations", "expectedReadback"],
   "properties": {
-    "schemaVersion": {"enum": [1, 2, 3]},
+    "schemaVersion": {"enum": [1, 2, 3, 4]},
     "artifactType": {"const": "mutation-plan"},
     "generatedAt": {"type": "string", "format": "date-time"},
     "expiresAt": {"type": "string", "format": "date-time"},
@@ -72,7 +72,7 @@
         "properties": {
           "operationId": {"type": "string", "minLength": 1},
           "kind": {"type": "string", "minLength": 1},
-          "apiVersion": {"enum": ["v1beta", "v1alpha"]},
+          "apiVersion": {"enum": ["v1beta", "v1alpha", "v2"]},
           "method": {"enum": ["POST", "PATCH", "PUT", "FILE_PATCH"]},
           "resource": {"type": "string", "minLength": 1},
           "fieldMask": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
@@ -99,5 +99,8 @@
     ,"route": {"enum": ["direct", "gtm"]}
     ,"verificationCommands": {"type": "array", "items": {"type": "object"}}
     ,"deploymentApproved": {"const": false}
+    ,"stage": {"enum": ["WORKSPACE_CREATE", "WORKSPACE_SYNC", "ENTITY_BULK_UPDATE", "QUICK_PREVIEW", "VERSION_CREATE", "PUBLISH"]}
+    ,"gtmContext": {"type": "object", "$ref": "#/$defs/safeValue"}
+    ,"evidence": {"type": ["object", "null"], "$ref": "#/$defs/safeValue"}
   }
 }

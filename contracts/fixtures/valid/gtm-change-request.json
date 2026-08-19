@@ -1,0 +1,1 @@
+{"schemaVersion":1,"artifactType":"gtm-change-request","projectRoot":"C:/projects/site","profileId":"profile-test","container":"accounts/1/containers/2","stage":"WORKSPACE_CREATE","rationale":"Keep plugin changes isolated.","workspaceName":"Google Analytics Advisor 20260819","workspaceDescription":"Prepared from an approved measurement plan."}
