@@ -17,6 +17,7 @@ from .paths import runtime_paths
 
 
 SERVICE = "com.anilau.google-analytics-advisor"
+MAX_SECRET_BYTES = 1024 * 1024
 
 
 class SecretStore:
@@ -34,6 +35,16 @@ def _safe_key(key: str) -> str:
     if not key or len(key) > 200 or any(ord(char) < 32 for char in key):
         raise AdvisorError("SECRET_KEY_INVALID", "The secret reference is invalid.", EXIT_CONFIGURATION)
     return key
+
+
+def _safe_value(value: bytes) -> bytes:
+    if not isinstance(value, bytes) or not value or len(value) > MAX_SECRET_BYTES:
+        raise AdvisorError(
+            "SECRET_VALUE_INVALID",
+            "A protected credential must contain between 1 byte and 1 MiB.",
+            EXIT_CONFIGURATION,
+        )
+    return value
 
 
 class WindowsDpapiStore(SecretStore):
@@ -69,8 +80,7 @@ class WindowsDpapiStore(SecretStore):
         return self.root / f"{digest}.dpapi"
 
     def _protect(self, value: bytes) -> bytes:
-        if not value:
-            raise AdvisorError("SECRET_VALUE_INVALID", "An empty secret cannot be stored.", EXIT_CONFIGURATION)
+        value = _safe_value(value)
         buffer = ctypes.create_string_buffer(value, len(value))
         source = self.DATA_BLOB(len(value), ctypes.cast(buffer, ctypes.POINTER(ctypes.c_ubyte)))
         target = self.DATA_BLOB()
@@ -167,6 +177,7 @@ class MacKeychainStore(SecretStore):
         return status, value, item
 
     def put(self, key: str, value: bytes) -> None:
+        value = _safe_value(value)
         status, _, item = self._find(key)
         if status == 0:
             try:
@@ -232,6 +243,7 @@ class LinuxSecretServiceStore(SecretStore):
         return result
 
     def put(self, key: str, value: bytes) -> None:
+        value = _safe_value(value)
         encoded = base64.b64encode(value)
         self._run(["secret-tool", "store", "--label=Google Analytics Advisor", "application", SERVICE, "key", _safe_key(key)], value=encoded)
 

@@ -3,7 +3,9 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
-from scripts.google_analytics_cli.contracts import ARTIFACTS, validate_artifact
+import json
+
+from scripts.google_analytics_cli.contracts import ARTIFACTS, validate_artifact, validate_artifact_data
 from scripts.google_analytics_cli.errors import AdvisorError
 
 
@@ -35,6 +37,14 @@ class ContractTests(unittest.TestCase):
         self.assertTrue(validate_artifact("report", FIXTURES / "valid" / "report-v2.json")["valid"])
         with self.assertRaises(AdvisorError):
             validate_artifact("report", FIXTURES / "invalid" / "report-v2.json")
+
+    def test_all_artifact_roots_reject_unknown_fields(self) -> None:
+        for name in sorted(ARTIFACTS):
+            with self.subTest(name=name):
+                value = json.loads((FIXTURES / "valid" / f"{name}.json").read_text(encoding="utf-8"))
+                value["unexpectedStage11Field"] = True
+                with self.assertRaises(AdvisorError):
+                    validate_artifact_data(name, value, path_label="stage11-fixture")
 
 
 if __name__ == "__main__":

@@ -17,7 +17,7 @@ if [ -z "$PYTHON" ]; then
     exit 2
 fi
 
-"$PYTHON" -m unittest discover -s tests -v
+"$PYTHON" tests/run_suite.py
 sh ./scripts/google-analytics.sh version --json
 sh ./scripts/google-analytics.sh runtime detect --json
 sh ./scripts/google-analytics.sh runtime install-guide --json

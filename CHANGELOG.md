@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.11.0 - 2026-08-28
+
+- Added a default-deny validation runner that blocks all non-loopback production network requests,
+  including inherited subprocess checks, while allowing only synthetic fake transports and the local
+  one-use OAuth callback.
+- Hardened dependency-free HTTP handling with strict credential-free HTTPS URL validation, bounded
+  retry counts, JSON content-type checks, and removal of Authorization headers on cross-host
+  redirects; OAuth form posts are restricted to Google's exact token and revocation endpoints.
+- Made every protected credential backend reject empty and oversized values before storage while
+  preserving DPAPI, macOS Keychain, and Linux Secret Service with no plaintext fallback.
+- Expanded contract, transport, secret, archive, credential-leak, CI, and cross-process safety tests;
+  the Windows acceptance suite uses only synthetic data and performs no Google, website, publish,
+  deploy, or production-event mutation.
+- Updated CI to run the Windows CPython 3.10-3.13 security suite before release on pushes, pull
+  requests, and manual dispatch, and hardened the local limited-memory runner for Windows PowerShell
+  5.1 and PowerShell 7.
+
 ## 0.10.2 - 2026-08-28
 
 - Fixed approved measurement plans being rejected by GA4, website, Measurement Protocol, and GTM

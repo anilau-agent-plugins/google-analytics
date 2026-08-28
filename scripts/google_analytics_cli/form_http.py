@@ -10,6 +10,13 @@ import urllib.request
 from typing import Any, Callable
 
 from .errors import AdvisorError, EXIT_NETWORK
+from .network_policy import enforce_network_policy, validate_https_url
+
+
+ALLOWED_OAUTH_ENDPOINTS = {
+    "https://oauth2.googleapis.com/token",
+    "https://oauth2.googleapis.com/revoke",
+}
 
 
 class FormTransport:
@@ -19,14 +26,17 @@ class FormTransport:
     ) -> None:
         self.timeout = timeout
         self.max_response_bytes = max_response_bytes
+        self._injected_opener = opener is not None
         self.opener = opener or urllib.request.urlopen
         self.ssl_context = ssl_context or ssl.create_default_context()
         self.ssl_context.check_hostname = True
         self.ssl_context.verify_mode = ssl.CERT_REQUIRED
 
     def post(self, url: str, fields: dict[str, str]) -> dict[str, Any]:
-        if not url.startswith("https://"):
+        validate_https_url(url)
+        if url not in ALLOWED_OAUTH_ENDPOINTS:
             raise AdvisorError("OAUTH_ENDPOINT_INVALID", "OAuth endpoints must use HTTPS.", EXIT_NETWORK)
+        enforce_network_policy(url, injected_transport=self._injected_opener)
         body = urllib.parse.urlencode(fields).encode("ascii")
         request = urllib.request.Request(
             url, data=body,

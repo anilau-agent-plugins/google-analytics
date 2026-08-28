@@ -38,6 +38,7 @@ class FakeReportTransport:
         self.low_quota = False
         self.incompatible = False
         self.extra_incompatible = False
+        self.empty = False
         self.metadata = {
             "dimensions": [{"apiName": item} for item in (
                 "date", "sessionDefaultChannelGroup", "firstUserDefaultChannelGroup", "landingPage",
@@ -98,6 +99,9 @@ class FakeReportTransport:
         for row_index, values in enumerate(dimension_values):
             rows.append({"dimensionValues": [{"value": value} for value in values], "metricValues": [{"value": str(max(0, 100 - row_index * 20 - index))} for index, _ in enumerate(metrics)]})
         metadata: dict[str, Any] = {"subjectToThresholding": self.thresholded, "dataLossFromOtherRow": self.other, "timeZone": "Asia/Bangkok", "currencyCode": "USD"}
+        if self.empty:
+            rows = []
+            metadata["emptyReason"] = "No rows matched the selected complete period."
         if self.sampled:
             metadata["samplingMetadatas"] = [{"samplesReadCount": "500", "samplingSpaceSize": "1000"}]
         if self.restricted and "totalRevenue" in metrics:
@@ -279,6 +283,20 @@ class ReportTests(unittest.TestCase):
         self.assertTrue(any(item["type"] == "small-data" for item in result["report"]["limitations"]))
         self.assertIn("Google Analytics", render_report(result["report"], "en"))
         self.assertIn("Google Analytics", render_report(result["report"], "ru"))
+
+    def test_empty_property_is_labeled_empty_without_invented_recommendations(self) -> None:
+        self.transport.empty = True
+        planned = self._plan(self._request(["overview"]))
+        result = self.service.run(Path(planned["artifact"]["path"]))
+        self.assertEqual(result["status"], "empty")
+        self.assertTrue(any(item["type"] == "empty" for item in result["report"]["limitations"]))
+        evidence_ids = {item["datasetId"] for item in result["report"]["datasets"]}
+        for recommendation in result["report"]["recommendations"]:
+            self.assertTrue(set(recommendation["evidenceRefs"]).issubset(evidence_ids))
+
+    def test_multilingual_dimension_value_is_preserved_when_not_pii(self) -> None:
+        value = "Заявка подтверждена 日本語"
+        self.assertEqual(redact_text(value), (value, False))
 
     def test_approved_measurement_plan_enables_business_context(self) -> None:
         plan = json.loads((ROOT / "contracts" / "fixtures" / "valid" / "measurement-plan-v2.json").read_text())

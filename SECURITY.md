@@ -25,3 +25,13 @@ promised.
 The plugin is designed to keep credentials in protected operating-system storage, send Google API
 requests directly to Google, reject secret-bearing project artifacts, and require exact confirmation
 for supported mutations. Reports that show a bypass of these safeguards are especially valuable.
+
+The canonical validation entrypoint runs with a loopback-only network policy. API tests use injected
+fake transports and synthetic fixtures; an accidental request to a production host is blocked before
+HTTP. Mutation and Measurement Protocol tests therefore cannot change a Google resource or send a
+production event. OAuth loopback tests may contact only the local one-use callback server.
+
+HTTP transport accepts credential-free HTTPS URLs on the standard port, bounds retries and response
+sizes, validates JSON responses, and removes Authorization headers on cross-host redirects. OAuth
+form requests are limited to Google's token and revocation endpoints. Protected credential backends
+reject empty or oversized values and never fall back to plaintext storage.

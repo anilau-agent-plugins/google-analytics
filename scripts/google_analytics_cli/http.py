@@ -8,16 +8,32 @@ import random
 import ssl
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Callable
 
 from .errors import AdvisorError, EXIT_NETWORK
+from .network_policy import enforce_network_policy, validate_https_url
 from .output import redact
 
 
 RETRYABLE = {429, 500, 502, 503, 504}
+
+
+class _SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Never forward an Authorization header to a different host."""
+
+    def redirect_request(self, req: Any, fp: Any, code: int, msg: str, headers: Any, newurl: str) -> Any:
+        redirected = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if redirected is None:
+            return None
+        old_host = urllib.parse.urlsplit(req.full_url).hostname
+        new_host = urllib.parse.urlsplit(newurl).hostname
+        if old_host != new_host:
+            redirected.remove_header("Authorization")
+        return redirected
 
 
 @dataclass
@@ -41,12 +57,15 @@ class JsonTransport:
     ) -> None:
         self.timeout = timeout
         self.max_response_bytes = max_response_bytes
-        self.opener = opener or urllib.request.urlopen
-        self.sleep = sleep
-        self.random_value = random_value
         self.ssl_context = ssl_context or ssl.create_default_context()
         self.ssl_context.check_hostname = True
         self.ssl_context.verify_mode = ssl.CERT_REQUIRED
+        self._injected_opener = opener is not None
+        self.opener = opener or urllib.request.build_opener(
+            _SafeRedirectHandler(), urllib.request.HTTPSHandler(context=self.ssl_context)
+        ).open
+        self.sleep = sleep
+        self.random_value = random_value
 
     def _read(self, response: Any) -> bytes:
         body = response.read(self.max_response_bytes + 1)
@@ -85,11 +104,15 @@ class JsonTransport:
         max_attempts: int | None = None,
         retry_mode: str | None = None,
     ) -> JsonResponse:
+        validate_https_url(url)
+        enforce_network_policy(url, injected_transport=self._injected_opener)
         normalized = method.upper()
         if retry_mode not in {None, "allowlisted-read"}:
             raise AdvisorError("UNSAFE_RETRY_POLICY", "Unknown retry policy.", EXIT_NETWORK)
         safe_read = normalized in {"GET", "HEAD"} or (normalized == "POST" and retry_mode == "allowlisted-read")
         attempts = max_attempts if max_attempts is not None else (3 if safe_read else 1)
+        if not isinstance(attempts, int) or isinstance(attempts, bool) or not 1 <= attempts <= 5:
+            raise AdvisorError("UNSAFE_RETRY_POLICY", "A request may use between one and five attempts.", EXIT_NETWORK)
         if attempts > 1 and not safe_read:
             raise AdvisorError("UNSAFE_RETRY_POLICY", "Retries are disabled for mutation requests.", EXIT_NETWORK)
         body = None if payload is None else json.dumps(payload, ensure_ascii=False).encode("utf-8")
@@ -99,8 +122,17 @@ class JsonTransport:
         request = urllib.request.Request(url, data=body, headers=request_headers, method=normalized)
         for attempt in range(1, attempts + 1):
             try:
-                with self.opener(request, timeout=self.timeout, context=self.ssl_context) as response:
+                opener_kwargs = {"timeout": self.timeout}
+                if self._injected_opener:
+                    opener_kwargs["context"] = self.ssl_context
+                with self.opener(request, **opener_kwargs) as response:
                     raw = self._read(response)
+                    content_type = str(response.headers.get("Content-Type", "")).split(";", 1)[0].strip().lower()
+                    if raw and content_type and content_type not in {"application/json", "application/problem+json"} and not content_type.endswith("+json"):
+                        raise AdvisorError(
+                            "MALFORMED_HTTP_RESPONSE", "The server returned a non-JSON content type.",
+                            EXIT_NETWORK, details={"contentType": content_type[:128]},
+                        )
                     data = None if not raw else json.loads(raw.decode("utf-8"))
                     response_headers = {str(k).lower(): str(v) for k, v in response.headers.items()}
                     return JsonResponse(response.status, data, self._request_id(response.headers), response_headers)

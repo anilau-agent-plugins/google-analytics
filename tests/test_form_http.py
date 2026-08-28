@@ -39,6 +39,18 @@ class FormHttpTests(unittest.TestCase):
         self.assertEqual(details, {"status": 400, "googleError": "invalid_grant"})
         self.assertNotIn("sensitive detail", str(caught.exception.as_dict()))
 
+    def test_non_google_and_non_https_oauth_endpoints_are_rejected_before_send(self) -> None:
+        calls = []
+
+        def opener(*args, **kwargs):
+            calls.append((args, kwargs))
+            raise AssertionError("network must not be reached")
+
+        for url in ("http://oauth2.googleapis.com/token", "https://example.test/token"):
+            with self.subTest(url=url), self.assertRaises(AdvisorError):
+                FormTransport(opener=opener).post(url, {"code": "fixture"})
+        self.assertEqual(calls, [])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -74,14 +74,51 @@ public static class GoogleAnalyticsStageJobLimit {
 '@
 
 Add-Type -TypeDefinition $source
+
+function ConvertTo-ProcessArgument {
+    param([string] $Value)
+    if ($Value -notmatch '[\s"]') { return $Value }
+    return '"' + (($Value -replace '(\\*)"', '$1$1\"') -replace '(\\+)$', '$1$1') + '"'
+}
+
+$pythonFile = $null
+$pythonPrefix = @()
+foreach ($candidate in @(
+    @{ File = "py"; Prefix = @("-3") },
+    @{ File = "python3"; Prefix = @() },
+    @{ File = "python"; Prefix = @() }
+)) {
+    if (Get-Command $candidate.File -ErrorAction SilentlyContinue) {
+        & $candidate.File @($candidate.Prefix) -c "import sys; raise SystemExit(0 if (3,10) <= sys.version_info[:2] < (3,14) else 1)" 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            $pythonFile = $candidate.File
+            $pythonPrefix = $candidate.Prefix
+            break
+        }
+    }
+}
+if (-not $pythonFile) {
+    throw "Supported CPython 3.10-3.13 was not found."
+}
+
 $start = [System.Diagnostics.ProcessStartInfo]::new()
-$start.FileName = "python"
+$start.FileName = $pythonFile
 $start.UseShellExecute = $false
 $start.WorkingDirectory = (Get-Location).Path
-$start.Environment["PYTHONDONTWRITEBYTECODE"] = "1"
-$start.ArgumentList.Add("-B")
-foreach ($argument in $PythonArgs) {
-    $start.ArgumentList.Add($argument)
+if ($start.PSObject.Properties.Name -contains "Environment") {
+    $start.Environment["PYTHONDONTWRITEBYTECODE"] = "1"
+    $start.Environment["GOOGLE_ANALYTICS_ADVISOR_NETWORK_POLICY"] = "loopback-only"
+} else {
+    $start.EnvironmentVariables["PYTHONDONTWRITEBYTECODE"] = "1"
+    $start.EnvironmentVariables["GOOGLE_ANALYTICS_ADVISOR_NETWORK_POLICY"] = "loopback-only"
+}
+$allArguments = @($pythonPrefix) + @("-B") + @($PythonArgs)
+if ($start.PSObject.Properties.Name -contains "ArgumentList") {
+    foreach ($argument in $allArguments) {
+        $start.ArgumentList.Add($argument)
+    }
+} else {
+    $start.Arguments = (($allArguments | ForEach-Object { ConvertTo-ProcessArgument $_ }) -join " ")
 }
 $process = [System.Diagnostics.Process]::Start($start)
 [GoogleAnalyticsStageJobLimit]::Assign($process.Handle, 536870912)

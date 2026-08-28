@@ -7,7 +7,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from scripts.google_analytics_cli.errors import AdvisorError
-from scripts.google_analytics_cli.secret_store import LinuxSecretServiceStore, WindowsDpapiStore
+from scripts.google_analytics_cli.secret_store import LinuxSecretServiceStore, MAX_SECRET_BYTES, WindowsDpapiStore
 
 
 class SecretStoreTests(unittest.TestCase):
@@ -42,6 +42,21 @@ class SecretStoreTests(unittest.TestCase):
             self.assertEqual(store.get("key-1"), b"secret")
         self.assertNotIn("c2VjcmV0", calls[0][0])
         self.assertEqual(calls[0][1], b"c2VjcmV0")
+
+    def test_all_secret_backends_reject_empty_and_oversized_values_before_write(self) -> None:
+        calls = []
+
+        def runner(args, **kwargs):
+            calls.append((args, kwargs))
+            return subprocess.CompletedProcess(args, 0, stdout=b"", stderr=b"")
+
+        with patch("scripts.google_analytics_cli.secret_store.shutil.which", return_value="/usr/bin/secret-tool"):
+            store = LinuxSecretServiceStore(runner=runner)
+            for value in (b"", b"x" * (MAX_SECRET_BYTES + 1)):
+                with self.subTest(size=len(value)), self.assertRaises(AdvisorError) as caught:
+                    store.put("key-1", value)
+                self.assertEqual(caught.exception.code, "SECRET_VALUE_INVALID")
+        self.assertEqual(calls, [])
 
 
 if __name__ == "__main__":
