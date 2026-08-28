@@ -94,6 +94,11 @@ Approval creates a new immutable artifact. It never overwrites the draft. To con
 inside project data, run `measurement migrate --input <absolute-v1-path> --json`; migration always
 creates a blocked v2 draft that must be reconfirmed.
 
+`approvalSha256` in the approved revision records the exact draft hash the user confirmed.
+`contentSha256` protects the newly created approved revision, including its new identity, status,
+timestamp, and supersession link. These hashes therefore have different roles and are normally
+different; downstream workflows must validate each role rather than require equality.
+
 ## Explain the result
 
 Present: primary result, reliable source, proposed technical events, key-event recommendations,

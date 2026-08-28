@@ -19,7 +19,7 @@ from .errors import AdvisorError, EXIT_CONFIGURATION, EXIT_INPUT, EXIT_NETWORK
 from .gtm_renderer import render_plan
 from .gtm_templates import build_entities
 from .http import JsonResponse, JsonTransport
-from .measurement_policy import pii_issues, plan_content_sha256
+from .measurement_policy import approved_plan_is_valid, pii_issues
 from .website_context import _project_evidence, load_context as load_site_context
 
 
@@ -207,7 +207,7 @@ class GtmMutationService:
     def _measurement(path: Path) -> dict[str, Any]:
         value = _load(path.resolve(), "measurement plan")
         validate_artifact_data("measurement-plan", value, path_label=str(path))
-        if value.get("schemaVersion") != 2 or value.get("status") != "approved" or value.get("contentSha256") != plan_content_sha256(value) or value.get("approvalSha256") != value.get("contentSha256"):
+        if not approved_plan_is_valid(value):
             raise AdvisorError("MEASUREMENT_PLAN_NOT_APPROVED", "Stage 9 requires an untampered approved measurement-plan v2.", EXIT_INPUT)
         return value
 

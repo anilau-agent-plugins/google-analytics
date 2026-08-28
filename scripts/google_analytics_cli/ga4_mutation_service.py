@@ -18,7 +18,7 @@ from .contracts import validate_artifact_data
 from .errors import AdvisorError, EXIT_CONFIGURATION, EXIT_INPUT, EXIT_NETWORK
 from .ga4_mutation_renderer import render_plan
 from .http import JsonResponse, JsonTransport
-from .measurement_policy import pii_issues, plan_content_sha256
+from .measurement_policy import approved_plan_is_valid, pii_issues
 from .secret_store import SecretStore
 
 
@@ -106,7 +106,7 @@ class Ga4MutationService:
     def _validate_measurement_plan(plan: dict[str, Any]) -> None:
         if plan.get("schemaVersion") != 2 or plan.get("artifactType") != "measurement-plan" or plan.get("status") != "approved":
             raise AdvisorError("MEASUREMENT_PLAN_NOT_APPROVED", "Stage 7 requires an approved measurement-plan v2.", EXIT_INPUT)
-        if plan.get("contentSha256") != plan_content_sha256(plan) or plan.get("approvalSha256") != plan.get("contentSha256"):
+        if not approved_plan_is_valid(plan):
             raise AdvisorError("MEASUREMENT_PLAN_TAMPERED", "The approved measurement plan hash is invalid.", EXIT_INPUT)
         boundaries = plan.get("stageBoundaries", {})
         if not isinstance(boundaries, dict) or boundaries.get("mutationApprovalGranted") is not False:

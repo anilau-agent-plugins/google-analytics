@@ -18,10 +18,13 @@ NOW = datetime(2026, 8, 16, 12, 0, tzinfo=timezone.utc)
 def approved_measurement(path: Path, project: Path) -> dict:
     plan = json.loads((ROOT / "contracts" / "fixtures" / "valid" / "measurement-plan-v2.json").read_text(encoding="utf-8"))
     plan["site"] = str(project)
+    draft_sha = plan_content_sha256(plan)
     plan["status"] = "approved"
     plan["approvedAt"] = "2026-08-16T11:00:00Z"
+    plan["supersedes"] = plan["planId"]
+    plan["planId"] = "measure-20260816T110000Z-approved0001"
+    plan["approvalSha256"] = draft_sha
     plan["contentSha256"] = plan_content_sha256(plan)
-    plan["approvalSha256"] = plan["contentSha256"]
     path.write_text(json.dumps(plan), encoding="utf-8")
     return plan
 

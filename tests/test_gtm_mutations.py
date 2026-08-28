@@ -141,11 +141,14 @@ class GtmMutationTests(unittest.TestCase):
 
     def approved_measurement(self, path: Path) -> dict[str, Any]:
         plan = json.loads((ROOT / "contracts" / "fixtures" / "valid" / "measurement-plan-v2.json").read_text(encoding="utf-8"))
+        plan["events"][0]["collectionOwner"] = "browser-gtm"
+        draft_sha = plan_content_sha256(plan)
         plan["status"] = "approved"
         plan["approvedAt"] = "2026-08-19T11:00:00Z"
-        plan["events"][0]["collectionOwner"] = "browser-gtm"
+        plan["supersedes"] = plan["planId"]
+        plan["planId"] = "measure-20260819T110000Z-approved0001"
+        plan["approvalSha256"] = draft_sha
         plan["contentSha256"] = plan_content_sha256(plan)
-        plan["approvalSha256"] = plan["contentSha256"]
         path.write_text(json.dumps(plan), encoding="utf-8")
         return plan
 

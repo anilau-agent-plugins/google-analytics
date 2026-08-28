@@ -14,7 +14,7 @@ from .artifact_store import ArtifactStore, canonical_json
 from .contracts import validate_artifact_data
 from .errors import AdvisorError, EXIT_CONFIGURATION, EXIT_INPUT
 from .ga4_mutation_service import mutation_plan_sha256
-from .measurement_policy import plan_content_sha256
+from .measurement_policy import approved_plan_is_valid
 from .site_scanner import inspect_site
 from .website_context import _project_evidence, build_context, load_context
 from .website_patch import sha256_bytes, simulate_patch
@@ -41,7 +41,7 @@ def _approved_measurement(path: Path, binding: dict[str, Any]) -> dict[str, Any]
     if (
         value.get("schemaVersion") != 2 or value.get("status") != "approved"
         or value.get("planId") != binding.get("planId") or value.get("contentSha256") != binding.get("contentSha256")
-        or value.get("contentSha256") != plan_content_sha256(value) or value.get("approvalSha256") != value.get("contentSha256")
+        or not approved_plan_is_valid(value)
     ):
         raise AdvisorError("MEASUREMENT_PLAN_TAMPERED", "The approved measurement plan binding is stale or invalid.", EXIT_INPUT)
     return value

@@ -119,6 +119,7 @@ class MeasurementServiceTests(unittest.TestCase):
             approved = service.approve(Path(result["artifact"]["path"]), plan["contentSha256"])
             self.assertEqual(approved["plan"]["status"], "approved")
             self.assertEqual(approved["plan"]["approvalSha256"], plan["contentSha256"])
+            self.assertNotEqual(approved["plan"]["approvalSha256"], approved["plan"]["contentSha256"])
             self.assertNotEqual(approved["artifact"]["path"], result["artifact"]["path"])
             self.assertFalse(approved["mutationPerformed"])
             validate_artifact("measurement-plan", Path(approved["artifact"]["path"]))

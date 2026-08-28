@@ -14,7 +14,7 @@ from typing import Any
 from .artifact_store import ArtifactStore, canonical_json
 from .contracts import validate_artifact_data
 from .errors import AdvisorError, EXIT_INPUT
-from .measurement_policy import plan_content_sha256
+from .measurement_policy import approved_plan_is_valid
 from .site_scanner import EXCLUDED_DIRS, _is_link_or_reparse, inspect_site
 
 
@@ -44,7 +44,7 @@ def _approved_measurement(path: Path, root: Path) -> dict[str, Any]:
     validate_artifact_data("measurement-plan", value, path_label=str(path))
     if value.get("schemaVersion") != 2 or value.get("status") != "approved":
         raise AdvisorError("MEASUREMENT_PLAN_NOT_APPROVED", "Website changes require an approved measurement-plan v2.", EXIT_INPUT)
-    if value.get("contentSha256") != plan_content_sha256(value) or value.get("approvalSha256") != value.get("contentSha256"):
+    if not approved_plan_is_valid(value):
         raise AdvisorError("MEASUREMENT_PLAN_TAMPERED", "The approved measurement plan hash is invalid.", EXIT_INPUT)
     site = Path(str(value.get("site", ""))).expanduser()
     if site.is_absolute() and site.resolve() != root:

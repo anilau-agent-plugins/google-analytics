@@ -1,3 +1,3 @@
 """Dependency-free runtime for Google Analytics Advisor."""
 
-__version__ = "0.10.1"
+__version__ = "0.10.2"

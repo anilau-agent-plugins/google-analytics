@@ -5,7 +5,7 @@ import json
 import unittest
 from pathlib import Path
 
-from scripts.google_analytics_cli.measurement_policy import evaluate_plan, plan_content_sha256
+from scripts.google_analytics_cli.measurement_policy import approved_plan_is_valid, evaluate_plan, plan_content_sha256
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -89,6 +89,21 @@ class MeasurementPolicyTests(unittest.TestCase):
         issues = self.issues(plan)
         self.assertTrue(any("transaction_id" in item and "items" in item for item in issues))
         self.assertTrue(any("currency is required" in item for item in issues))
+
+    def test_approved_revision_keeps_confirmed_draft_hash_separate(self) -> None:
+        plan = self.plan()
+        draft_sha = plan_content_sha256(plan)
+        plan["status"] = "approved"
+        plan["approvedAt"] = "2026-08-16T11:00:00Z"
+        plan["supersedes"] = plan["planId"]
+        plan["planId"] = "measure-20260816T110000Z-approved0001"
+        plan["approvalSha256"] = draft_sha
+        plan["contentSha256"] = plan_content_sha256(plan)
+
+        self.assertNotEqual(plan["approvalSha256"], plan["contentSha256"])
+        self.assertTrue(approved_plan_is_valid(plan))
+        plan["events"][0]["businessMeaning"] = "tampered"
+        self.assertFalse(approved_plan_is_valid(plan))
 
 
 if __name__ == "__main__":

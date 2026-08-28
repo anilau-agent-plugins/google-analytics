@@ -44,6 +44,28 @@ def plan_content_sha256(plan: dict[str, Any]) -> str:
     return hashlib.sha256(canonical_json(content)).hexdigest()
 
 
+def approved_plan_is_valid(plan: dict[str, Any]) -> bool:
+    """Validate an approved revision without conflating its two hash roles.
+
+    ``approvalSha256`` identifies the draft the user explicitly confirmed, while
+    ``contentSha256`` protects the subsequently created approved revision.  The
+    revision changes identity, timestamps, status, and supersession metadata, so
+    those hashes are intentionally different for plans produced by ``approve``.
+    """
+    approval_sha = plan.get("approvalSha256")
+    return (
+        plan.get("schemaVersion") == 2
+        and plan.get("status") == "approved"
+        and plan.get("contentSha256") == plan_content_sha256(plan)
+        and isinstance(approval_sha, str)
+        and re.fullmatch(r"[a-f0-9]{64}", approval_sha) is not None
+        and isinstance(plan.get("approvedAt"), str)
+        and bool(plan["approvedAt"])
+        and isinstance(plan.get("supersedes"), str)
+        and bool(plan["supersedes"])
+    )
+
+
 def evaluate_plan(plan: dict[str, Any], budgets: dict[str, int] | None = None) -> dict[str, list[str]]:
     blockers = _scan_pii(plan)
     warnings: list[str] = []

@@ -16,7 +16,7 @@ from .contracts import validate_artifact_data
 from .errors import AdvisorError, EXIT_INPUT, EXIT_NETWORK
 from .ga4_mutation_service import mutation_plan_sha256
 from .http import JsonTransport
-from .measurement_policy import pii_issues, plan_content_sha256
+from .measurement_policy import approved_plan_is_valid, pii_issues
 from .secret_store import SecretStore, secret_store
 
 
@@ -48,9 +48,7 @@ def _approved(path: Path) -> dict[str, Any]:
     value = _load(path, "measurement plan")
     validate_artifact_data("measurement-plan", value, path_label=str(path))
     if (
-        value.get("schemaVersion") != 2 or value.get("status") != "approved"
-        or value.get("contentSha256") != plan_content_sha256(value)
-        or value.get("approvalSha256") != value.get("contentSha256")
+        not approved_plan_is_valid(value)
         or not value.get("identity", {}).get("measurementProtocolPlanned")
     ):
         raise AdvisorError("MEASUREMENT_PROTOCOL_NOT_PLANNED", "An approved Measurement Protocol design is required.", EXIT_INPUT)

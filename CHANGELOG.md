@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.10.2 - 2026-08-28
+
+- Fixed approved measurement plans being rejected by GA4, website, Measurement Protocol, and GTM
+  workflows because they incorrectly required the confirmed draft hash to equal the approved
+  revision's content hash.
+- Centralized approved-plan integrity validation while preserving separate SHA-256 roles: exact user
+  confirmation evidence for the draft and tamper detection for the final immutable revision.
+- Added end-to-end regression coverage using the distinct hashes produced by the real approval flow.
+
 ## 0.10.1 - 2026-08-28
 
 - Fixed a false report-planning blocker caused by treating unrelated incompatible fields returned by
