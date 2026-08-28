@@ -1,6 +1,6 @@
 ---
 name: google-analytics
-description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, evidence-backed Data API reports, measurement strategy, customer-owned Desktop OAuth, confirmed GA4 configuration, safe local measurement installation, Consent Mode, SPA/ecommerce events, Measurement Protocol validation, and separately confirmed GTM operations. Use when a user asks about GA4 setup, performance, acquisition, content, events, key events, ecommerce, realtime, funnels, analytics code, conversions, GTM, an audit, connecting Google, creating a Google Cloud OAuth application, checking Python, installing measurement code, or safely publishing a GTM version. Version 0.10.0 adds bounded plain-language reports and prioritized recommendations; it does not deploy websites.
+description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, evidence-backed Data API reports, measurement strategy, customer-owned Desktop OAuth, confirmed GA4 configuration, safe local measurement installation, Consent Mode, SPA/ecommerce events, Measurement Protocol validation, and separately confirmed GTM operations. Use when a user asks about GA4 setup, performance, acquisition, content, events, key events, ecommerce, realtime, funnels, analytics code, conversions, GTM, an audit, connecting Google, creating a Google Cloud OAuth application, checking Python, installing measurement code, or safely publishing a GTM version. Version 0.10.1 provides bounded plain-language reports and prioritized recommendations; it does not deploy websites.
 ---
 
 # Google Analytics Advisor
@@ -14,7 +14,7 @@ explanation, but keep exact product names, event names, metric names, commands a
 
 ## Current capability boundary
 
-Treat version 0.10.0 as the read-only reporting, baseline, measurement-design, confirmed GA4 configuration, safe local website-installation, and protected GTM-lifecycle release. It can discover GA4 accounts, properties,
+Treat version 0.10.1 as the read-only reporting, baseline, measurement-design, confirmed GA4 configuration, safe local website-installation, and protected GTM-lifecycle release. It can discover GA4 accounts, properties,
 website streams and core settings; inspect selected GTM resources; statically inspect a local website
 project; run one bounded 28-day event diagnostic; correlate public tag IDs; and write immutable
 snapshots plus a baseline report; create, validate, render, approve, and migrate immutable local
@@ -266,6 +266,6 @@ For unsupported remote mutation or reporting requests, return:
 
 - what the user is trying to achieve;
 - why live access or runtime support is required;
-- that version 0.10.0 can perform bounded evidence-backed reports, the baseline, local measurement design, separately confirmed supported GA4 configuration, local website installation, and protected GTM lifecycle portions;
+- that version 0.10.1 can perform bounded evidence-backed reports, the baseline, local measurement design, separately confirmed supported GA4 configuration, local website installation, and protected GTM lifecycle portions;
 - the implementation stage that will add it;
 - a safe next step that does not expose secrets or pretend the operation succeeded.

@@ -14,6 +14,7 @@ from .report_periods import comparison
 EMAIL = re.compile(r"\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", re.I)
 PHONE = re.compile(r"(?<!\w)\+?[0-9][0-9 ()-]{8,}[0-9](?!\w)")
 CREDENTIAL = re.compile(r"(?:ya29\.|1//|GOCSPX-|bearer\s+)[A-Za-z0-9._/-]+", re.I)
+ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 INTEGER_TYPES = {"INTEGER", "TYPE_INTEGER", "METRIC_TYPE_INTEGER"}
 FLOAT_TYPES = {"FLOAT", "TYPE_FLOAT", "METRIC_TYPE_FLOAT", "SECONDS", "MILLISECONDS", "CURRENCY"}
 
@@ -21,7 +22,8 @@ FLOAT_TYPES = {"FLOAT", "TYPE_FLOAT", "METRIC_TYPE_FLOAT", "SECONDS", "MILLISECO
 def redact_text(value: str) -> tuple[str, bool]:
     original = value
     value = EMAIL.sub("[redacted]", value)
-    value = PHONE.sub("[redacted]", value)
+    if not ISO_DATE.fullmatch(value):
+        value = PHONE.sub("[redacted]", value)
     value = CREDENTIAL.sub("[redacted]", value)
     if "://" in value:
         try:

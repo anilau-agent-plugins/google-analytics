@@ -2,7 +2,7 @@
 
 ## Current version
 
-Google Analytics Advisor 0.10.0 runs locally in the user's environment. It does not collect telemetry
+Google Analytics Advisor 0.10.1 runs locally in the user's environment. It does not collect telemetry
 and does not send prompts, credentials, project files or analytics data to Anilau. Google
 authorization and connection diagnostics communicate directly from the user's computer to Google;
 they do not pass through Anilau infrastructure.
@@ -32,7 +32,7 @@ not configured by default and can be disabled from the CLI.
 The customer supplies a Desktop OAuth client from the customer's own Google Cloud project. The local
 CLI sends the browser authorization request, authorization-code exchange, token refresh, optional
 revocation, read-only discovery and bounded diagnostics directly to Google over HTTPS. The requested scopes cover
-identity, GA4 read/edit and GTM read/edit/version/publish. Version 0.10.0 can perform allowlisted GA4
+identity, GA4 read/edit and GTM read/edit/version/publish. Version 0.10.1 can perform allowlisted GA4
 Admin configuration and local website source changes after separate immutable expiring plans and
 exact SHA-256 confirmations. It can also perform supported GTM web-container operations through
 separate workspace, sync, entity, compiler-preview, version, and publish plans. Authorization does

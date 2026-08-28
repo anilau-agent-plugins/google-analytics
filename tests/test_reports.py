@@ -12,6 +12,7 @@ from scripts.google_analytics_cli.http import JsonResponse
 from scripts.google_analytics_cli.measurement_policy import plan_content_sha256
 from scripts.google_analytics_cli.report_periods import comparison, resolve_periods
 from scripts.google_analytics_cli.report_service import ReportService, report_plan_sha256, report_request_sha256
+from scripts.google_analytics_cli.report_analysis import redact_text
 from scripts.google_analytics_cli.report_renderer import render_report
 
 
@@ -36,6 +37,7 @@ class FakeReportTransport:
         self.redact_event = False
         self.low_quota = False
         self.incompatible = False
+        self.extra_incompatible = False
         self.metadata = {
             "dimensions": [{"apiName": item} for item in (
                 "date", "sessionDefaultChannelGroup", "firstUserDefaultChannelGroup", "landingPage",
@@ -67,6 +69,9 @@ class FakeReportTransport:
             }
             if self.incompatible and data["metricCompatibilities"]:
                 data["metricCompatibilities"][0]["compatibility"] = "INCOMPATIBLE"
+            if self.extra_incompatible:
+                data["dimensionCompatibilities"].append({"dimensionMetadata": {"apiName": "cohortNthDay"}, "compatibility": "INCOMPATIBLE"})
+                data["metricCompatibilities"].append({"metricMetadata": {"apiName": "grossItemRevenue"}, "compatibility": "INCOMPATIBLE"})
             return JsonResponse(200, data, "compatibility-1", {})
         if method == "POST" and url.endswith(":runReport"):
             return JsonResponse(200, self._core(kwargs["payload"]), f"report-{len(self.calls)}", {})
@@ -145,6 +150,10 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(comparison(5, 0)["state"], "from-zero")
         self.assertIsNone(comparison(5, 0)["relative"])
 
+    def test_iso_report_date_is_not_mistaken_for_a_phone_number(self) -> None:
+        self.assertEqual(redact_text("2026-07-31"), ("2026-07-31", False))
+        self.assertEqual(redact_text("+1 202 555 0123"), ("[redacted]", True))
+
     def test_today_is_incomplete_and_leap_day_year_comparison_is_omitted(self) -> None:
         today_request = json.loads(self._request(includeToday=True).read_text())
         today_periods, today_limitations = resolve_periods(today_request, "Asia/Bangkok", now=lambda: NOW)
@@ -168,6 +177,14 @@ class ReportTests(unittest.TestCase):
         result = self._plan(self._request(["overview"]))
         self.assertEqual(result["status"], "blocked")
         self.assertTrue(any("incompatible" in item.lower() for item in result["plan"]["blockers"]))
+
+    def test_unrequested_incompatible_catalog_fields_do_not_block_report(self) -> None:
+        self.transport.extra_incompatible = True
+        result = self._plan(self._request(["acquisition", "landing", "device"]))
+        self.assertEqual(result["status"], "ready")
+        compatibility_calls = [call for call in self.transport.calls if call["url"].endswith(":checkCompatibility")]
+        self.assertTrue(compatibility_calls)
+        self.assertTrue(all(call["payload"]["compatibilityFilter"] == "COMPATIBLE" for call in compatibility_calls))
 
     def test_run_preserves_sampling_threshold_other_and_evidence(self) -> None:
         self.transport.sampled = True

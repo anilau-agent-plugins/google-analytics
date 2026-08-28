@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.10.1 - 2026-08-28
+
+- Fixed a false report-planning blocker caused by treating unrelated incompatible fields returned by
+  `checkCompatibility` as if they belonged to the requested report.
+- Limited compatibility evaluation to the exact requested dimensions and metrics and requested only
+  `COMPATIBLE` results from Google, while preserving fail-closed handling for missing or explicitly
+  incompatible requested fields.
+- Added a regression fixture matching the real Google response shape that previously blocked channel,
+  landing-page, and device reports.
+- Prevented ISO report dates from being mistaken for phone numbers by the artifact privacy scanner.
+
 ## 0.10.0 - 2026-08-19
 
 - Added immutable read-only report requests and plans for bounded overview, acquisition, landing and

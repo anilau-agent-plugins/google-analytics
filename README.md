@@ -1,6 +1,6 @@
 # Google Analytics Advisor
 
-[![Version 0.10.0](https://img.shields.io/badge/version-0.10.0-2563eb)](https://github.com/anilau-agent-plugins/google-analytics/releases/latest)
+[![Version 0.10.1](https://img.shields.io/badge/version-0.10.1-2563eb)](https://github.com/anilau-agent-plugins/google-analytics/releases/latest)
 [![MIT License](https://img.shields.io/badge/license-MIT-16a34a)](LICENSE)
 [![Codex and Claude Code](https://img.shields.io/badge/works_with-Codex%20%7C%20Claude%20Code-7c3aed)](#installation-instructions)
 
@@ -42,7 +42,7 @@ computer and helps install a suitable version when needed. It uses:
 To install:
 
 1. Open the [latest release](https://github.com/anilau-agent-plugins/google-analytics/releases/latest).
-2. Download the file named `google-analytics-0.10.0.zip` and unpack it.
+2. Download the file named `google-analytics-0.10.1.zip` and unpack it.
 3. In Codex or Claude Code, point to the unpacked folder and say: **“Install this plugin.”**
 4. Start a new task or conversation and say: **“Check my Google Analytics setup.”**
 
@@ -95,7 +95,7 @@ To update:
 
 An update replaces the installed plugin copy. It does not delete Google credentials or project
 reports because those are stored outside the plugin folder. Automatic updates are not enabled in
-version 0.10.0; this prevents an unverified file from silently changing installed code. The plugin can
+version 0.10.1; this prevents an unverified file from silently changing installed code. The plugin can
 perform a telemetry-free version check when a trusted signed update manifest is configured, but it
 still asks before installation.
 

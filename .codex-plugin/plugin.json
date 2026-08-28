@@ -1,6 +1,6 @@
 {
   "name": "google-analytics",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "Plain-language GA4 reports, recommendations, and protected analytics changes.",
   "author": {
     "name": "Eduard Volkov",

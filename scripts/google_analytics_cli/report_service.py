@@ -64,16 +64,30 @@ def _absolute(path_value: str | None, root: Path, label: str) -> Path | None:
 
 def _compatibility_ok(response: dict[str, Any], dimensions: list[str], metrics: list[str]) -> tuple[bool, list[str]]:
     problems: list[str] = []
-    dimension_results = response.get("dimensionCompatibilities", [])
-    metric_results = response.get("metricCompatibilities", [])
-    found_dimensions = {item.get("dimensionMetadata", {}).get("apiName") for item in dimension_results if isinstance(item, dict)}
-    found_metrics = {item.get("metricMetadata", {}).get("apiName") for item in metric_results if isinstance(item, dict)}
+    dimension_results = response.get("dimensionCompatibilities", []) if isinstance(response.get("dimensionCompatibilities", []), list) else []
+    metric_results = response.get("metricCompatibilities", []) if isinstance(response.get("metricCompatibilities", []), list) else []
+    requested_dimensions = set(dimensions)
+    requested_metrics = set(metrics)
+    found_dimensions: set[str] = set()
+    found_metrics: set[str] = set()
     for item in dimension_results:
+        if not isinstance(item, dict):
+            continue
+        name = str(item.get("dimensionMetadata", {}).get("apiName", ""))
+        if name not in requested_dimensions:
+            continue
+        found_dimensions.add(name)
         if item.get("compatibility") != "COMPATIBLE":
-            problems.append(str(item.get("dimensionMetadata", {}).get("apiName", "unknown dimension")))
+            problems.append(name)
     for item in metric_results:
+        if not isinstance(item, dict):
+            continue
+        name = str(item.get("metricMetadata", {}).get("apiName", ""))
+        if name not in requested_metrics:
+            continue
+        found_metrics.add(name)
         if item.get("compatibility") != "COMPATIBLE":
-            problems.append(str(item.get("metricMetadata", {}).get("apiName", "unknown metric")))
+            problems.append(name)
     problems.extend(item for item in dimensions if item not in found_dimensions)
     problems.extend(item for item in metrics if item not in found_metrics)
     return not problems, sorted(set(problems))
@@ -188,7 +202,13 @@ class ReportService:
             payload: dict[str, Any] = {"dateRanges": date_ranges, "dimensions": [{"name": item} for item in dimensions], "metrics": [{"name": item} for item in metrics], "metricAggregations": ["TOTAL"], "limit": str(min(250, template.max_rows)), "offset": "0", "returnPropertyQuota": True}
             if dimension_filter:
                 payload["dimensionFilter"] = dimension_filter
-            compatibility = executor.execute("data.compatibility.check", resource=property_name, payload={key: payload[key] for key in ("dimensions", "metrics", "dimensionFilter") if key in payload}).data or {}
+            compatibility_payload = {
+                key: payload[key]
+                for key in ("dimensions", "metrics", "dimensionFilter", "metricFilter")
+                if key in payload
+            }
+            compatibility_payload["compatibilityFilter"] = "COMPATIBLE"
+            compatibility = executor.execute("data.compatibility.check", resource=property_name, payload=compatibility_payload).data or {}
             compatible, problems = _compatibility_ok(compatibility, dimensions, metrics)
             if not compatible:
                 blockers.append(f"{preset}: Data API marked fields incompatible or omitted them: {', '.join(problems)}.")
