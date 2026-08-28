@@ -1,0 +1,20 @@
+{
+  "name": "anilau-google-analytics",
+  "interface": {
+    "displayName": "Anilau Google Analytics"
+  },
+  "plugins": [
+    {
+      "name": "google-analytics",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

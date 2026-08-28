@@ -2,6 +2,14 @@
 
 ## 0.11.0 - 2026-08-28
 
+- Added public Git-backed marketplace metadata and verified installation, update, rollback, and
+  uninstall instructions for Codex and Claude Code.
+- Added a bounded handoff to the commercial Google Ads plugin when a concrete next step requires
+  advertising-account or campaign work, without recommending it merely because paid traffic or an
+  advertising tag is present.
+- Added a direct Google Ads product-page link to the README.
+- Documented the owner-approved Windows-only release acceptance for 0.11.0 and removed GitHub
+  Actions so this release does not consume CI minutes; full cross-platform CI is deferred to 0.20.0.
 - Added a default-deny validation runner that blocks all non-loopback production network requests,
   including inherited subprocess checks, while allowing only synthetic fake transports and the local
   one-use OAuth callback.

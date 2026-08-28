@@ -2,13 +2,15 @@
 
 [![Version 0.11.0](https://img.shields.io/badge/version-0.11.0-2563eb)](https://github.com/anilau-agent-plugins/google-analytics/releases/latest)
 [![MIT License](https://img.shields.io/badge/license-MIT-16a34a)](LICENSE)
-[![Codex and Claude Code](https://img.shields.io/badge/works_with-Codex%20%7C%20Claude%20Code-7c3aed)](#installation-instructions)
+[![Codex and Claude Code](https://img.shields.io/badge/works_with-Codex%20%7C%20Claude%20Code-7c3aed)](#how-to-install)
 
 Google Analytics Advisor is a free plugin that helps you understand and improve Google Analytics 4
 without becoming an analytics specialist. Talk to it in your own language. It explains what it finds
 in plain words, prepares a safe plan, and asks before making any important change.
 
-It works with **Codex** and **Claude Code** on Windows, macOS, and Linux.
+It works with **Codex** and **Claude Code** on Windows, macOS, and Linux. Version 0.11.0 received its
+complete release acceptance on Windows. The macOS and Linux implementations are included, but were
+not live-tested for this release; compatibility feedback is handled through GitHub Issues.
 
 ## What it helps you do
 
@@ -30,16 +32,51 @@ The plugin currently understands static HTML, Laravel Blade, React/Vite, and Nex
 projects. It does not deploy websites, manage Analytics/GTM users, delete containers, accept
 arbitrary Custom HTML, or promise business results.
 
-## Installation instructions
+## What the plugin uses
 
 You do not need to install or configure Python yourself. The plugin checks what is already on the
-computer and helps install a suitable version when needed. It uses:
+computer and helps install a suitable version when needed.
 
 - Codex or Claude Code;
 - Python 3.10, 3.11, 3.12, or 3.13;
 - a Google account that can access the Analytics resources you want to inspect.
 
-To install:
+## How to install
+
+The simplest managed installation is to ask the agent:
+
+> Install Google Analytics Advisor from
+> https://github.com/anilau-agent-plugins/google-analytics using its public marketplace. Verify the
+> installation and start a new task when required.
+
+The agent should explain the source, run the matching commands below, verify the installed version,
+and leave Google sign-in and consent to you.
+
+<details>
+<summary>Manual marketplace commands</summary>
+
+### Codex
+
+```text
+codex plugin marketplace add anilau-agent-plugins/google-analytics --ref main
+codex plugin add google-analytics@anilau-google-analytics
+```
+
+Start a new Codex task after installation.
+
+### Claude Code
+
+```text
+claude plugin marketplace add anilau-agent-plugins/google-analytics
+claude plugin install google-analytics@anilau-google-analytics
+```
+
+Run `/reload-plugins` or restart Claude Code. The skill name is
+`google-analytics:google-analytics`.
+
+</details>
+
+### Release ZIP fallback
 
 1. Open the [latest release](https://github.com/anilau-agent-plugins/google-analytics/releases/latest).
 2. Download the file named `google-analytics-0.11.0.zip` and unpack it.
@@ -50,54 +87,76 @@ The agent completes safe local setup itself. It pauses only when you need to sig
 approve Google permissions, choose between genuinely different options, or confirm a change. It never
 needs you to paste a password, token, or downloaded Google OAuth file into chat.
 
-If your application cannot install directly from a folder, ask it to follow the manual instructions
-below.
+### Verify the installation
 
-<details>
-<summary>Manual installation for Codex and Claude Code</summary>
+From an unpacked release or plugin directory, run the command for the current operating system:
 
-### Codex
-
-Add the unpacked plugin folder as a local source in your personal marketplace, then run:
-
-```text
-codex plugin add google-analytics@personal
+```powershell
+powershell -NoProfile -File .\scripts\google-analytics.ps1 doctor --json
 ```
 
-Start a new Codex task after installation.
-
-### Claude Code
-
-From a local marketplace containing this repository, run:
-
-```text
-claude plugin validate ./google-analytics --strict
-claude plugin marketplace add <absolute-marketplace-directory>
-claude plugin install google-analytics@anilau-agent-plugins-local
+```sh
+sh ./scripts/google-analytics.sh doctor --json
 ```
 
-Run `/reload-plugins` or restart Claude Code when prompted. The skill name is
-`google-analytics:google-analytics`.
-
-</details>
+The result should identify version `0.11.0`, a supported Python runtime, writable protected-data
+locations, and available TLS support. `doctor` does not access an Analytics property or change
+Google, GTM, or website resources.
 
 ## How updates work
 
-The safe update source is the [GitHub Releases page](https://github.com/anilau-agent-plugins/google-analytics/releases).
-The release version and files are public, so no GitHub token is required.
+The public Git repository and its release tags are the update source. No GitHub token is required.
 
-To update:
+Codex:
 
-1. Download and unpack the newest release.
-2. Point Codex or Claude Code to that folder and say: **“Update my Google Analytics plugin from this
-   folder.”**
-3. Start a new task or reload plugins when asked.
+```text
+codex plugin marketplace upgrade anilau-google-analytics
+codex plugin add google-analytics@anilau-google-analytics
+```
+
+Claude Code:
+
+```text
+claude plugin marketplace update anilau-google-analytics
+claude plugin update google-analytics@anilau-google-analytics
+```
+
+Start a new Codex task or restart/reload Claude Code after the update. If you installed from a ZIP,
+download the newest [GitHub Release](https://github.com/anilau-agent-plugins/google-analytics/releases)
+and ask the agent to update from that folder.
 
 An update replaces the installed plugin copy. It does not delete Google credentials or project
 reports because those are stored outside the plugin folder. Automatic updates are not enabled in
 version 0.11.0; this prevents an unverified file from silently changing installed code. The plugin can
 perform a telemetry-free version check when a trusted signed update manifest is configured, but it
 still asks before installation.
+
+## Uninstall and rollback
+
+Removing the plugin does not remove Google credentials or project reports.
+
+Codex:
+
+```text
+codex plugin remove google-analytics@anilau-google-analytics
+codex plugin marketplace remove anilau-google-analytics
+```
+
+Claude Code:
+
+```text
+claude plugin uninstall google-analytics@anilau-google-analytics
+claude plugin marketplace remove anilau-google-analytics
+```
+
+Removing the marketplace is optional when you expect to reinstall later. To roll back, download a
+previous release ZIP, verify its published SHA-256, and ask the agent to install that exact version.
+Never downgrade or delete `.google-analytics-advisor/` artifacts automatically.
+
+Credential deletion is a separate operation. First inspect the exact profile with `auth status`,
+then use its displayed confirmation with `auth forget-local` or `auth revoke`. Delete a selected
+project's `.google-analytics-advisor/` directory only when you also intend to remove its local plans,
+reports, snapshots, and journals.
 
 ## Your data and credentials
 
@@ -156,8 +215,10 @@ exports, production datasets, or private website source into a public GitHub iss
 
 Google Analytics Advisor is one of the free, open-source demonstration plugins from
 [Anilau Agent Plugins](https://github.com/anilau-agent-plugins), alongside
-[Yandex Metrica Advisor](https://github.com/anilau-agent-plugins/yandex-metrika). Anilau also
-develops commercial plugins for Google Ads, Yandex Direct, and YouGile. See the
+[Yandex Metrica Advisor](https://github.com/anilau-agent-plugins/yandex-metrika). If your next step
+requires auditing or managing the advertising account itself, see the commercial
+[Google Ads plugin for Codex and Claude Code](https://anilau.com/en/agent-plugins/google-ads/).
+Anilau also develops commercial plugins for Yandex Direct and YouGile. See the
 [English catalog](https://anilau.com/en/agent-plugins/) or
 [Russian catalog](https://anilau.com/ru/agent-plugins/) for current availability.
 

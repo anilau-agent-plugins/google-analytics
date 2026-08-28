@@ -1,0 +1,32 @@
+{
+  "name": "anilau-google-analytics",
+  "owner": {
+    "name": "Anilau",
+    "email": "admin@anilau.com"
+  },
+  "metadata": {
+    "description": "Public Anilau marketplace for Google Analytics Advisor."
+  },
+  "plugins": [
+    {
+      "name": "google-analytics",
+      "source": "./",
+      "description": "Plain-language GA4 reports, recommendations, and protected analytics changes.",
+      "version": "0.11.0",
+      "author": {
+        "name": "Eduard Volkov",
+        "email": "admin@anilau.com"
+      },
+      "homepage": "https://anilau.com/en/agent-plugins/google-analytics/",
+      "repository": "https://github.com/anilau-agent-plugins/google-analytics",
+      "license": "MIT",
+      "keywords": [
+        "google-analytics",
+        "ga4",
+        "analytics",
+        "measurement"
+      ],
+      "category": "productivity"
+    }
+  ]
+}

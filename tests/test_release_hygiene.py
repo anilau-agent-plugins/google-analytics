@@ -17,6 +17,8 @@ class ReleaseHygieneTests(unittest.TestCase):
         required = (
             ".codex-plugin/plugin.json",
             ".claude-plugin/plugin.json",
+            ".agents/plugins/marketplace.json",
+            ".claude-plugin/marketplace.json",
             "skills/google-analytics/SKILL.md",
             "skills/google-analytics/agents/openai.yaml",
             "skills/google-analytics/references/ga4-configuration.md",
@@ -30,6 +32,7 @@ class ReleaseHygieneTests(unittest.TestCase):
             "SECURITY.md",
             "CONTRIBUTING.md",
             "CODE_OF_CONDUCT.md",
+            "docs/decisions/0001-release-validation-without-github-ci.md",
         )
         for relative in required:
             with self.subTest(relative=relative):
@@ -46,14 +49,28 @@ class ReleaseHygieneTests(unittest.TestCase):
         self.assertEqual(codex["version"], __version__)
         self.assertEqual(codex["license"], "MIT")
         self.assertEqual(claude["license"], "MIT")
+        codex_marketplace = json.loads(
+            (ROOT / ".agents" / "plugins" / "marketplace.json").read_text(encoding="utf-8")
+        )
+        claude_marketplace = json.loads(
+            (ROOT / ".claude-plugin" / "marketplace.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(codex_marketplace["name"], "anilau-google-analytics")
+        self.assertEqual(codex_marketplace["plugins"][0]["name"], "google-analytics")
+        self.assertEqual(codex_marketplace["plugins"][0]["source"]["path"], "./")
+        self.assertEqual(claude_marketplace["name"], "anilau-google-analytics")
+        self.assertEqual(claude_marketplace["plugins"][0]["name"], "google-analytics")
+        self.assertEqual(claude_marketplace["plugins"][0]["version"], __version__)
+        self.assertEqual(claude_marketplace["plugins"][0]["source"], "./")
 
     def test_public_documentation_matches_open_source_release(self) -> None:
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         support = (ROOT / "SUPPORT.md").read_text(encoding="utf-8")
         license_text = (ROOT / "LICENSE").read_text(encoding="utf-8")
         self.assertIn("free, open-source", readme)
-        self.assertIn("Installation instructions", readme)
+        self.assertIn("How to install", readme)
         self.assertIn("How updates work", readme)
+        self.assertIn("Uninstall and rollback", readme)
         self.assertIn("GitHub Issues", support)
         self.assertTrue(license_text.startswith("MIT License"))
         for phrase in ("LicenseRef-Anilau-Commercial", "not yet available for commercial"):

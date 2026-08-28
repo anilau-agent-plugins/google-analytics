@@ -103,3 +103,11 @@ customer and are not routed through Anilau infrastructure.
 
 Do not include secrets or customer analytics exports in support messages. If a future support case
 requires diagnostic data, the customer must review and explicitly choose what to share.
+
+## Distribution and support websites
+
+Installing from GitHub or opening anilau.com uses those services as ordinary software-distribution
+or documentation websites. The plugin does not send Analytics data, project files, credentials, or
+telemetry to either service. GitHub and Anilau may process ordinary web-request metadata under their
+own policies when the user deliberately visits a page, downloads a release, updates a marketplace,
+or submits a support request.

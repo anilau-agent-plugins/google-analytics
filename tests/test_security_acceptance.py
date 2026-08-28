@@ -51,9 +51,9 @@ class SecurityAcceptanceTests(unittest.TestCase):
 
     def test_release_candidate_has_only_expected_top_level_entries(self) -> None:
         allowed = {
-            ".claude-plugin", ".codex-plugin", ".github", ".gitignore", "CHANGELOG.md",
+            ".agents", ".claude-plugin", ".codex-plugin", ".github", ".gitignore", "CHANGELOG.md",
             "CODE_OF_CONDUCT.md", "CONTRIBUTING.md", "LICENSE", "PRIVACY.md", "README.md",
-            "SECURITY.md", "SUPPORT.md", "contracts", "scripts", "skills", "tests",
+            "SECURITY.md", "SUPPORT.md", "contracts", "docs", "scripts", "skills", "tests",
         }
         unexpected = sorted({path.relative_to(ROOT).parts[0] for path in self._release_files()} - allowed)
         self.assertEqual(unexpected, [])
@@ -93,10 +93,17 @@ class SecurityAcceptanceTests(unittest.TestCase):
                     continue
                 self.assertFalse(isinstance(value, dict) and "installed" in value and "client_secret" in value.get("installed", {}))
 
-    def test_ci_runs_security_suite_before_release_on_supported_python_matrix(self) -> None:
-        workflow = (ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
-        for phrase in ("push:", "pull_request:", "workflow_dispatch:", 'python: ["3.10", "3.11", "3.12", "3.13"]', "python tests/run_suite.py"):
-            self.assertIn(phrase, workflow)
+    def test_release_records_local_validation_exception_and_has_no_github_workflow(self) -> None:
+        workflow_root = ROOT / ".github" / "workflows"
+        workflows = [] if not workflow_root.exists() else [
+            path for path in workflow_root.iterdir() if path.suffix.lower() in {".yml", ".yaml"}
+        ]
+        self.assertEqual(workflows, [])
+        decision = (
+            ROOT / "docs" / "decisions" / "0001-release-validation-without-github-ci.md"
+        ).read_text(encoding="utf-8")
+        for phrase in ("Version 0.11.0", "without GitHub Actions", "Windows", "0.20.0"):
+            self.assertIn(phrase, decision)
         self.assertEqual(os.environ.get("GOOGLE_ANALYTICS_ADVISOR_NETWORK_POLICY"), "loopback-only")
 
 

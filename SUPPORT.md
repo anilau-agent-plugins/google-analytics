@@ -20,6 +20,11 @@ The plugin is provided under the MIT License. Community support has no guarantee
 Paid implementation or consulting can be discussed separately through
 [anilau.com](https://anilau.com/en/agent-plugins/).
 
+Version 0.11.0 received full release acceptance on Windows with the available CPython runtime.
+macOS and Linux adapters remain included but were not live-tested for this release. Reports from
+those systems are welcome; include the OS version, Python version, launcher used, and redacted error
+code without sending credentials or customer data.
+
 ## Safe diagnostics
 
 For authorization failures, share only the redacted error code, command name, and probe status. For

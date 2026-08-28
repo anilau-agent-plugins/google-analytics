@@ -6,7 +6,7 @@
     "name": "Eduard Volkov",
     "url": "https://anilau.com"
   },
-  "homepage": "https://github.com/anilau-agent-plugins/google-analytics",
+  "homepage": "https://anilau.com/en/agent-plugins/google-analytics/",
   "repository": "https://github.com/anilau-agent-plugins/google-analytics",
   "license": "MIT",
   "keywords": [
@@ -37,7 +37,9 @@
       "Google OAuth",
       "Local tag inspection"
     ],
-    "websiteURL": "https://anilau.com",
+    "websiteURL": "https://anilau.com/en/agent-plugins/google-analytics/",
+    "privacyPolicyURL": "https://github.com/anilau-agent-plugins/google-analytics/blob/v0.11.0/PRIVACY.md",
+    "termsOfServiceURL": "https://github.com/anilau-agent-plugins/google-analytics/blob/v0.11.0/LICENSE",
     "defaultPrompt": [
       "Help me plan analytics for my website.",
       "Explain which conversions my project needs.",
