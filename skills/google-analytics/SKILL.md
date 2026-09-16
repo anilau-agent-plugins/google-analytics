@@ -122,6 +122,21 @@ Keychain. On Linux they require Secret Service through `secret-tool`; there is n
 Access tokens live only in process memory. Never direct the user to credential files or suggest
 copying protected state between computers.
 
+## Advisor request routing
+
+Classify analytics questions by their meaning before choosing a workflow. For an overall assessment,
+an unexplained business-result change, or improvement ideas without a narrow metric or slice, read
+[references/proactive-advisor-playbook.md](references/proactive-advisor-playbook.md) and run its
+broad GA4-only route. For a concrete metric, event, period, page, channel, device, or hypothesis, use
+only the smallest relevant existing workflow. When the exact project, property, period, or requested
+outcome is ambiguous, ask the single question that unlocks the most progress; never make a
+non-specialist choose raw dimensions, metrics, or preset names.
+
+Do not use a keyword-only classifier. A broad diagnosis remains read-only and never authorizes a
+GA4, GTM, website, publish, or deployment change. Google Search Console is not available in this
+stage: do not request its scope, credential, property, or live access, and do not let its absence
+block the available GA4 assessment.
+
 ## Read-only baseline workflow
 
 Read [references/baseline-audit.md](references/baseline-audit.md) before a live discovery or audit.

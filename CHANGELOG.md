@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased - 0.20.0 development
+
+- Added a GA4-only proactive advisor playbook that routes broad, targeted, and ambiguous requests,
+  tracks assessment completeness, degrades safely when evidence is missing, and keeps analysis
+  separate from every mutation workflow.
+- Added synthetic behavioral scenarios and release checks without changing OAuth scopes, CLI
+  commands, JSON contracts, public version metadata, or adding Google Search Console access.
+
 ## 0.11.0 - 2026-08-28
 
 - Added public Git-backed marketplace metadata and verified installation, update, rollback, and

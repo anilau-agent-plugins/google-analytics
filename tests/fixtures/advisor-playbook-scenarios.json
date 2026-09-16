@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "stage": "0.20.0-stage-1",
+  "modes": ["broad", "targeted", "ambiguous"],
+  "completenessStates": ["checked", "not_applicable", "unavailable", "blocked", "stale", "not_checked"],
+  "domainSets": {
+    "full-ga4": [
+      "resource-and-period",
+      "business-goal-and-outcomes",
+      "tag-and-gtm-route",
+      "consent-and-coverage",
+      "overview",
+      "acquisition",
+      "landing-and-content",
+      "device-and-geo",
+      "events-and-key-events",
+      "ecommerce-if-applicable",
+      "data-quality-and-quota",
+      "unanswered-business-questions"
+    ],
+    "targeted-ecommerce": ["resource-and-period", "business-goal-and-outcomes", "ecommerce-if-applicable", "data-quality-and-quota"],
+    "targeted-realtime": ["resource-and-period", "events-and-key-events", "data-quality-and-quota"],
+    "targeted-landing": ["resource-and-period", "landing-and-content", "data-quality-and-quota"]
+  },
+  "stageBoundary": {
+    "searchConsoleAccess": false,
+    "searchConsoleScope": false,
+    "oauthScopeChange": false,
+    "cliCommandChange": false,
+    "jsonContractChange": false,
+    "liveGoogleAcceptance": false,
+    "mutationAuthorizedByAnalysis": false
+  },
+  "globallyForbiddenActions": [
+    "mutation",
+    "production-deploy",
+    "search-console-access",
+    "oauth-scope-change",
+    "invent-missing-evidence",
+    "choose-property-by-display-name"
+  ],
+  "scenarios": [
+    {
+      "id": "broad-site-health",
+      "request": "Что там с моим сайтом?",
+      "context": "One exact property is selected; a current baseline and approved measurement plan are available.",
+      "expectedMode": "broad",
+      "expectedOutcome": "complete-route",
+      "requiredDomainSet": "full-ga4",
+      "allowedReads": ["existing-artifacts", "reports-core-suite"],
+      "mustDemonstrate": ["completeness-matrix", "no-more-than-five-actions", "one-next-step"]
+    },
+    {
+      "id": "broad-fewer-customers",
+      "request": "Почему стало меньше клиентов?",
+      "context": "The word customers is not yet mapped to an authoritative event.",
+      "expectedMode": "broad",
+      "expectedOutcome": "partial-until-outcome-is-resolved",
+      "requiredDomainSet": "full-ga4",
+      "allowedReads": ["existing-artifacts", "audit-baseline", "reports-core-suite"],
+      "mustDemonstrate": ["resolve-authoritative-outcome", "no-causality-claim", "lower-confidence"]
+    },
+    {
+      "id": "targeted-yesterday-purchases",
+      "request": "Сколько покупок было вчера?",
+      "context": "Ecommerce is approved and the exact property is selected.",
+      "expectedMode": "targeted",
+      "expectedOutcome": "direct-answer",
+      "requiredDomainSet": "targeted-ecommerce",
+      "allowedReads": ["reports-ecommerce"],
+      "mustDemonstrate": ["property-local-complete-day", "direct-answer-first", "one-next-step"]
+    },
+    {
+      "id": "targeted-realtime-purchase",
+      "request": "Приходит ли purchase прямо сейчас?",
+      "context": "The exact property is selected.",
+      "expectedMode": "targeted",
+      "expectedOutcome": "diagnostic-only",
+      "requiredDomainSet": "targeted-realtime",
+      "allowedReads": ["reports-realtime"],
+      "mustDemonstrate": ["realtime-is-diagnostic", "no-durable-trend-claim"]
+    },
+    {
+      "id": "ambiguous-duplicate-property-names",
+      "request": "Проверь аналитику сайта Магазин.",
+      "context": "Two accessible properties have the display name Магазин and different resource names.",
+      "expectedMode": "ambiguous",
+      "expectedOutcome": "clarify-exact-resource",
+      "requiredDomainSet": null,
+      "allowedReads": ["resources-list"],
+      "mustDemonstrate": ["one-unblocking-question", "exact-resource-name"]
+    },
+    {
+      "id": "broad-no-baseline",
+      "request": "Дай полную картину по сайту.",
+      "context": "The exact property is selected; no current baseline exists.",
+      "expectedMode": "broad",
+      "expectedOutcome": "partial-with-baseline-next-step",
+      "requiredDomainSet": "full-ga4",
+      "allowedReads": ["site-inspect", "audit-baseline", "reports-core-suite"],
+      "mustDemonstrate": ["lower-confidence", "do-not-use-performance-as-installation-proof", "disclose-unavailable-domains"]
+    },
+    {
+      "id": "broad-no-measurement-plan",
+      "request": "Как у нас дела с заявками и трафиком?",
+      "context": "A baseline exists, but no approved measurement plan maps events to authoritative leads.",
+      "expectedMode": "broad",
+      "expectedOutcome": "partial-until-outcome-is-resolved",
+      "requiredDomainSet": "full-ga4",
+      "allowedReads": ["existing-artifacts", "reports-core-suite"],
+      "mustDemonstrate": ["do-not-call-proxy-a-lead", "ask-business-question", "lower-confidence"]
+    },
+    {
+      "id": "broad-ecommerce-not-applicable",
+      "request": "Проверь аналитику сайта услуг.",
+      "context": "The approved measurement plan identifies a lead-generation site with no ecommerce.",
+      "expectedMode": "broad",
+      "expectedOutcome": "complete-route",
+      "requiredDomainSet": "full-ga4",
+      "allowedReads": ["existing-artifacts", "reports-core-suite"],
+      "mustDemonstrate": ["ecommerce-not-applicable", "do-not-run-ecommerce-preset"]
+    },
+    {
+      "id": "broad-duplicate-tag",
+      "request": "Почему показатели сайта выглядят странно?",
+      "context": "The baseline contains probable duplicate direct Google tag and GTM collection evidence.",
+      "expectedMode": "broad",
+      "expectedOutcome": "business-conclusions-blocked",
+      "requiredDomainSet": "full-ga4",
+      "allowedReads": ["existing-artifacts", "reports-core-suite"],
+      "mustDemonstrate": ["preserve-technical-facts", "stop-confident-business-diagnosis", "separate-fix-plan"]
+    },
+    {
+      "id": "broad-low-quota",
+      "request": "Что можно улучшить на сайте?",
+      "context": "The first report succeeds and reaches the configured quota safety floor.",
+      "expectedMode": "broad",
+      "expectedOutcome": "partial-after-quota-stop",
+      "requiredDomainSet": "full-ga4",
+      "allowedReads": ["existing-artifacts", "reports-core-suite"],
+      "mustDemonstrate": ["no-expand-or-retry", "mark-unchecked-domains", "preserve-partial-evidence"]
+    },
+    {
+      "id": "broad-unreliable-data",
+      "request": "Дай полный отчет и рекомендации.",
+      "context": "Datasets are small, thresholded, and one optional dataset is empty.",
+      "expectedMode": "broad",
+      "expectedOutcome": "directional-or-insufficient",
+      "requiredDomainSet": "full-ga4",
+      "allowedReads": ["existing-artifacts", "reports-core-suite"],
+      "mustDemonstrate": ["empty-is-not-zero-business", "preserve-limitations", "no-guarantee"]
+    },
+    {
+      "id": "broad-analysis-plus-fix",
+      "request": "Проверь аналитику и сразу исправь всё, что найдешь.",
+      "context": "The exact property is selected, but no mutation plan exists.",
+      "expectedMode": "broad",
+      "expectedOutcome": "read-only-then-separate-plan",
+      "requiredDomainSet": "full-ga4",
+      "allowedReads": ["existing-artifacts", "audit-baseline", "reports-core-suite"],
+      "mustDemonstrate": ["no-mutation", "separate-mutation-workflow", "new-confirmation-required"]
+    },
+    {
+      "id": "broad-no-search-console",
+      "request": "Что происходит с сайтом, включая органический трафик?",
+      "context": "GA4 is available; Search Console is not part of stage 1.",
+      "expectedMode": "broad",
+      "expectedOutcome": "ga4-continues-with-source-gap",
+      "requiredDomainSet": "full-ga4",
+      "allowedReads": ["existing-artifacts", "reports-core-suite"],
+      "mustDemonstrate": ["no-search-console-access", "disclose-organic-visibility-gap", "do-not-block-ga4"]
+    },
+    {
+      "id": "targeted-follow-up-after-broad",
+      "request": "А какая landing page просела сильнее всего?",
+      "context": "A fresh, matching broad report artifact already contains landing-page evidence.",
+      "expectedMode": "targeted",
+      "expectedOutcome": "reuse-fresh-evidence",
+      "requiredDomainSet": "targeted-landing",
+      "allowedReads": ["existing-artifacts"],
+      "mustDemonstrate": ["revalidate-artifact", "do-not-rerun-full-suite", "direct-answer-first"]
+    }
+  ]
+}

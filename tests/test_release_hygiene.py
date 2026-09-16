@@ -23,6 +23,7 @@ class ReleaseHygieneTests(unittest.TestCase):
             "skills/google-analytics/agents/openai.yaml",
             "skills/google-analytics/references/ga4-configuration.md",
             "skills/google-analytics/references/gtm-management.md",
+            "skills/google-analytics/references/proactive-advisor-playbook.md",
             "skills/google-analytics/references/reporting-advisor.md",
             "README.md",
             "CHANGELOG.md",

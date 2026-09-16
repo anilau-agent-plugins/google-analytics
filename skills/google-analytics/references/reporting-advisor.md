@@ -4,6 +4,11 @@ Use this workflow for a selected GA4 website property. It is read-only with resp
 uses the customer's Data API quota and writes credential-free artifacts below the selected project's
 `.google-analytics-advisor/` directory.
 
+When the request is a broad site assessment rather than a specific reporting question, first read
+[proactive-advisor-playbook.md](proactive-advisor-playbook.md). That playbook decides completeness,
+stop/degradation behavior, and the response shape; this document remains the source of truth for the
+bounded report execution itself.
+
 ## Start from the decision
 
 Ask what the user wants to understand or decide. Resolve the exact `properties/<id>` resource from
@@ -14,6 +19,12 @@ The closed presets are overview, acquisition, landing/content, device/geo, event
 ecommerce, realtime, custom-core, and experimental funnel. Realtime describes only the last 30 or 60
 minutes. Funnel reporting uses Data API v1alpha and remains disabled unless the environment flag,
 request opt-in, disclosure acceptance, and approved Stage-10-ready funnel design all agree.
+
+For a broad GA4-only assessment, let the agent select one bounded suite rather than asking the user
+to choose presets. Default to `overview`, `acquisition`, `landing`, `content`, `device`, and `events`.
+Add `key-events` when available, `ecommerce` only when applicable, and `geo` or
+`user-acquisition` only when useful to the business question and quota. Realtime does not establish
+trend completeness. Keep experimental funnels and custom-core behind their existing gates.
 
 ## Prepare, inspect, then run
 
