@@ -12,6 +12,7 @@ from .oauth import USERINFO_ENDPOINT
 
 ADMIN_SUMMARIES = "https://analyticsadmin.googleapis.com/v1beta/accountSummaries?pageSize=1"
 GTM_ACCOUNTS = "https://tagmanager.googleapis.com/tagmanager/v2/accounts?pageSize=1"
+SEARCH_CONSOLE_SITES = "https://www.googleapis.com/webmasters/v3/sites"
 
 
 def _classification(exc: AdvisorError) -> dict[str, Any]:
@@ -20,20 +21,30 @@ def _classification(exc: AdvisorError) -> dict[str, Any]:
     reason = None
     try:
         parsed = json.loads(body)
-        details = parsed.get("error", {}).get("details", []) if isinstance(parsed, dict) else []
+        error = parsed.get("error", {}) if isinstance(parsed, dict) else {}
+        details = error.get("details", []) if isinstance(error, dict) else []
         for item in details:
             if isinstance(item, dict) and item.get("reason"):
                 reason = item["reason"]
                 break
-        if reason is None and isinstance(parsed, dict):
-            reason = parsed.get("error", {}).get("status")
+        if reason is None and isinstance(error, dict):
+            for item in error.get("errors", []):
+                if isinstance(item, dict) and item.get("reason"):
+                    reason = item["reason"]
+                    break
+        if reason is None and isinstance(error, dict):
+            reason = error.get("status")
     except (json.JSONDecodeError, AttributeError):
         pass
-    if reason in {"SERVICE_DISABLED", "ACCESS_NOT_CONFIGURED"} or "SERVICE_DISABLED" in body:
+    normalized_reason = str(reason or "").replace("_", "").lower()
+    lower_body = body.lower()
+    if normalized_reason in {"servicedisabled", "accessnotconfigured"} or any(
+        marker in lower_body for marker in ("service_disabled", "accessnotconfigured", "has not been used", "service is disabled")
+    ):
         state = "api_disabled"
-    elif reason in {"ACCESS_TOKEN_SCOPE_INSUFFICIENT", "INSUFFICIENT_AUTHENTICATION_SCOPES"} or "insufficientPermissions" in body:
+    elif normalized_reason in {"accesstokenscopeinsufficient", "insufficientauthenticationscopes", "insufficientpermissions"}:
         state = "scope_missing"
-    elif reason in {"ORG_POLICY_VIOLATION", "ADMIN_POLICY_ENFORCED", "DOMAIN_POLICY"}:
+    elif normalized_reason in {"orgpolicyviolation", "adminpolicyenforced", "domainpolicy"}:
         state = "admin_policy"
     elif status == 401:
         state = "token_invalid"
@@ -52,9 +63,19 @@ def _get(transport: JsonTransport, url: str, token: str) -> Any:
     ).data
 
 
-def run_probes(access_token: str, *, transport: JsonTransport | None = None) -> dict[str, Any]:
+def run_probes(
+    access_token: str, *, transport: JsonTransport | None = None,
+    search_console_enabled: bool | None = None,
+) -> dict[str, Any]:
     http = transport or JsonTransport(timeout=15.0, max_response_bytes=1024 * 1024)
-    result: dict[str, Any] = {"readOnly": True, "identity": {}, "analyticsAdmin": {}, "tagManager": {}, "analyticsData": {}}
+    result: dict[str, Any] = {
+        "readOnly": True,
+        "identity": {},
+        "analyticsAdmin": {},
+        "tagManager": {},
+        "analyticsData": {},
+        "searchConsole": {},
+    }
     try:
         identity = _get(http, USERINFO_ENDPOINT, access_token)
         result["identity"] = {
@@ -94,6 +115,33 @@ def run_probes(access_token: str, *, transport: JsonTransport | None = None) -> 
     else:
         result["analyticsData"] = {"status": "not_verifiable_no_property", "resourceAvailable": False}
 
-    states = [value.get("status") for key, value in result.items() if key != "readOnly" and isinstance(value, dict)]
+    if search_console_enabled is None:
+        result["searchConsole"] = {
+            "status": "not_requested",
+            "resourceAvailable": False,
+            "networkRequestPerformed": False,
+        }
+    elif not search_console_enabled:
+        result["searchConsole"] = {
+            "status": "authorization_required",
+            "resourceAvailable": False,
+            "networkRequestPerformed": False,
+        }
+    else:
+        try:
+            search_console = _get(http, SEARCH_CONSOLE_SITES, access_token)
+            sites = search_console.get("siteEntry", []) if isinstance(search_console, dict) else []
+            result["searchConsole"] = {
+                "status": "ready",
+                "resourceAvailable": bool(sites),
+                "networkRequestPerformed": True,
+            }
+        except AdvisorError as exc:
+            result["searchConsole"] = {**_classification(exc), "networkRequestPerformed": True}
+
+    states = [
+        value.get("status") for key, value in result.items()
+        if key != "readOnly" and isinstance(value, dict) and value.get("status") != "not_requested"
+    ]
     result["status"] = "ready" if all(item in {"ready", "not_verifiable_no_property"} for item in states) else "degraded"
     return result

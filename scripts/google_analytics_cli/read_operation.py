@@ -27,6 +27,7 @@ def _op(operation_id: str, method: str, base: str, path: str, safe_post: bool = 
 ADMIN = "https://analyticsadmin.googleapis.com"
 DATA = "https://analyticsdata.googleapis.com"
 GTM = "https://tagmanager.googleapis.com"
+SEARCH_CONSOLE = "https://www.googleapis.com"
 
 OPERATIONS = {
     item.operation_id: item for item in (
@@ -56,6 +57,7 @@ OPERATIONS = {
         _op("gtm.gtag_config.list", "GET", GTM, "/tagmanager/v2/{resource}/gtag_config"),
         _op("gtm.live_version.get", "GET", GTM, "/tagmanager/v2/{resource}/versions/live"),
         _op("gtm.version_headers.list", "GET", GTM, "/tagmanager/v2/{resource}/version_headers"),
+        _op("searchconsole.sites.list", "GET", SEARCH_CONSOLE, "/webmasters/v3/sites"),
     )
 }
 
@@ -113,9 +115,18 @@ class ReadExecutor:
             if status == 404:
                 code, message = "RESOURCE_NOT_FOUND", "The selected Google resource was not found."
             elif status == 401:
-                code, message = "SCOPE_MISSING", "Google rejected the authorization; reauthorization may be required."
+                code, message = "TOKEN_INVALID", "Google rejected the authorization token; reauthorization may be required."
             elif status == 403 and ("accessnotconfigured" in body or "has not been used" in body or "disabled" in body):
                 code, message = "API_DISABLED", "A required Google API is disabled in the user's Cloud project."
+            elif status == 403 and any(
+                marker in body for marker in (
+                    "access_token_scope_insufficient",
+                    "insufficient authentication scopes",
+                    "insufficientauthenticationscopes",
+                    "insufficientpermissions",
+                )
+            ):
+                code, message = "SCOPE_MISSING", "The access token does not include the required Google API scope."
             elif status in {429, 403} and any(word in body for word in ("quota", "rate limit", "ratelimit")):
                 code, message = "QUOTA_LIMITED", "Google API quota limited this read-only request."
             elif status == 403:

@@ -114,6 +114,25 @@ class ReleaseHygieneTests(unittest.TestCase):
         self.assertIn("https://console.cloud.google.com/projectcreate", setup)
         self.assertIn("https://console.cloud.google.com/auth/clients?project=<PROJECT_ID>", setup)
 
+    def test_search_console_capability_is_read_only_and_exactly_bounded(self) -> None:
+        skill = (ROOT / "skills" / "google-analytics" / "SKILL.md").read_text(encoding="utf-8")
+        setup = (
+            ROOT / "skills" / "google-analytics" / "references" / "google-cloud-oauth-setup.md"
+        ).read_text(encoding="utf-8")
+        discovery = (
+            ROOT / "skills" / "google-analytics" / "references" / "search-console-discovery.md"
+        ).read_text(encoding="utf-8")
+        oauth = (ROOT / "scripts" / "google_analytics_cli" / "oauth.py").read_text(encoding="utf-8")
+        registry = (ROOT / "scripts" / "google_analytics_cli" / "read_operation.py").read_text(encoding="utf-8")
+        self.assertIn("auth upgrade --profile <id> --json", skill)
+        self.assertIn("search-console sites list --profile <profile-id> --json", discovery)
+        self.assertIn("searchconsole.googleapis.com", setup)
+        self.assertIn('"https://www.googleapis.com/auth/webmasters.readonly"', oauth)
+        self.assertNotIn('"https://www.googleapis.com/auth/webmasters",', oauth)
+        self.assertIn('"searchconsole.sites.list", "GET"', registry)
+        self.assertNotIn('"searchconsole.sites.add"', registry)
+        self.assertNotIn('"searchconsole.sites.delete"', registry)
+
     def test_ga4_mutations_require_a_hash_and_forbid_automatic_retry(self) -> None:
         skill = (ROOT / "skills" / "google-analytics" / "SKILL.md").read_text(encoding="utf-8")
         reference = (

@@ -63,7 +63,14 @@ class CliTests(unittest.TestCase):
                 "https://www.googleapis.com/auth/tagmanager.edit.containers",
                 "https://www.googleapis.com/auth/tagmanager.edit.containerversions",
                 "https://www.googleapis.com/auth/tagmanager.publish",
+                "https://www.googleapis.com/auth/webmasters.readonly",
             ],
+        )
+        self.assertEqual(payload["data"]["profile"], "full-target")
+        self.assertEqual(payload["data"]["targetScopeSetRevision"], "search-console-read-v1")
+        self.assertIn(
+            "search_console_read",
+            {group["group"] for group in payload["data"]["permissionGroups"]},
         )
         self.assertFalse(payload["data"]["mutationApprovalGranted"])
 

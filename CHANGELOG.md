@@ -5,8 +5,14 @@
 - Added a GA4-only proactive advisor playbook that routes broad, targeted, and ambiguous requests,
   tracks assessment completeness, degrades safely when evidence is missing, and keeps analysis
   separate from every mutation workflow.
-- Added synthetic behavioral scenarios and release checks without changing OAuth scopes, CLI
-  commands, JSON contracts, public version metadata, or adding Google Search Console access.
+- Added Search Console read-only authorization and exact property discovery with one guarded
+  `sites.list` operation, normalized URL-prefix/Domain identities, permission levels, and explicit
+  partial/empty-access handling.
+- Added capability-aware OAuth status and rollback-safe scope upgrade for existing profiles. Failed,
+  declined, partial, or wrong-account upgrades preserve the previous GA4/GTM credential.
+- Added conditional Search Console diagnostics and customer-owned Cloud onboarding without requesting
+  Search Console write access, Cloud Platform scopes, or treating consent as mutation approval.
+- Kept public version metadata unchanged while `0.20.0` remains under staged development.
 
 ## 0.11.0 - 2026-08-28
 

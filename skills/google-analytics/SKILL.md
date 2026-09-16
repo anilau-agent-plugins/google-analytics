@@ -1,6 +1,6 @@
 ---
 name: google-analytics
-description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, evidence-backed Data API reports, measurement strategy, customer-owned Desktop OAuth, confirmed GA4 configuration, safe local measurement installation, Consent Mode, SPA/ecommerce events, Measurement Protocol validation, and separately confirmed GTM operations. Use when a user asks about GA4 setup, performance, acquisition, content, events, key events, ecommerce, realtime, funnels, analytics code, conversions, GTM, an audit, connecting Google, creating a Google Cloud OAuth application, checking Python, installing measurement code, or safely publishing a GTM version. Version 0.11.0 provides bounded plain-language reports, prioritized recommendations, and production-network-isolated security validation; it does not deploy websites.
+description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, Search Console authorization and property discovery, evidence-backed Data API reports, measurement strategy, customer-owned Desktop OAuth, confirmed GA4 configuration, safe local measurement installation, Consent Mode, SPA/ecommerce events, Measurement Protocol validation, and separately confirmed GTM operations. Use when a user asks about GA4 setup, Search Console access, performance, acquisition, content, events, key events, ecommerce, realtime, funnels, analytics code, conversions, GTM, an audit, connecting Google, creating a Google Cloud OAuth application, checking Python, installing measurement code, or safely publishing a GTM version. It does not deploy websites or modify Search Console properties.
 ---
 
 # Google Analytics Advisor
@@ -14,7 +14,7 @@ explanation, but keep exact product names, event names, metric names, commands a
 
 ## Current capability boundary
 
-Treat version 0.11.0 as the security-validated read-only reporting, baseline, measurement-design, confirmed GA4 configuration, safe local website-installation, and protected GTM-lifecycle release. It can discover GA4 accounts, properties,
+Treat the current development build as the security-validated read-only reporting, baseline, measurement-design, confirmed GA4 configuration, safe local website-installation, protected GTM lifecycle, and Search Console property-discovery capability. It can discover GA4 accounts, properties,
 website streams and core settings; inspect selected GTM resources; statically inspect a local website
 project; run one bounded 28-day event diagnostic; correlate public tag IDs; and write immutable
 snapshots plus a baseline report; create, validate, render, approve, and migrate immutable local
@@ -28,6 +28,9 @@ workspace/entity/preview/version/publish stages with fresh fingerprints and inde
 can run bounded overview, acquisition, landing/content, device/geo, events, key-events, ecommerce,
 realtime, approved custom-core, and separately gated experimental funnel reports; preserve source
 evidence, data-quality limitations, and prioritized plain-language recommendations.
+It can also safely add the Search Console read-only scope to the customer-owned authorization and
+list exact Search Console property identities and permission levels. Search Console performance,
+sitemaps, URL Inspection, property changes, user management, and the GA4 link are not available yet.
 Only claim findings returned by the CLI, and preserve every
 reported limitation. Never describe a source-code match alone as proof that production collection
 works.
@@ -79,10 +82,14 @@ Browser permission is limited to this OAuth onboarding session and does not appr
 website, publishing or deployment changes. Let the user switch modes at any point without restarting.
 
 1. Run `auth profiles list --json` and `auth client list --json` first. Reuse a suitable existing
-   connection or imported client instead of creating duplicates.
+   connection or imported client instead of creating duplicates. For an existing profile, run
+   `auth status --profile <id> --json` and preserve its GA4/GTM capability when Search Console is
+   missing.
 2. If a new client/setup is required, present the two-mode choice above and wait for the selection.
-3. Run `auth consent-preview --json` and explain each permission group in plain language before
-   opening Google consent. State that scopes enable future operations but never approve a mutation.
+3. Run `auth consent-preview --json` for a new profile or
+   `auth consent-preview --profile <id> --json` for an upgrade. Explain each permission group and the
+   exact scope difference before opening Google consent. State that scopes enable future operations
+   but never approve a mutation.
 4. Follow the selected-mode workflow in
    [references/google-cloud-oauth-setup.md](references/google-cloud-oauth-setup.md): inspect an existing
    `gcloud` installation and signed-in project without exposing credentials; use it for project/API
@@ -98,15 +105,19 @@ website, publishing or deployment changes. Let the user switch modes at any poin
    `auth client import --file <absolute-path> --json`.
 7. Explain that import copies the client into the operating system's protected credential store and
    does not delete the downloaded source. Let the user delete or retain that source themselves.
-8. Run `auth login --client <client-ref> --json`. The CLI uses PKCE S256, a one-use
+8. For a new profile, run `auth login --client <client-ref> --json`. For an existing GA4/GTM profile
+   missing only Search Console, reuse its client and run `auth upgrade --profile <id> --json`; do not
+   create another client or profile. The CLI uses PKCE S256, a one-use
    `127.0.0.1` callback and the system browser. Never expose an authorization URL, code verifier,
    callback code, client secret, access token or refresh token in chat or logs.
 9. After successful login, run `auth status --json` and the bounded read-only `auth doctor --json`
    without asking for another confirmation, unless the user explicitly prohibited network
    diagnostics. Explain any required API/access action. Doctor does not audit analytics configuration.
 
-The complete v1 scopes are requested together because installed applications do not use incremental
-authorization here. They cover identity, GA4 read/edit and GTM read/edit/version/publish. Publishing,
+The complete target scopes are requested together. They cover identity, GA4 read/edit,
+GTM read/edit/version/publish, and Search Console read-only. Existing eight-scope profiles need one
+explicit upgrade for the added Search Console capability; a failed or declined upgrade leaves their
+GA4/GTM access usable. Publishing,
 GA4 changes, GTM changes and website changes still require a future immutable plan and a separate
 explicit confirmation. Never treat login as approval to change anything.
 
@@ -133,9 +144,22 @@ outcome is ambiguous, ask the single question that unlocks the most progress; ne
 non-specialist choose raw dimensions, metrics, or preset names.
 
 Do not use a keyword-only classifier. A broad diagnosis remains read-only and never authorizes a
-GA4, GTM, website, publish, or deployment change. Google Search Console is not available in this
-stage: do not request its scope, credential, property, or live access, and do not let its absence
-block the available GA4 assessment.
+GA4, GTM, Search Console, website, publish, or deployment change. Search Console property discovery
+is available but its performance data is not. Do not start consent merely because a broad request
+was asked; explain the optional capability and never let its absence block the available GA4
+assessment.
+
+## Search Console discovery workflow
+
+Read [references/search-console-discovery.md](references/search-console-discovery.md) before adding
+Search Console authorization or discovering its properties. Check the selected profile's capability
+first. New profiles request the full target scope set once; existing profiles use the guarded
+`auth upgrade` flow only after the user agrees to the additional read-only permission.
+
+Run `search-console sites list --profile <profile-id> --json` only when the capability is ready.
+Preserve the exact `selectionKey`, property type, raw permission, normalized permission, and every
+limitation. Never infer that similar URL-prefix and Domain properties are interchangeable. This
+command is discovery only: do not claim Search performance, sitemap, index, or GA4-link findings.
 
 ## Read-only baseline workflow
 

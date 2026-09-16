@@ -48,6 +48,13 @@ class ReadOperationTests(unittest.TestCase):
                     executor.execute(operation, resource=resource)
         self.assertEqual(transport.calls, [])
 
+    def test_search_console_registry_exposes_only_sites_list(self) -> None:
+        operations = [name for name in OPERATIONS if name.startswith("searchconsole.")]
+        self.assertEqual(operations, ["searchconsole.sites.list"])
+        operation = OPERATIONS[operations[0]]
+        self.assertEqual(operation.method, "GET")
+        self.assertEqual(operation.base_url + operation.path_template, "https://www.googleapis.com/webmasters/v3/sites")
+
     def test_allowlisted_post_retries_but_arbitrary_post_does_not(self) -> None:
         class Response:
             status = 200

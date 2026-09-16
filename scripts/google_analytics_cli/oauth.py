@@ -23,9 +23,12 @@ TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token"
 REVOCATION_ENDPOINT = "https://oauth2.googleapis.com/revoke"
 USERINFO_ENDPOINT = "https://openidconnect.googleapis.com/v1/userinfo"
 
-SCOPES = (
+IDENTITY_SCOPES = (
     "openid",
     "email",
+)
+
+ANALYTICS_GTM_SCOPES = (
     "https://www.googleapis.com/auth/analytics.readonly",
     "https://www.googleapis.com/auth/analytics.edit",
     "https://www.googleapis.com/auth/tagmanager.readonly",
@@ -33,6 +36,16 @@ SCOPES = (
     "https://www.googleapis.com/auth/tagmanager.edit.containerversions",
     "https://www.googleapis.com/auth/tagmanager.publish",
 )
+
+SEARCH_CONSOLE_SCOPES = (
+    "https://www.googleapis.com/auth/webmasters.readonly",
+)
+
+BASE_SCOPES = IDENTITY_SCOPES + ANALYTICS_GTM_SCOPES
+TARGET_SCOPES = BASE_SCOPES + SEARCH_CONSOLE_SCOPES
+SCOPES = TARGET_SCOPES
+BASE_SCOPE_SET_REVISION = "analytics-gtm-v1"
+TARGET_SCOPE_SET_REVISION = "search-console-read-v1"
 
 _GRANTED_SCOPE_ALIASES = {
     "https://www.googleapis.com/auth/userinfo.email": "email",
@@ -43,7 +56,27 @@ SCOPE_GROUPS = (
     {"group": "analytics_read", "purpose": "Read GA4 settings and reports in later stages."},
     {"group": "analytics_edit", "purpose": "Change only separately approved GA4 settings in later stages."},
     {"group": "gtm", "purpose": "Read and edit GTM, create versions, and publish only after separate confirmation."},
+    {
+        "group": "search_console_read",
+        "purpose": (
+            "Read the Search Console sites and data available to this Google account; "
+            "the plugin cannot add or delete sites or manage users."
+        ),
+    },
 )
+
+
+def normalize_granted_scopes(value: str | list[str] | tuple[str, ...]) -> tuple[str, ...]:
+    raw = value.split() if isinstance(value, str) else value
+    normalized = {_GRANTED_SCOPE_ALIASES.get(str(scope), str(scope)) for scope in raw if str(scope)}
+    return tuple(scope for scope in TARGET_SCOPES if scope in normalized) + tuple(
+        sorted(normalized - set(TARGET_SCOPES))
+    )
+
+
+def missing_scopes(granted: str | list[str] | tuple[str, ...], required: tuple[str, ...]) -> list[str]:
+    available = set(normalize_granted_scopes(granted))
+    return [scope for scope in required if scope not in available]
 
 
 def generate_pkce() -> tuple[str, str]:
@@ -52,13 +85,16 @@ def generate_pkce() -> tuple[str, str]:
     return verifier, challenge
 
 
-def authorization_url(client_id: str, redirect_uri: str, state: str, challenge: str) -> str:
+def authorization_url(
+    client_id: str, redirect_uri: str, state: str, challenge: str,
+    scopes: tuple[str, ...] = TARGET_SCOPES,
+) -> str:
     query = urllib.parse.urlencode(
         {
             "client_id": client_id,
             "redirect_uri": redirect_uri,
             "response_type": "code",
-            "scope": " ".join(SCOPES),
+            "scope": " ".join(scopes),
             "access_type": "offline",
             "prompt": "consent",
             "code_challenge": challenge,
@@ -121,19 +157,20 @@ class _LoopbackHandler(BaseHTTPRequestHandler):
         return
 
 
-def _validate_initial_tokens(payload: dict[str, Any]) -> dict[str, Any]:
+def _validate_initial_tokens(
+    payload: dict[str, Any], *, required_scopes: tuple[str, ...] = TARGET_SCOPES,
+) -> dict[str, Any]:
     token_type = payload.get("token_type")
     access_token = payload.get("access_token")
     refresh_token = payload.get("refresh_token")
-    granted = set(str(payload.get("scope", "")).split())
-    granted.update(_GRANTED_SCOPE_ALIASES.get(scope, scope) for scope in tuple(granted))
+    granted = normalize_granted_scopes(str(payload.get("scope", "")))
     if token_type != "Bearer" or not isinstance(access_token, str) or not access_token:
         raise AdvisorError("OAUTH_TOKEN_INVALID", "Google returned an invalid access token response.", EXIT_NETWORK)
-    missing = [scope for scope in SCOPES if scope not in granted]
+    missing = missing_scopes(granted, required_scopes)
     if missing:
         raise AdvisorError(
             "OAUTH_SCOPE_INCOMPLETE",
-            "Google authorization did not grant the complete V1 permission set.",
+            "Google authorization did not grant the complete target permission set.",
             EXIT_CONFIGURATION,
             details={"missingScopes": missing},
             next_action="Review the requested permission groups and authorize the complete set in one new consent flow.",
@@ -151,6 +188,7 @@ def _validate_initial_tokens(payload: dict[str, Any]) -> dict[str, Any]:
 def authorize(
     client: dict[str, str], *, form: FormTransport | None = None, json_transport: JsonTransport | None = None,
     browser_open: Callable[[str], bool] = webbrowser.open, timeout: float = 300.0,
+    scopes: tuple[str, ...] = TARGET_SCOPES,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     verifier, challenge = generate_pkce()
     state = secrets.token_urlsafe(32)
@@ -160,7 +198,7 @@ def authorize(
     server.oauth_code = None  # type: ignore[attr-defined]
     server.oauth_error = None  # type: ignore[attr-defined]
     redirect_uri = f"http://127.0.0.1:{server.server_port}/oauth2/callback"
-    url = authorization_url(client["client_id"], redirect_uri, state, challenge)
+    url = authorization_url(client["client_id"], redirect_uri, state, challenge, scopes)
     try:
         if not browser_open(url):
             raise AdvisorError(
@@ -191,7 +229,7 @@ def authorize(
             "redirect_uri": redirect_uri,
         },
     )
-    _validate_initial_tokens(tokens)
+    _validate_initial_tokens(tokens, required_scopes=scopes)
     identity_response = (json_transport or JsonTransport(timeout=15.0)).request(
         "GET", USERINFO_ENDPOINT, headers={"Authorization": f"Bearer {tokens['access_token']}"}, max_attempts=1
     )

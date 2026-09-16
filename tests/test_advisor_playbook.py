@@ -4,7 +4,7 @@ import json
 import unittest
 from pathlib import Path
 
-from scripts.google_analytics_cli.oauth import SCOPES
+from scripts.google_analytics_cli.oauth import BASE_SCOPES, SEARCH_CONSOLE_SCOPES, TARGET_SCOPES
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -72,7 +72,7 @@ class AdvisorPlaybookTests(unittest.TestCase):
         self.assertIsNone(ambiguous["requiredDomainSet"])
         self.assertEqual(ambiguous["allowedReads"], ["resources-list"])
 
-    def test_stage_boundary_forbids_new_access_and_mutation_authority(self) -> None:
+    def test_stage_one_catalog_remains_mutation_safe_after_stage_two_scope_addition(self) -> None:
         boundary = self.catalog["stageBoundary"]
         self.assertTrue(boundary)
         self.assertTrue(all(value is False for value in boundary.values()))
@@ -80,7 +80,9 @@ class AdvisorPlaybookTests(unittest.TestCase):
         self.assertTrue(
             {"mutation", "search-console-access", "oauth-scope-change", "invent-missing-evidence"}.issubset(forbidden)
         )
-        self.assertFalse(any("webmasters" in scope or "search-console" in scope for scope in SCOPES))
+        self.assertFalse(any("webmasters" in scope or "search-console" in scope for scope in BASE_SCOPES))
+        self.assertEqual(SEARCH_CONSOLE_SCOPES, ("https://www.googleapis.com/auth/webmasters.readonly",))
+        self.assertNotIn("https://www.googleapis.com/auth/webmasters", TARGET_SCOPES)
 
     def test_skill_routes_to_a_discoverable_single_source_playbook(self) -> None:
         skill = SKILL.read_text(encoding="utf-8")
@@ -90,7 +92,7 @@ class AdvisorPlaybookTests(unittest.TestCase):
         self.assertIn("Route the request by meaning", playbook)
         self.assertIn("Track completeness", playbook)
         self.assertIn("Resume without repeating work", playbook)
-        self.assertNotIn("https://www.googleapis.com/auth/webmasters", skill + playbook)
+        self.assertNotIn("`https://www.googleapis.com/auth/webmasters`", skill + playbook)
 
 
 if __name__ == "__main__":

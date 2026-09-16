@@ -46,6 +46,7 @@ def build_parser() -> Parser:
     auth = sub.add_parser("auth")
     auth_sub = auth.add_subparsers(dest="auth_command", required=True, parser_class=Parser)
     preview = auth_sub.add_parser("consent-preview")
+    preview.add_argument("--profile")
     preview.add_argument("--json", action="store_true")
     client = auth_sub.add_parser("client")
     client_sub = client.add_subparsers(dest="client_command", required=True, parser_class=Parser)
@@ -61,6 +62,9 @@ def build_parser() -> Parser:
     login = auth_sub.add_parser("login")
     login.add_argument("--client", required=True)
     login.add_argument("--json", action="store_true")
+    upgrade = auth_sub.add_parser("upgrade")
+    upgrade.add_argument("--profile", required=True)
+    upgrade.add_argument("--json", action="store_true")
     profiles = auth_sub.add_parser("profiles")
     profiles_sub = profiles.add_subparsers(dest="profiles_command", required=True, parser_class=Parser)
     profiles_list = profiles_sub.add_parser("list")
@@ -87,6 +91,17 @@ def build_parser() -> Parser:
     resources_list = resources_sub.add_parser("list")
     resources_list.add_argument("--profile", required=True)
     resources_list.add_argument("--json", action="store_true")
+    search_console = sub.add_parser("search-console")
+    search_console_sub = search_console.add_subparsers(
+        dest="search_console_command", required=True, parser_class=Parser
+    )
+    search_console_sites = search_console_sub.add_parser("sites")
+    search_console_sites_sub = search_console_sites.add_subparsers(
+        dest="search_console_sites_command", required=True, parser_class=Parser
+    )
+    search_console_sites_list = search_console_sites_sub.add_parser("list")
+    search_console_sites_list.add_argument("--profile", required=True)
+    search_console_sites_list.add_argument("--json", action="store_true")
     site = sub.add_parser("site")
     site_sub = site.add_subparsers(dest="site_command", required=True, parser_class=Parser)
     site_inspect = site_sub.add_parser("inspect")
@@ -267,14 +282,29 @@ def dispatch(argv: list[str]) -> tuple[str, str, Any]:
         return "contracts validate", "valid", validate_artifact(args.schema, args.input)
     if args.group == "auth":
         if args.auth_command == "consent-preview":
-            from .oauth import SCOPES, SCOPE_GROUPS
+            from .oauth import SCOPE_GROUPS, TARGET_SCOPES, TARGET_SCOPE_SET_REVISION
 
-            return "auth consent-preview", "authorization_required", {
-                "profile": "full-v1",
-                "scopes": list(SCOPES),
+            result = {
+                "profile": "full-target",
+                "targetScopeSetRevision": TARGET_SCOPE_SET_REVISION,
+                "scopes": list(TARGET_SCOPES),
                 "permissionGroups": list(SCOPE_GROUPS),
                 "mutationApprovalGranted": False,
             }
+            if args.profile:
+                current = AuthService().status(args.profile)
+                result.update({
+                    "profileId": current["profileId"],
+                    "currentGrantedScopes": current["grantedScopes"],
+                    "missingScopes": current["missingTargetScopes"],
+                    "authorizationUpgradeRequired": current["authorizationUpgradeRequired"],
+                })
+            preview_status = (
+                "authorization_required"
+                if not args.profile or result.get("authorizationUpgradeRequired", True)
+                else "ready"
+            )
+            return "auth consent-preview", preview_status, result
         service = AuthService()
         if args.auth_command == "client" and args.client_command == "import":
             return "auth client import", "client_ready", service.client_import(args.file)
@@ -284,6 +314,9 @@ def dispatch(argv: list[str]) -> tuple[str, str, Any]:
             return "auth client remove", "removed", service.client_remove(args.client, args.confirm_client)
         if args.auth_command == "login":
             return "auth login", "connected", service.login(args.client)
+        if args.auth_command == "upgrade":
+            result = service.upgrade(args.profile)
+            return "auth upgrade", result["status"], result
         if args.auth_command == "profiles" and args.profiles_command == "list":
             return "auth profiles list", "ready", service.profiles()
         if args.auth_command == "status":
@@ -330,6 +363,15 @@ def dispatch(argv: list[str]) -> tuple[str, str, Any]:
 
         result = BaselineService().resources(args.profile)
         return "resources list", "partial" if result["limitations"] else "ready", result
+    if (
+        args.group == "search-console"
+        and args.search_console_command == "sites"
+        and args.search_console_sites_command == "list"
+    ):
+        from .search_console import SearchConsoleService
+
+        result = SearchConsoleService().sites(args.profile)
+        return "search-console sites list", result["status"], result
     if args.group == "audit" and args.audit_command == "baseline":
         from .baseline_audit import BaselineService
 

@@ -111,9 +111,12 @@ Track these domains:
     and quota coverage;
 12. unanswered business questions.
 
-Google Search Console is outside this stage. Its absence never blocks available GA4 analysis. Do
-not request a Search Console scope, credential, property, or live access; simply state that organic
-search visibility was not assessed when it matters to the user's question.
+Search Console property discovery is available, but Search Console performance is outside this
+stage. When an already connected profile has the read-only capability, use
+[search-console-discovery.md](search-console-discovery.md) to establish the exact property identity.
+Do not start OAuth consent automatically for a broad request. If the capability is missing, explain
+the optional upgrade and continue the available GA4 analysis. In every case state that organic-search
+performance itself was not assessed yet.
 
 Do not describe the assessment as complete when an applicable domain remains `not_checked` without
 an explanation.

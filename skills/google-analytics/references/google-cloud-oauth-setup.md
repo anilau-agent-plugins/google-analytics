@@ -33,8 +33,9 @@ not create or use an Anilau OAuth application, proxy or service-account key.
    browser control otherwise. Do not attach billing unless a required API explicitly needs it and the
    user separately approves the billing account.
 3. Read back the selected project. Prepare an exact plan to enable only
-   `analyticsadmin.googleapis.com`, `analyticsdata.googleapis.com`, and
-   `tagmanager.googleapis.com`. After one confirmation covering those three services and the exact
+   `analyticsadmin.googleapis.com`, `analyticsdata.googleapis.com`,
+   `tagmanager.googleapis.com`, and `searchconsole.googleapis.com`. After one confirmation covering
+   those four services and the exact
    project, run `gcloud services enable ... --project <project-id>` when available. Otherwise operate
    the API Library pages. Verify enabled state afterward; do not request a general Cloud OAuth scope.
 4. Open Google Auth Platform for the selected project. In browser-assisted mode, first verify the
@@ -75,6 +76,7 @@ interface, but preserve the stated values and verify each resulting screen.
    - `https://console.cloud.google.com/apis/library/analyticsadmin.googleapis.com?project=<PROJECT_ID>`
    - `https://console.cloud.google.com/apis/library/analyticsdata.googleapis.com?project=<PROJECT_ID>`
    - `https://console.cloud.google.com/apis/library/tagmanager.googleapis.com?project=<PROJECT_ID>`
+   - `https://console.cloud.google.com/apis/library/searchconsole.googleapis.com?project=<PROJECT_ID>`
 3. **Google Auth Platform:** open
    `https://console.cloud.google.com/auth/overview?project=<PROJECT_ID>` and choose **Get started** if
    shown. Enter **App name** `Google Analytics Advisor`; choose the user's intended support email;
@@ -84,9 +86,9 @@ interface, but preserve the stated values and verify each resulting screen.
    Google Workspace organization and Google offers it; otherwise choose **External**. For External
    Testing, add the exact authorizing Google account under **Test users** and warn about testing-mode
    refresh-token expiry.
-5. **Data Access / Scopes:** add exactly the eight scopes printed by
+5. **Data Access / Scopes:** add exactly the nine target scopes printed by
    `auth consent-preview --json`; do not add `profile`, Cloud Platform, user-management, deletion,
-   Firebase, Google Ads or Data Manager scopes. Save the configuration.
+   Firebase, Google Ads, Data Manager, or the read/write `webmasters` scope. Save the configuration.
 6. **Desktop client:** open
    `https://console.cloud.google.com/auth/clients?project=<PROJECT_ID>`, click **Create Client**, set
    **Application type** to **Desktop app**, set **Name** to `Google Analytics Advisor`, and click
@@ -97,8 +99,26 @@ interface, but preserve the stated values and verify each resulting screen.
 
 The CLI rejects Web application and service-account JSON. It accepts a loopback redirect chosen at
 runtime on `127.0.0.1`; do not configure an out-of-band redirect and do not ask the user to paste a
-browser code. Login requests all v1 scopes together, uses PKCE S256, and opens Google's consent page
+browser code. Login requests all target scopes together, uses PKCE S256, and opens Google's consent page
 in the system browser.
+
+## Existing profile upgrade for Search Console
+
+An existing eight-scope GA4/GTM profile does not need another Desktop client JSON.
+
+1. Run `auth status --profile <profile-id> --json`. Confirm that `analyticsGtm` remains `ready` and
+   `searchConsole` is `authorization_required`.
+2. In the same user-owned Cloud project, enable only `searchconsole.googleapis.com` after exact
+   confirmation and add `webmasters.readonly` to Google Auth Platform **Data Access**.
+3. Run `auth consent-preview --profile <profile-id> --json` and explain the one-scope difference.
+4. After the user agrees, run `auth upgrade --profile <profile-id> --json`. The user must select the
+   same Google account in Google's browser consent. A different account is rejected rather than
+   silently replacing the profile.
+5. Run `auth status` and `auth doctor`. A declined consent or pre-switch failure leaves the previous
+   GA4/GTM credential active.
+
+Do not revoke the old grant as a cleanup technique: Google revocation can affect the complete grant
+for this project/client. The CLI performs only protected local credential rotation.
 
 ## Permission meaning
 
@@ -109,22 +129,27 @@ in the system browser.
 - `tagmanager.edit.containers` and `tagmanager.edit.containerversions`: prepare separately approved
   GTM workspace and version changes in later stages.
 - `tagmanager.publish`: publish only after an additional explicit confirmation; login never publishes.
+- `webmasters.readonly`: list and read Search Console data available to the connected account; it
+  cannot add/delete properties or manage users.
 
-No scope for deleting containers, managing users, creating Analytics accounts, Firebase, Google Ads,
-Data Manager or general Google Cloud administration is requested.
+No scope for deleting containers, managing users, creating Analytics accounts, Search Console
+write access, Firebase, Google Ads, Data Manager or general Google Cloud administration is requested.
 
 ## Safe diagnostics
 
-After login, `auth doctor --json` asks Google only for identity and minimal read-only GA4/GTM/API
-responses. If an API is disabled, use the returned project-specific enable link when available. An
-access-denied result can instead mean that the connected Google account lacks access to GA4 or GTM;
-do not solve that by requesting broader OAuth scopes.
+After login, `auth doctor --json` asks Google only for identity and minimal read-only GA4/GTM/Search
+Console API responses. It skips the Search Console network call when that scope is absent. If an API
+is disabled, use the returned project-specific enable link when available. An access-denied result
+can instead mean that the connected Google account lacks resource access; do not solve that by
+requesting broader OAuth scopes.
 
 Official references:
 
 - [OAuth for desktop applications](https://developers.google.com/identity/protocols/oauth2/native-app)
 - [Google OAuth scope catalog](https://developers.google.com/identity/protocols/oauth2/scopes)
 - [Google Tag Manager authorization](https://developers.google.com/tag-platform/tag-manager/api/v2/authorization)
+- [Search Console authorization](https://developers.google.com/webmaster-tools/v1/how-tos/authorizing)
+- [Search Console sites.list](https://developers.google.com/webmaster-tools/v1/sites/list)
 - [OAuth security practices](https://developers.google.com/identity/protocols/oauth2/resources/best-practices)
 - [Create Desktop OAuth credentials](https://developers.google.com/workspace/guides/create-credentials#desktop-app)
 - [Create a project with gcloud](https://cloud.google.com/sdk/gcloud/reference/projects/create)

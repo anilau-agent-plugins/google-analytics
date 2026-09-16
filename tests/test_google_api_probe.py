@@ -12,7 +12,11 @@ class Response:
 
 
 class Transport:
+    def __init__(self):
+        self.calls = []
+
     def request(self, method, url, **kwargs):
+        self.calls.append((method, url, kwargs))
         if "userinfo" in url:
             return Response({"sub": "s", "email": "u@example.com", "email_verified": True})
         if "analyticsadmin" in url:
@@ -21,6 +25,8 @@ class Transport:
             return Response({"account": [{"accountId": "1"}]})
         if "analyticsdata" in url:
             return Response({"dimensions": []})
+        if "/webmasters/v3/sites" in url:
+            return Response({"siteEntry": [{"siteUrl": "sc-domain:example.com"}]})
         raise AssertionError(url)
 
 
@@ -55,6 +61,21 @@ class ProbeTests(unittest.TestCase):
     def test_missing_scope_is_distinct_from_resource_access(self) -> None:
         result = run_probes("access", transport=ScopeTransport())
         self.assertEqual(result["analyticsAdmin"]["status"], "scope_missing")
+
+    def test_search_console_probe_is_conditional_and_read_only(self) -> None:
+        transport = Transport()
+        missing = run_probes("access", transport=transport, search_console_enabled=False)
+        self.assertEqual(missing["searchConsole"]["status"], "authorization_required")
+        self.assertFalse(missing["searchConsole"]["networkRequestPerformed"])
+
+        ready = run_probes("access", transport=transport, search_console_enabled=True)
+        self.assertEqual(ready["searchConsole"]["status"], "ready")
+        self.assertTrue(ready["searchConsole"]["resourceAvailable"])
+        self.assertTrue(ready["searchConsole"]["networkRequestPerformed"])
+        search_console_calls = [call for call in transport.calls if "/webmasters/" in call[1]]
+        self.assertEqual(len(search_console_calls), 1)
+        self.assertEqual(search_console_calls[0][0], "GET")
+        self.assertEqual(search_console_calls[0][1], "https://www.googleapis.com/webmasters/v3/sites")
 
 
 if __name__ == "__main__":

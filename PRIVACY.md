@@ -9,7 +9,7 @@ they do not pass through Anilau infrastructure.
 
 During assisted onboarding, an existing Google Cloud CLI or the user's Cloud Console session can be
 used to inspect the selected account/project, create a confirmed customer project, and enable the
-three required APIs. These interactions go directly to Google. The advisor must not read Cloud CLI
+four required APIs. These interactions go directly to Google. The advisor must not read Cloud CLI
 credential files or print access tokens, and it must obtain confirmation before changing Cloud state.
 
 Browser-assisted setup is optional and begins only after explicit permission for the current OAuth
@@ -32,11 +32,17 @@ not configured by default and can be disabled from the CLI.
 The customer supplies a Desktop OAuth client from the customer's own Google Cloud project. The local
 CLI sends the browser authorization request, authorization-code exchange, token refresh, optional
 revocation, read-only discovery and bounded diagnostics directly to Google over HTTPS. The requested scopes cover
-identity, GA4 read/edit and GTM read/edit/version/publish. Version 0.11.0 can perform allowlisted GA4
+identity, GA4 read/edit, GTM read/edit/version/publish, and Search Console read-only. Version 0.11.0 can perform allowlisted GA4
 Admin configuration and local website source changes after separate immutable expiring plans and
 exact SHA-256 confirmations. It can also perform supported GTM web-container operations through
 separate workspace, sync, entity, compiler-preview, version, and publish plans. Authorization does
 not approve any mutation.
+
+The unreleased 0.20.0 development capability can make one bounded Search Console `sites.list`
+request. It returns exact property identities and the connected account's permission levels. The
+response is displayed for selection and is not written as a Search Console performance dataset.
+This stage does not query Search Analytics, sitemap, or URL Inspection data and cannot add, delete,
+verify, or modify a Search Console property or its users.
 
 Read-only baseline audits can request selected GA4 configuration, a bounded event-name/count report,
 and selected GTM configuration directly from Google. The CLI does not request Measurement Protocol
@@ -90,6 +96,11 @@ protects them for the current user with DPAPI; macOS uses Keychain; Linux uses S
 non-secret local index stores opaque profile/client references, masked client identifiers, project ID,
 timestamps, state and confirmation hashes outside plugin source and caches. It does not store email
 addresses or tokens.
+
+When an existing profile adds Search Console read-only access, the CLI writes the candidate refresh
+token to a protected staging slot, verifies protected readback, and only then switches the profile.
+A failed or declined upgrade leaves the previous GA4/GTM credential active. Protected staging slots
+are never written to project artifacts or output and are cleaned after canonical rotation.
 
 `auth forget-local` deletes the selected local refresh token without revoking Google's grant.
 `auth revoke` asks Google to revoke the grant and deletes the local token only after a definite
