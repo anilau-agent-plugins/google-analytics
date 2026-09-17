@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "artifactType": "search-console-link-result",
+  "generatedAt": "2026-09-17T12:05:00Z",
+  "resultId": "search-console-link-result-fixture0001",
+  "resultSha256": "17d78d29c627f466ee4d57f3a8b3985189dbf5f579227cb6194b32ef4e7b63f2",
+  "projectRoot": "C:/synthetic/project",
+  "planId": "search-console-link-plan-fixture0001",
+  "planSha256": "2222222222222222222222222222222222222222222222222222222222222222",
+  "confirmationSha256": "2222222222222222222222222222222222222222222222222222222222222222",
+  "outcome": "created",
+  "mode": "browser_assisted",
+  "resources": {"ga4Property": "properties/200", "webStream": "properties/200/dataStreams/300", "searchConsoleProperty": "sc-domain:example.test"},
+  "readback": {"observedAt": "2026-09-17T12:04:00Z", "uiState": "linked_created", "ga4LinkTableVerified": true, "searchConsoleAssociationVerified": false, "pairMatched": true, "message": "Exact link is visible in the GA4 link table."},
+  "integratedDataState": "pending_expected",
+  "limitations": ["Search Console association page was not independently verified."],
+  "cliNetworkUsed": false,
+  "browserInteractionRecorded": true,
+  "mutationPerformed": true,
+  "manualActionRequired": false
+}

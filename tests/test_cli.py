@@ -57,6 +57,14 @@ class CliTests(unittest.TestCase):
         code, payload = self.run_cli("advisor", "cross-source", "plan", "--json")
         self.assertEqual(code, 4)
         self.assertEqual(payload["errors"][0]["code"], "INVALID_ARGUMENTS")
+
+    def test_search_console_link_cli_requires_local_safety_artifacts(self) -> None:
+        code, payload = self.run_cli("search-console", "link", "plan", "--json")
+        self.assertEqual(code, 4)
+        self.assertEqual(payload["errors"][0]["code"], "INVALID_ARGUMENTS")
+        code, payload = self.run_cli("search-console", "link", "record", "--json")
+        self.assertEqual(code, 4)
+        self.assertEqual(payload["errors"][0]["code"], "INVALID_ARGUMENTS")
         code, payload = self.run_cli("advisor", "cross-source", "run", "--json")
         self.assertEqual(code, 4)
         self.assertEqual(payload["errors"][0]["code"], "INVALID_ARGUMENTS")

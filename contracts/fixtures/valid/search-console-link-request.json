@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "artifactType": "search-console-link-request",
+  "createdAt": "2026-09-17T12:00:00Z",
+  "requestId": "search-console-link-request-fixture0001",
+  "projectRoot": "C:/synthetic/project",
+  "profileId": "profile-0123456789abcdef",
+  "mode": "browser_assisted",
+  "language": "en",
+  "desiredOutcome": "create_exact_link",
+  "ga4Property": {"name": "properties/200", "displayName": "Example GA4"},
+  "webStream": {"name": "properties/200/dataStreams/300", "displayName": "Example web", "type": "WEB_DATA_STREAM", "defaultUri": "https://example.test", "measurementId": "G-EXAMPLE123", "fingerprintSha256": "83ff762b09779e8fdbad62cd3ff92f93b45067fecceeda2249f66e995d376811"},
+  "searchConsoleProperty": {"selectionKey": "sc-domain:example.test", "propertyType": "domain", "permissionLevel": "owner", "providerPermissionLevel": "SITE_OWNER", "fingerprintSha256": "3b51b596d416ab754da7e53278743e0645352c48215ebbf46bcfdf2f570ff5e7"},
+  "scopeCompatibility": "exact",
+  "preflight": {"observedAt": "2026-09-17T12:00:00Z", "linkState": "ready_for_review", "accountMatch": "matched", "ga4EditorStatus": "available", "linkButtonAvailable": true, "reviewReady": true},
+  "acknowledgements": {"samePageSetConfirmed": true, "dataVisibilityUnderstood": true, "oneToOneLimitsUnderstood": true, "delayAndRetentionUnderstood": true, "independentApiAnalysisUnderstood": true, "collectionPublicationSeparate": true},
+  "contentSha256": "0e35d7ee8b37ad1904109af75013b4abb33c75d0de4f03d9115ed4098427abd2"
+}

@@ -36,6 +36,14 @@ file and internal artifact SHA-256 values before planning and again before execu
 authorization or transport dependency. It never performs fuzzy URL matching and never persists
 Search Console query or fragment values.
 
+Search Console/GA4 link planning is local-only and accepts only project-contained artifacts with
+canonical SHA-256 validation. Ready plans expire after 30 minutes, are single-use, contain one exact
+UI Submit, and require the full plan hash. The CLI has no link-management transport and cannot click
+Google UI. Browser-assisted execution needs separate permission, stops before Submit, rejects account
+or resource drift, and never retries an ambiguous response. Result artifacts reject account email,
+cookies, screenshots, raw HTML, passwords, MFA/passkeys, and browser storage. Existing links are
+never deleted or recreated by this workflow.
+
 HTTP transport accepts credential-free HTTPS URLs on the standard port, bounds retries and response
 sizes, validates JSON responses, and removes Authorization headers on cross-host redirects. OAuth
 form requests are limited to Google's token and revocation endpoints. Protected credential backends

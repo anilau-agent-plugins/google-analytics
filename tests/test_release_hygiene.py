@@ -26,6 +26,7 @@ class ReleaseHygieneTests(unittest.TestCase):
             "skills/google-analytics/references/proactive-advisor-playbook.md",
             "skills/google-analytics/references/reporting-advisor.md",
             "skills/google-analytics/references/search-console-indexing.md",
+            "skills/google-analytics/references/search-console-linking.md",
             "README.md",
             "CHANGELOG.md",
             "LICENSE",
@@ -206,6 +207,23 @@ class ReleaseHygieneTests(unittest.TestCase):
         self.assertIn('"automaticRetries": 0', service)
         for method in ('method="PATCH"', 'method="PUT"', 'method="DELETE"'):
             self.assertNotIn(method, service)
+
+    def test_search_console_linking_is_ui_guarded_and_never_auto_replaces(self) -> None:
+        skill = (ROOT / "skills" / "google-analytics" / "SKILL.md").read_text(encoding="utf-8")
+        reference = (ROOT / "skills" / "google-analytics" / "references" / "search-console-linking.md").read_text(encoding="utf-8")
+        service = (ROOT / "scripts" / "google_analytics_cli" / "search_console_link_service.py").read_text(encoding="utf-8")
+        for phrase in (
+            "Detailed self-service", "Browser-assisted", "fresh explicit permission",
+            "full `planSha256`", "Do not retry a click", "unpublished in GA4 navigation by default",
+        ):
+            self.assertIn(phrase, reference)
+        self.assertIn("Search Console and GA4 linking workflow", skill)
+        self.assertIn("prior OAuth setup permission never carries over", skill)
+        self.assertIn("PLAN_TTL = timedelta(minutes=30)", service)
+        self.assertIn('"UI_SUBMIT_CREATE_LINK"', service)
+        for forbidden in ('method="POST"', 'method="PATCH"', 'method="PUT"', 'method="DELETE"'):
+            self.assertNotIn(forbidden, service)
+        self.assertNotIn("analyticsadmin.googleapis.com", service)
 
     def test_working_material_and_local_paths_are_not_publishable(self) -> None:
         forbidden_names = {"planning", ".plugin-work", "DEVELOPMENT_PLAN.md"}

@@ -102,6 +102,27 @@ def build_parser() -> Parser:
     search_console_sites_list = search_console_sites_sub.add_parser("list")
     search_console_sites_list.add_argument("--profile", required=True)
     search_console_sites_list.add_argument("--json", action="store_true")
+    search_console_link = search_console_sub.add_parser("link")
+    search_console_link_sub = search_console_link.add_subparsers(
+        dest="search_console_link_command", required=True, parser_class=Parser
+    )
+    search_console_link_plan = search_console_link_sub.add_parser("plan")
+    search_console_link_plan.add_argument("--request", required=True, type=Path)
+    search_console_link_plan.add_argument("--json", action="store_true")
+    search_console_link_show_plan = search_console_link_sub.add_parser("show-plan")
+    search_console_link_show_plan.add_argument("--plan", required=True, type=Path)
+    search_console_link_show_plan.add_argument("--language", choices=["auto", "ru", "en"], default="auto")
+    search_console_link_show_plan.add_argument("--json", action="store_true")
+    search_console_link_record = search_console_link_sub.add_parser("record")
+    search_console_link_record.add_argument("--plan", required=True, type=Path)
+    search_console_link_record.add_argument("--confirm-sha256", required=True)
+    search_console_link_record.add_argument("--outcome", required=True, choices=["created", "already_linked_exact", "cancelled", "blocked", "ambiguous", "failed"])
+    search_console_link_record.add_argument("--readback", required=True, type=Path)
+    search_console_link_record.add_argument("--json", action="store_true")
+    search_console_link_show = search_console_link_sub.add_parser("show")
+    search_console_link_show.add_argument("--result", required=True, type=Path)
+    search_console_link_show.add_argument("--language", choices=["auto", "ru", "en"], default="auto")
+    search_console_link_show.add_argument("--json", action="store_true")
     search_console_reports = search_console_sub.add_parser("reports")
     search_console_reports_sub = search_console_reports.add_subparsers(
         dest="search_console_reports_command", required=True, parser_class=Parser
@@ -453,6 +474,21 @@ def dispatch(argv: list[str]) -> tuple[str, str, Any]:
 
         result = SearchConsoleService().sites(args.profile)
         return "search-console sites list", result["status"], result
+    if args.group == "search-console" and args.search_console_command == "link":
+        from .search_console_link_service import SearchConsoleLinkService
+
+        service = SearchConsoleLinkService()
+        if args.search_console_link_command == "plan":
+            result = service.plan(args.request)
+            return "search-console link plan", result["status"], result
+        if args.search_console_link_command == "show-plan":
+            result = service.show_plan(args.plan, args.language)
+            return "search-console link show-plan", result["status"], result
+        if args.search_console_link_command == "record":
+            result = service.record(args.plan, args.confirm_sha256, args.outcome, args.readback)
+            return "search-console link record", result["status"], result
+        result = service.show(args.result, args.language)
+        return "search-console link show", result["status"], result
     if args.group == "search-console" and args.search_console_command == "reports":
         from .search_console_report_service import SearchConsoleReportService
 

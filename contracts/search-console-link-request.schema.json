@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:anilau:google-analytics:search-console-link-request:v1",
+  "title": "Google Analytics Advisor Search Console link request",
+  "$defs": {
+    "ga4Property": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "displayName"],
+      "properties": {
+        "name": {"type": "string", "pattern": "^properties/[0-9]+$"},
+        "displayName": {"type": "string", "minLength": 1}
+      }
+    },
+    "webStream": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "displayName", "type", "defaultUri", "measurementId", "fingerprintSha256"],
+      "properties": {
+        "name": {"type": "string", "pattern": "^properties/[0-9]+/dataStreams/[0-9]+$"},
+        "displayName": {"type": "string", "minLength": 1},
+        "type": {"const": "WEB_DATA_STREAM"},
+        "defaultUri": {"type": "string", "pattern": "^https?://[^\\s]+$"},
+        "measurementId": {"type": "string", "pattern": "^G-[A-Z0-9]+$"},
+        "fingerprintSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "searchConsoleProperty": {
+      "type": "object", "additionalProperties": false,
+      "required": ["selectionKey", "propertyType", "permissionLevel", "providerPermissionLevel", "fingerprintSha256"],
+      "properties": {
+        "selectionKey": {"type": "string", "minLength": 4},
+        "propertyType": {"enum": ["domain", "url_prefix"]},
+        "permissionLevel": {"enum": ["owner", "full", "restricted", "unverified", "unknown"]},
+        "providerPermissionLevel": {"type": ["string", "null"]},
+        "fingerprintSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      }
+    },
+    "preflight": {
+      "type": "object", "additionalProperties": false,
+      "required": ["observedAt", "linkState", "accountMatch", "ga4EditorStatus", "linkButtonAvailable", "reviewReady"],
+      "properties": {
+        "observedAt": {"type": "string", "format": "date-time"},
+        "linkState": {"enum": ["not_linked", "already_linked_exact", "conflicting_ga4_link", "conflicting_search_console_association", "permission_blocked", "account_mismatch", "reauthentication_required", "ui_changed_or_ambiguous", "ready_for_review"]},
+        "accountMatch": {"enum": ["matched", "user_confirmed", "mismatch", "unknown"]},
+        "ga4EditorStatus": {"enum": ["available", "unavailable", "unknown"]},
+        "linkButtonAvailable": {"type": "boolean"},
+        "reviewReady": {"type": "boolean"}
+      }
+    },
+    "acknowledgements": {
+      "type": "object", "additionalProperties": false,
+      "required": ["samePageSetConfirmed", "dataVisibilityUnderstood", "oneToOneLimitsUnderstood", "delayAndRetentionUnderstood", "independentApiAnalysisUnderstood", "collectionPublicationSeparate"],
+      "properties": {
+        "samePageSetConfirmed": {"type": "boolean"},
+        "dataVisibilityUnderstood": {"type": "boolean"},
+        "oneToOneLimitsUnderstood": {"type": "boolean"},
+        "delayAndRetentionUnderstood": {"type": "boolean"},
+        "independentApiAnalysisUnderstood": {"type": "boolean"},
+        "collectionPublicationSeparate": {"type": "boolean"}
+      }
+    }
+  },
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "artifactType", "createdAt", "requestId", "projectRoot", "profileId", "mode", "language", "desiredOutcome", "ga4Property", "webStream", "searchConsoleProperty", "scopeCompatibility", "preflight", "acknowledgements", "contentSha256"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "artifactType": {"const": "search-console-link-request"},
+    "createdAt": {"type": "string", "format": "date-time"},
+    "requestId": {"type": "string", "pattern": "^search-console-link-request-[A-Za-z0-9._-]{8,140}$"},
+    "projectRoot": {"type": "string", "minLength": 3},
+    "profileId": {"type": "string", "pattern": "^profile-[a-f0-9]{16}$"},
+    "mode": {"enum": ["self_service", "browser_assisted"]},
+    "language": {"enum": ["auto", "ru", "en"]},
+    "desiredOutcome": {"const": "create_exact_link"},
+    "ga4Property": {"$ref": "#/$defs/ga4Property"},
+    "webStream": {"$ref": "#/$defs/webStream"},
+    "searchConsoleProperty": {"$ref": "#/$defs/searchConsoleProperty"},
+    "scopeCompatibility": {"enum": ["exact", "compatible_candidate", "blocked"]},
+    "preflight": {"$ref": "#/$defs/preflight"},
+    "acknowledgements": {"$ref": "#/$defs/acknowledgements"},
+    "contentSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

@@ -35,6 +35,12 @@
 - Fixed live cross-source acceptance for long numeric GA4 stream IDs while retaining phone-number
   protection, and prevented duplicate overview/dedicated Search Console page datasets from creating
   false canonical ambiguity.
+- Added local-only Search Console/GA4 link request, 30-minute plan, and result contracts; exact
+  resource fingerprints, owner/Editor and one-to-one conflict guards, self-service/browser-assisted
+  routing, full SHA-256 confirmation, single-use recording, and no-retry ambiguous outcomes.
+- Added plain-language linking guidance and UI readback while keeping link deletion/recreation,
+  ownership verification, user management, and Search Console collection publication outside the
+  confirmed operation.
 - Kept public version metadata unchanged while `0.20.0` remains under staged development.
 
 ## 0.11.0 - 2026-08-28

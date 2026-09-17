@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:anilau:google-analytics:search-console-link-result:v1",
+  "title": "Google Analytics Advisor Search Console link UI result",
+  "$defs": {
+    "safe": {"oneOf": [{"type": ["string", "number", "boolean", "null"]}, {"type": "array", "items": {"$ref": "#/$defs/safe"}}, {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}]}
+  },
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "artifactType", "generatedAt", "resultId", "resultSha256", "projectRoot", "planId", "planSha256", "confirmationSha256", "outcome", "mode", "resources", "readback", "integratedDataState", "limitations", "cliNetworkUsed", "browserInteractionRecorded", "mutationPerformed", "manualActionRequired"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "artifactType": {"const": "search-console-link-result"},
+    "generatedAt": {"type": "string", "format": "date-time"},
+    "resultId": {"type": "string", "pattern": "^search-console-link-result-[A-Za-z0-9._-]{8,140}$"},
+    "resultSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "projectRoot": {"type": "string", "minLength": 3},
+    "planId": {"type": "string", "minLength": 8},
+    "planSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "confirmationSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "outcome": {"enum": ["created", "already_linked_exact", "cancelled", "blocked", "ambiguous", "failed"]},
+    "mode": {"enum": ["self_service", "browser_assisted"]},
+    "resources": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}},
+    "readback": {
+      "type": "object", "additionalProperties": false,
+      "required": ["observedAt", "uiState", "ga4LinkTableVerified", "searchConsoleAssociationVerified", "pairMatched", "message"],
+      "properties": {
+        "observedAt": {"type": "string", "format": "date-time"},
+        "uiState": {"enum": ["linked_created", "exact_existing", "cancelled", "blocked", "failed", "ambiguous"]},
+        "ga4LinkTableVerified": {"type": "boolean"},
+        "searchConsoleAssociationVerified": {"type": "boolean"},
+        "pairMatched": {"type": "boolean"},
+        "message": {"type": "string", "minLength": 1}
+      }
+    },
+    "integratedDataState": {"enum": ["not_checked", "pending_expected", "available", "unavailable_after_delay"]},
+    "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "cliNetworkUsed": {"const": false},
+    "browserInteractionRecorded": {"type": "boolean"},
+    "mutationPerformed": {"type": "boolean"},
+    "manualActionRequired": {"type": "boolean"}
+  }
+}

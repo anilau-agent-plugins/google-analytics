@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:anilau:google-analytics:search-console-link-plan:v1",
+  "title": "Google Analytics Advisor immutable Search Console link UI plan",
+  "$defs": {
+    "safe": {"oneOf": [{"type": ["string", "number", "boolean", "null"]}, {"type": "array", "items": {"$ref": "#/$defs/safe"}}, {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}]}
+  },
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "artifactType", "generatedAt", "expiresAt", "planId", "planSha256", "projectRoot", "requestSha256", "status", "mode", "resources", "preconditions", "operations", "excludedOperations", "expectedReadback", "blockers", "singleUse", "confirmationRequired", "confirmationScope", "networkUsed", "mutationPerformed", "browserMutationPending"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "artifactType": {"const": "search-console-link-plan"},
+    "generatedAt": {"type": "string", "format": "date-time"},
+    "expiresAt": {"type": "string", "format": "date-time"},
+    "planId": {"type": "string", "pattern": "^search-console-link-plan-[A-Za-z0-9._-]{8,140}$"},
+    "planSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "projectRoot": {"type": "string", "minLength": 3},
+    "requestSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "status": {"enum": ["ready", "no_op", "blocked"]},
+    "mode": {"enum": ["self_service", "browser_assisted"]},
+    "resources": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}},
+    "preconditions": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}},
+    "operations": {"type": "array", "maxItems": 1, "items": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}},
+    "excludedOperations": {"type": "array", "minItems": 4, "uniqueItems": true, "items": {"enum": ["DELETE_EXISTING_LINK", "RECREATE_LINK", "VERIFY_SEARCH_CONSOLE_OWNERSHIP", "PUBLISH_SEARCH_CONSOLE_COLLECTION", "MANAGE_USERS"]}},
+    "expectedReadback": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "blockers": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "singleUse": {"const": true},
+    "confirmationRequired": {"type": "boolean"},
+    "confirmationScope": {"type": "string", "minLength": 1},
+    "networkUsed": {"const": false},
+    "mutationPerformed": {"const": false},
+    "browserMutationPending": {"type": "boolean"}
+  }
+}

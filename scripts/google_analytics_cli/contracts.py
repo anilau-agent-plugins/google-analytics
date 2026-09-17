@@ -22,6 +22,7 @@ ARTIFACTS = {
     "search-console-sitemap-snapshot", "search-console-inspection-request",
     "search-console-inspection-plan", "search-console-inspection-report",
     "cross-source-analysis-request", "cross-source-analysis-plan", "cross-source-analysis-report",
+    "search-console-link-request", "search-console-link-plan", "search-console-link-result",
 }
 ALLOWED = {
     "$schema", "$id", "$defs", "$ref", "title", "type", "const", "enum", "required",
@@ -188,7 +189,21 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
     discriminator = data.get("changeRequestType") if name == "ga4-change-request" else data.get("artifactType")
     if discriminator != name:
         _fail("$.changeRequestType" if name == "ga4-change-request" else "$.artifactType", f"does not match requested schema {name}")
-    if name in {"report-request", "search-console-report-request", "search-console-inspection-request", "cross-source-analysis-request"}:
+    if name == "search-console-link-request":
+        from .artifact_store import canonical_json
+
+        expected = hashlib.sha256(canonical_json({key: value for key, value in data.items() if key != "contentSha256"})).hexdigest()
+        if data["contentSha256"] != expected:
+            _fail("$.contentSha256", "does not match canonical request content")
+        if not data["webStream"]["name"].startswith(data["ga4Property"]["name"] + "/dataStreams/"):
+            _fail("$.webStream.name", "must belong to the selected GA4 property")
+        stream = {key: data["webStream"].get(key) for key in ("name", "displayName", "type", "defaultUri", "measurementId")}
+        if data["webStream"]["fingerprintSha256"] != hashlib.sha256(canonical_json(stream)).hexdigest():
+            _fail("$.webStream.fingerprintSha256", "does not match the exact web-stream preview")
+        search = {key: data["searchConsoleProperty"].get(key) for key in ("selectionKey", "propertyType", "permissionLevel", "providerPermissionLevel")}
+        if data["searchConsoleProperty"]["fingerprintSha256"] != hashlib.sha256(canonical_json(search)).hexdigest():
+            _fail("$.searchConsoleProperty.fingerprintSha256", "does not match the exact Search Console preview")
+    elif name in {"report-request", "search-console-report-request", "search-console-inspection-request", "cross-source-analysis-request"}:
         from .artifact_store import canonical_json
 
         expected = hashlib.sha256(canonical_json({key: value for key, value in data.items() if key != "contentSha256"})).hexdigest()
@@ -232,6 +247,29 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
                 item["dimension"] == "query" for item in data.get("filters", [])
             ):
                 _fail("$.filters", "query filters are unavailable for this search type")
+    elif name == "search-console-link-plan":
+        from .artifact_store import canonical_json
+
+        generated = datetime.fromisoformat(data["generatedAt"].replace("Z", "+00:00"))
+        expires = datetime.fromisoformat(data["expiresAt"].replace("Z", "+00:00"))
+        if generated >= expires:
+            _fail("$.expiresAt", "must be later than generatedAt")
+        if (expires - generated).total_seconds() > 1800:
+            _fail("$.expiresAt", "link plans cannot remain valid for more than 30 minutes")
+        expected = hashlib.sha256(canonical_json({key: value for key, value in data.items() if key != "planSha256"})).hexdigest()
+        if data["planSha256"] != expected:
+            _fail("$.planSha256", "does not match canonical plan content")
+        required_exclusions = {"DELETE_EXISTING_LINK", "RECREATE_LINK", "VERIFY_SEARCH_CONSOLE_OWNERSHIP", "PUBLISH_SEARCH_CONSOLE_COLLECTION", "MANAGE_USERS"}
+        if set(data["excludedOperations"]) != required_exclusions:
+            _fail("$.excludedOperations", "must preserve every Stage 6 exclusion")
+        if data["status"] == "ready":
+            if len(data["operations"]) != 1 or data["operations"][0].get("action") != "UI_SUBMIT_CREATE_LINK":
+                _fail("$.operations", "ready link plans require exactly one UI submit operation")
+            if data["blockers"] or data["confirmationRequired"] is not True or data["browserMutationPending"] is not True:
+                _fail("$", "ready link plans require confirmation, no blockers, and a pending UI mutation")
+        else:
+            if data["operations"] or data["confirmationRequired"] is not False or data["browserMutationPending"] is not False:
+                _fail("$", "blocked and no-op link plans cannot contain a pending UI mutation")
     elif name in {"report-plan", "search-console-report-plan", "search-console-inspection-plan", "cross-source-analysis-plan"}:
         from .artifact_store import canonical_json
 
@@ -312,6 +350,21 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
         expires = datetime.fromisoformat(data["expiresAt"].replace("Z", "+00:00"))
         if generated >= expires:
             _fail("$.expiresAt", "must be later than generatedAt")
+    elif name == "search-console-link-result":
+        from .artifact_store import canonical_json
+
+        expected = hashlib.sha256(canonical_json({key: value for key, value in data.items() if key != "resultSha256"})).hexdigest()
+        if data["resultSha256"] != expected:
+            _fail("$.resultSha256", "does not match canonical result content")
+        if data["confirmationSha256"] != data["planSha256"]:
+            _fail("$.confirmationSha256", "must equal the full immutable plan SHA-256")
+        if data["mutationPerformed"] != (data["outcome"] == "created"):
+            _fail("$.mutationPerformed", "must be true only for a recorded created outcome")
+        if data["outcome"] in {"created", "already_linked_exact"}:
+            if not data["readback"]["ga4LinkTableVerified"] or not data["readback"]["pairMatched"]:
+                _fail("$.readback", "successful outcomes require exact-pair GA4 UI readback")
+        if data["mode"] == "self_service" and data["browserInteractionRecorded"]:
+            _fail("$.browserInteractionRecorded", "self-service results cannot claim browser interaction")
     elif name in {"search-console-report", "search-console-inspection-report", "cross-source-analysis-report"}:
         from .artifact_store import canonical_json
 

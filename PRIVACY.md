@@ -57,6 +57,16 @@ removed before storage; schema v2 retains only boolean/unknown ambiguity metadat
 exact-only, capped at 500 mappings, and the resulting credential-free plan/report remains under the
 project's `.google-analytics-advisor/` directory.
 
+The unreleased Search Console/GA4 linking workflow cannot use a public Google API to create the
+link. Its CLI writes only credential-free request, 30-minute plan, and semantic result artifacts
+under the selected project's `.google-analytics-advisor/` directory. Optional browser assistance
+uses the user's existing Google session only after fresh permission. Account email is compared only
+transiently and is not stored in project artifacts. Cookies, passwords, MFA/passkeys, screenshots,
+raw HTML, and browser storage are prohibited. The user confirms the full plan SHA-256 before one
+exact Google UI Submit. Link readback is recorded separately from delayed report-data availability;
+no delete/recreate, ownership verification, user management, or report-collection publication is
+included.
+
 Read-only baseline audits can request selected GA4 configuration, a bounded event-name/count report,
 and selected GTM configuration directly from Google. The CLI does not request Measurement Protocol
 secret resources. Normalized snapshots and a baseline report are stored inside the selected project

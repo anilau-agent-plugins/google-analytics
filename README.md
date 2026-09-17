@@ -27,6 +27,9 @@ not live-tested for this release; compatibility feedback is handled through GitH
   selected URL sample without downloading sitemap XML or requesting indexing;
 - locally compare immutable GA4 `google / organic` and Search Console reports for the same complete
   periods, with exact-only page mapping and explicit unmatched, query-ambiguous, and timezone limits;
+- safely prepare and record a short-lived exact-resource plan for linking Search Console to one GA4
+  web stream through Google's UI, with self-service or separately permitted browser assistance and a
+  full SHA-256 confirmation before the final Submit;
 - find missing, duplicated, or conflicting analytics code in a local website project;
 - design useful events, key events, ecommerce tracking, funnels, and consent handling;
 - safely configure supported GA4 settings after showing you an exact change plan;
@@ -37,8 +40,9 @@ not live-tested for this release; compatibility feedback is handled through GitH
 - create and protect the Google authorization needed for this work.
 
 The plugin currently understands static HTML, Laravel Blade, React/Vite, and Next.js App Router
-projects. It does not deploy websites, manage Analytics/GTM users, delete containers, accept
-arbitrary Custom HTML, or promise business results.
+projects. It does not deploy websites, manage Analytics/GTM users, delete containers, automatically
+delete or recreate Search Console links, publish the Search Console report collection without a
+separate plan, accept arbitrary Custom HTML, or promise business results.
 
 ## What the plugin uses
 
@@ -192,6 +196,12 @@ separate plans and confirmations. The plugin never treats a timeout as success, 
 repeats an uncertain write or production event, never resolves GTM conflicts automatically, never
 publishes automatically, and never deploys a website as part of local installation.
 
+Search Console/GA4 linking is a separate Google UI workflow because Google exposes no public link-
+management API. The plugin first checks the exact property/stream/site and existing-link state, then
+offers detailed self-service or separately permitted browser assistance. It stops before `Submit`,
+requires the full SHA-256 of a 30-minute single-use plan, clicks at most once, and never deletes or
+recreates a conflicting link. Link readback is separate from delayed report-data availability.
+
 The published validation entrypoint runs with non-loopback network access disabled. Security tests
 use synthetic data and fake transports, so validation cannot change GA4/GTM resources or send
 production Measurement Protocol events.
@@ -205,6 +215,7 @@ Show which Search Console properties this Google account can read.
 Explain how my site performed in Google Search over the last 28 finalized days.
 Show which sitemaps Google knows and prepare a safe check of three important URLs.
 Compare Google Search visibility with what visitors did after landing, without treating clicks and sessions as the same metric.
+Help me safely link this exact Search Console property to the correct GA4 web stream.
 Show acquisition and key-event performance in plain language.
 Which conversions should this website track?
 Check this local website for duplicate Google tags.
