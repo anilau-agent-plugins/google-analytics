@@ -1,0 +1,26 @@
+{
+    "schemaVersion": 1,
+    "artifactType": "search-console-inspection-request",
+    "createdAt": "2026-09-17T00:00:00Z",
+    "requestId": "search-console-inspection-request-fixture01",
+    "contentSha256": "318713f4cb6c1fb8360714b865db72e4b37824707242c2efced7303d794c7e7d",
+    "projectRoot": "C:/fixture/project",
+    "profileId": "profile-0123456789abcdef",
+    "site": "sc-domain:example.com",
+    "question": "Is this important page indexed?",
+    "language": "en",
+    "providerLanguageCode": "en-US",
+    "sitemapSnapshotRef": null,
+    "urls": [
+        {
+            "url": "https://example.com/",
+            "reason": "Business homepage",
+            "sourceKind": "business-context",
+            "evidenceRef": null,
+            "sourceArtifact": null
+        }
+    ],
+    "requestedBudget": {
+        "maxUrls": 1
+    }
+}

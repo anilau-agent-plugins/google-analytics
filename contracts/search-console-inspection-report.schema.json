@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:anilau:google-analytics:search-console-inspection-report:v1",
+  "title": "Google Analytics Advisor Search Console URL Inspection report",
+  "$defs": {"safe": {"oneOf": [{"type": ["string", "number", "boolean", "null"]}, {"type": "array", "items": {"$ref": "#/$defs/safe"}}, {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}]}},
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "artifactType", "generatedAt", "reportId", "reportSha256", "sourcePlanId", "sourcePlanSha256", "profileId", "site", "propertyIdentity", "selectedUrls", "sitemapSnapshotRef", "results", "requestLedger", "budget", "facts", "limitations", "interpretations", "recommendations", "questions", "failure", "status", "qualityTier", "networkUsed", "mutationPerformed"],
+  "properties": {
+    "schemaVersion": {"const": 1}, "artifactType": {"const": "search-console-inspection-report"}, "generatedAt": {"type": "string", "format": "date-time"},
+    "reportId": {"type": "string", "pattern": "^search-console-inspection-report-[A-Za-z0-9._-]{8,140}$"}, "reportSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "sourcePlanId": {"type": "string", "minLength": 8}, "sourcePlanSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "profileId": {"type": "string", "pattern": "^profile-[a-f0-9]{16}$"},
+    "site": {"type": "string", "minLength": 4}, "propertyIdentity": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}},
+    "selectedUrls": {"type": "array", "minItems": 1, "maxItems": 10, "items": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}}, "sitemapSnapshotRef": {"oneOf": [{"type": "null"}, {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}]},
+    "results": {"type": "array", "maxItems": 10, "items": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}}, "requestLedger": {"type": "array", "items": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}},
+    "budget": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}, "facts": {"type": "array", "items": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}},
+    "limitations": {"type": "array", "items": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}}, "interpretations": {"type": "array", "items": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}},
+    "recommendations": {"type": "array", "maxItems": 5, "items": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}}, "questions": {"type": "array", "items": {"type": "string"}},
+    "failure": {"oneOf": [{"type": "null"}, {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}]}, "status": {"enum": ["ready", "partial", "failed"]}, "qualityTier": {"enum": ["directional_only", "insufficient"]},
+    "networkUsed": {"const": true}, "mutationPerformed": {"const": false}
+  }
+}

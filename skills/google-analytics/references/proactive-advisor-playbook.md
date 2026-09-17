@@ -120,6 +120,12 @@ start OAuth consent automatically for a broad request. If the capability is miss
 the optional upgrade and continue the available GA4 analysis. In every case state that organic-search
 performance itself was not assessed yet.
 
+Sitemap metadata and URL Inspection are an additional optional technical-organic evidence source.
+Use [search-console-indexing.md](search-console-indexing.md) only when the broad assessment has a
+specific indexing, crawl, robots, or canonical question and a small set of important URLs can be
+explained. Do not turn a broad request into a mass inspection, make URL Inspection mandatory, or
+describe a selected sample as site-wide coverage.
+
 Do not describe the assessment as complete when an applicable domain remains `not_checked` without
 an explanation.
 

@@ -52,6 +52,17 @@ class CliTests(unittest.TestCase):
         code, payload = self.run_cli("search-console", "reports", "catalog", "--profile", "profile-test")
         self.assertEqual(code, 4)
         self.assertEqual(payload["errors"][0]["code"], "INVALID_ARGUMENTS")
+
+    def test_search_console_indexing_cli_requires_exact_inputs(self) -> None:
+        code, payload = self.run_cli("search-console", "sitemaps", "list", "--profile", "profile-test")
+        self.assertEqual(code, 4)
+        self.assertEqual(payload["errors"][0]["code"], "INVALID_ARGUMENTS")
+        code, payload = self.run_cli(
+            "search-console", "indexing", "plan", "--profile", "profile-test",
+            "--site", "sc-domain:example.com",
+        )
+        self.assertEqual(code, 4)
+        self.assertEqual(payload["errors"][0]["code"], "INVALID_ARGUMENTS")
         code, payload = self.run_cli("search-console", "reports", "run", "--json")
         self.assertEqual(code, 4)
         self.assertEqual(payload["errors"][0]["code"], "INVALID_ARGUMENTS")

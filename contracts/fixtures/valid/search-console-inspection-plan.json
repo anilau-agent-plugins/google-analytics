@@ -1,0 +1,82 @@
+{
+    "schemaVersion": 1,
+    "artifactType": "search-console-inspection-plan",
+    "generatedAt": "2026-09-17T00:00:00Z",
+    "expiresAt": "2026-09-17T00:30:00Z",
+    "planId": "search-console-inspection-plan-20260917T000000Z-123456789abc",
+    "planSha256": "48a747187728aa2f56cd64cc937db7f9046edcfc6dec512f1ba10ec05fb32d68",
+    "projectRoot": "C:/fixture/project",
+    "profileId": "profile-0123456789abcdef",
+    "credentialFingerprint": "0123456789abcdef01234567",
+    "site": "sc-domain:example.com",
+    "propertyIdentity": {
+        "siteUrl": "sc-domain:example.com",
+        "propertyType": "domain",
+        "permissionLevel": "owner",
+        "providerPermissionLevel": "SITE_OWNER",
+        "dataReadable": true,
+        "selectionKey": "sc-domain:example.com"
+    },
+    "request": {
+        "schemaVersion": 1,
+        "artifactType": "search-console-inspection-request",
+        "createdAt": "2026-09-17T00:00:00Z",
+        "requestId": "search-console-inspection-request-fixture01",
+        "contentSha256": "318713f4cb6c1fb8360714b865db72e4b37824707242c2efced7303d794c7e7d",
+        "projectRoot": "C:/fixture/project",
+        "profileId": "profile-0123456789abcdef",
+        "site": "sc-domain:example.com",
+        "question": "Is this important page indexed?",
+        "language": "en",
+        "providerLanguageCode": "en-US",
+        "sitemapSnapshotRef": null,
+        "urls": [
+            {
+                "url": "https://example.com/",
+                "reason": "Business homepage",
+                "sourceKind": "business-context",
+                "evidenceRef": null,
+                "sourceArtifact": null
+            }
+        ],
+        "requestedBudget": {
+            "maxUrls": 1
+        }
+    },
+    "selections": [
+        {
+            "url": "https://example.com/",
+            "reason": "Business homepage",
+            "sourceKind": "business-context",
+            "evidenceRef": null,
+            "sourceArtifact": null,
+            "membership": {
+                "url": "https://example.com/",
+                "site": "sc-domain:example.com",
+                "propertyType": "domain",
+                "member": true
+            }
+        }
+    ],
+    "operations": [
+        {
+            "operationId": "searchconsole.urlinspection.inspect",
+            "url": "https://example.com/",
+            "order": 1
+        }
+    ],
+    "budget": {
+        "plannedUrlCalls": 1,
+        "maxUrlCalls": 10,
+        "automaticRetries": 0
+    },
+    "blockers": [],
+    "limitations": [
+        "URL Inspection returns Google's indexed version, not a live test.",
+        "The selected sample cannot be extrapolated to the whole site."
+    ],
+    "singleUse": true,
+    "networkUsed": true,
+    "inspectionDataRead": false,
+    "mutationPerformed": false
+}

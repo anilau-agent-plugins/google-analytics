@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:anilau:google-analytics:search-console-inspection-plan:v1",
+  "title": "Google Analytics Advisor immutable Search Console URL Inspection plan",
+  "$defs": {"safe": {"oneOf": [{"type": ["string", "number", "boolean", "null"]}, {"type": "array", "items": {"$ref": "#/$defs/safe"}}, {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}]}},
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "artifactType", "generatedAt", "expiresAt", "planId", "planSha256", "projectRoot", "profileId", "credentialFingerprint", "site", "propertyIdentity", "request", "selections", "operations", "budget", "blockers", "limitations", "singleUse", "networkUsed", "inspectionDataRead", "mutationPerformed"],
+  "properties": {
+    "schemaVersion": {"const": 1}, "artifactType": {"const": "search-console-inspection-plan"}, "generatedAt": {"type": "string", "format": "date-time"}, "expiresAt": {"type": "string", "format": "date-time"},
+    "planId": {"type": "string", "pattern": "^search-console-inspection-plan-[A-Za-z0-9._-]{8,140}$"}, "planSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "projectRoot": {"type": "string", "minLength": 3}, "profileId": {"type": "string", "pattern": "^profile-[a-f0-9]{16}$"}, "credentialFingerprint": {"type": "string", "pattern": "^[a-f0-9]{24}$"},
+    "site": {"type": "string", "minLength": 4}, "propertyIdentity": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}, "request": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}},
+    "selections": {"type": "array", "minItems": 1, "maxItems": 10, "items": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}},
+    "operations": {"type": "array", "minItems": 1, "maxItems": 10, "items": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}},
+    "budget": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}, "blockers": {"type": "array", "items": {"type": "string"}}, "limitations": {"type": "array", "items": {"type": "string"}},
+    "singleUse": {"const": true}, "networkUsed": {"const": true}, "inspectionDataRead": {"const": false}, "mutationPerformed": {"const": false}
+  }
+}

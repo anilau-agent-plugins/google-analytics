@@ -69,6 +69,21 @@ OPERATIONS = {
             "/webmasters/v3/sites/{site_url}/searchAnalytics/query", True,
             resource_kind="search-console-site", max_attempts=1,
         ),
+        _op(
+            "searchconsole.sitemaps.list", "GET", SEARCH_CONSOLE,
+            "/webmasters/v3/sites/{site_url}/sitemaps",
+            resource_kind="search-console-site", max_attempts=1,
+        ),
+        _op(
+            "searchconsole.sitemaps.get", "GET", SEARCH_CONSOLE,
+            "/webmasters/v3/sites/{site_url}/sitemaps/{feedpath}",
+            resource_kind="search-console-sitemap", max_attempts=1,
+        ),
+        _op(
+            "searchconsole.urlinspection.inspect", "POST", SEARCH_CONSOLE_API,
+            "/v1/urlInspection/index:inspect", True,
+            resource_kind="search-console-url", max_attempts=1,
+        ),
     )
 }
 
@@ -102,6 +117,7 @@ class ReadExecutor:
         operation_id: str,
         *,
         resource: str | None = None,
+        feedpath: str | None = None,
         query: dict[str, Any] | None = None,
         payload: dict[str, Any] | None = None,
     ) -> JsonResponse:
@@ -113,13 +129,20 @@ class ReadExecutor:
         if "{site_url}" in operation.path_template:
             if not resource:
                 raise AdvisorError("INVALID_SEARCH_CONSOLE_SITE", "A Search Console property identity is required.", EXIT_INPUT)
-            path = operation.path_template.format(site_url=_search_console_site(resource))
+            substitutions = {"site_url": _search_console_site(resource)}
+            if "{feedpath}" in operation.path_template:
+                if not feedpath:
+                    raise AdvisorError("INVALID_SEARCH_CONSOLE_SITEMAP", "An exact sitemap URL is required.", EXIT_INPUT)
+                substitutions["feedpath"] = quote(feedpath, safe="")
+            elif feedpath is not None:
+                raise AdvisorError("INVALID_SEARCH_CONSOLE_SITEMAP", "This operation does not accept a sitemap URL.", EXIT_INPUT)
+            path = operation.path_template.format(**substitutions)
         elif "{resource}" in operation.path_template:
             if not resource or not RESOURCE_RE.fullmatch(resource):
                 raise AdvisorError("INVALID_RESOURCE_NAME", "The Google resource name is invalid.", EXIT_INPUT)
             path = operation.path_template.format(resource=resource)
         else:
-            if resource is not None:
+            if resource is not None or feedpath is not None:
                 raise AdvisorError("INVALID_RESOURCE_NAME", "This operation does not accept a resource name.", EXIT_INPUT)
             path = operation.path_template
         url = operation.base_url + path

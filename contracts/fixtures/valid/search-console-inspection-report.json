@@ -1,0 +1,55 @@
+{
+    "schemaVersion": 1,
+    "artifactType": "search-console-inspection-report",
+    "generatedAt": "2026-09-17T00:01:00Z",
+    "reportId": "search-console-inspection-report-20260917T000100Z-123456789abc",
+    "reportSha256": "a64e3f70e3fec8cf711d2400e0f21cb5f3992ed8928111caf9b914830a1cc893",
+    "sourcePlanId": "search-console-inspection-plan-20260917T000000Z-123456789abc",
+    "sourcePlanSha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "profileId": "profile-0123456789abcdef",
+    "site": "sc-domain:example.com",
+    "propertyIdentity": {
+        "siteUrl": "sc-domain:example.com",
+        "propertyType": "domain"
+    },
+    "selectedUrls": [
+        {
+            "url": "https://example.com/",
+            "reason": "Business homepage",
+            "sourceKind": "business-context"
+        }
+    ],
+    "sitemapSnapshotRef": null,
+    "results": [],
+    "requestLedger": [],
+    "budget": {
+        "plannedUrlCalls": 1,
+        "requestsUsed": 1,
+        "requestsRemaining": 9,
+        "automaticRetries": 0
+    },
+    "facts": [],
+    "limitations": [
+        {
+            "code": "INDEXED_VERSION_ONLY",
+            "severity": "info",
+            "message": "Indexed version only.",
+            "evidenceRef": null
+        }
+    ],
+    "interpretations": [],
+    "recommendations": [],
+    "questions": [
+        "Check access."
+    ],
+    "failure": {
+        "code": "SEARCH_CONSOLE_ACCESS_DENIED",
+        "message": "Access denied.",
+        "url": "https://example.com/",
+        "automaticRetryPerformed": false
+    },
+    "status": "failed",
+    "qualityTier": "insufficient",
+    "networkUsed": true,
+    "mutationPerformed": false
+}

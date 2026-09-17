@@ -25,6 +25,7 @@ class ReadOperationTests(unittest.TestCase):
         self.assertEqual(posts, [
             "data.compatibility.check", "data.report.run", "data.report.batch",
             "data.report.realtime", "data.report.funnel", "searchconsole.searchanalytics.query",
+            "searchconsole.urlinspection.inspect",
         ])
         self.assertTrue(all(item.method in {"GET", "POST"} for item in OPERATIONS.values()))
         self.assertNotIn("secret", " ".join(OPERATIONS).lower())
@@ -50,7 +51,11 @@ class ReadOperationTests(unittest.TestCase):
 
     def test_search_console_registry_exposes_only_read_operations(self) -> None:
         operations = [name for name in OPERATIONS if name.startswith("searchconsole.")]
-        self.assertEqual(operations, ["searchconsole.sites.list", "searchconsole.searchanalytics.query"])
+        self.assertEqual(operations, [
+            "searchconsole.sites.list", "searchconsole.searchanalytics.query",
+            "searchconsole.sitemaps.list", "searchconsole.sitemaps.get",
+            "searchconsole.urlinspection.inspect",
+        ])
         operation = OPERATIONS[operations[0]]
         self.assertEqual(operation.method, "GET")
         self.assertEqual(operation.base_url + operation.path_template, "https://www.googleapis.com/webmasters/v3/sites")
@@ -58,6 +63,10 @@ class ReadOperationTests(unittest.TestCase):
         self.assertEqual(query.method, "POST")
         self.assertTrue(query.safe_post)
         self.assertEqual(query.max_attempts, 1)
+        for name in ("searchconsole.sitemaps.list", "searchconsole.sitemaps.get", "searchconsole.urlinspection.inspect"):
+            self.assertEqual(OPERATIONS[name].max_attempts, 1)
+        self.assertNotIn("searchconsole.sitemaps.submit", OPERATIONS)
+        self.assertNotIn("searchconsole.sitemaps.delete", OPERATIONS)
 
     def test_search_analytics_site_is_encoded_and_never_retried(self) -> None:
         transport = CapturingTransport()

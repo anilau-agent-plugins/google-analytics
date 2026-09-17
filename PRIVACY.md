@@ -38,13 +38,17 @@ exact SHA-256 confirmations. It can also perform supported GTM web-container ope
 separate workspace, sync, entity, compiler-preview, version, and publish plans. Authorization does
 not approve any mutation.
 
-The unreleased 0.20.0 development capability can make one bounded Search Console `sites.list`
-request and immutable bounded Search Analytics report requests. It stores exact property identity,
-selected periods, normalized rows, request IDs, completeness markers and recommendations under the
-selected project's `.google-analytics-advisor/` directory. Search Analytics uses at most 20 requests
-and 12,000 rows per run and does not automatically retry quota or network failures. This stage does
-not query sitemap or URL Inspection data and cannot add, delete, verify, or modify a Search Console
-property or its users.
+The unreleased 0.20.0 development capability can make bounded Search Console property discovery,
+Search Analytics, sitemap metadata, and URL Inspection requests. It stores exact property identity,
+selected periods or URLs, reasons for URL selection, normalized provider evidence, request IDs,
+completeness markers and recommendations under the selected project's
+`.google-analytics-advisor/` directory. Search Analytics uses at most 20 requests and 12,000 rows per
+run. URL Inspection uses at most 10 sequential requests per single-use plan; the default sample is
+five. Neither workflow automatically retries quota or network failures. Sitemap inventory is capped
+at 1,000 metadata entries and does not download or parse sitemap XML. Deprecated indexed sitemap
+counts are ignored. Provider URL query values are redacted before storage when necessary. These
+operations cannot add, delete, verify, or modify a Search Console property, its users, a sitemap, or
+the Google index.
 
 Read-only baseline audits can request selected GA4 configuration, a bounded event-name/count report,
 and selected GTM configuration directly from Google. The CLI does not request Measurement Protocol

@@ -19,6 +19,8 @@ ARTIFACTS = {
     "website-change-request", "mp-delivery-plan", "gtm-context", "gtm-change-request",
     "report-request", "report-plan",
     "search-console-report-request", "search-console-report-plan", "search-console-report",
+    "search-console-sitemap-snapshot", "search-console-inspection-request",
+    "search-console-inspection-plan", "search-console-inspection-report",
 }
 ALLOWED = {
     "$schema", "$id", "$defs", "$ref", "title", "type", "const", "enum", "required",
@@ -185,12 +187,19 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
     discriminator = data.get("changeRequestType") if name == "ga4-change-request" else data.get("artifactType")
     if discriminator != name:
         _fail("$.changeRequestType" if name == "ga4-change-request" else "$.artifactType", f"does not match requested schema {name}")
-    if name in {"report-request", "search-console-report-request"}:
+    if name in {"report-request", "search-console-report-request", "search-console-inspection-request"}:
         from .artifact_store import canonical_json
 
         expected = hashlib.sha256(canonical_json({key: value for key, value in data.items() if key != "contentSha256"})).hexdigest()
         if data["contentSha256"] != expected:
             _fail("$.contentSha256", "does not match canonical request content")
+        if name == "search-console-inspection-request":
+            if data["requestedBudget"]["maxUrls"] != len(data["urls"]):
+                _fail("$.requestedBudget.maxUrls", "must equal the exact selected URL count")
+            urls = [item["url"] for item in data["urls"]]
+            if len(urls) != len(set(urls)):
+                _fail("$.urls", "duplicate exact URLs are not allowed")
+            return
         period = data["period"]
         if period["mode"] == "last-complete-days" and (period.get("days") is None or period.get("from") is not None or period.get("to") is not None):
             _fail("$.period", "last-complete-days requires days only")
@@ -210,7 +219,7 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
                 item["dimension"] == "query" for item in data.get("filters", [])
             ):
                 _fail("$.filters", "query filters are unavailable for this search type")
-    elif name in {"report-plan", "search-console-report-plan"}:
+    elif name in {"report-plan", "search-console-report-plan", "search-console-inspection-plan"}:
         from .artifact_store import canonical_json
 
         generated = datetime.fromisoformat(data["generatedAt"].replace("Z", "+00:00"))
@@ -222,7 +231,8 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
             _fail("$.planSha256", "does not match canonical plan content")
         if data.get("mutationPerformed") is not False:
             _fail("$.mutationPerformed", "report plans are read-only")
-        if not data.get("queries") and not data.get("blockers"):
+        query_field = "operations" if name == "search-console-inspection-plan" else "queries"
+        if not data.get(query_field) and not data.get("blockers"):
             _fail("$.queries", "an unblocked report plan requires at least one query")
         if name == "search-console-report-plan":
             budget = data.get("budget", {})
@@ -233,6 +243,16 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
                     _fail(f"$.queries[{index}].operationId", "is not an allowed Search Console read")
                 if query.get("rowLimit", 0) > 1000 or query.get("maxPages", 0) > 2:
                     _fail(f"$.queries[{index}]", "exceeds the per-query product budget")
+        if name == "search-console-inspection-plan":
+            if data.get("singleUse") is not True or data.get("inspectionDataRead") is not False:
+                _fail("$", "inspection plans must be single-use and cannot contain inspection data")
+            if data.get("budget", {}).get("maxUrlCalls") != 10 or data.get("budget", {}).get("automaticRetries") != 0:
+                _fail("$.budget", "inspection plan must preserve the 10-call hard limit and zero retries")
+            if data.get("budget", {}).get("plannedUrlCalls") != len(data.get("operations", [])):
+                _fail("$.budget.plannedUrlCalls", "must equal the exact operation count")
+            for index, operation in enumerate(data.get("operations", [])):
+                if operation.get("operationId") != "searchconsole.urlinspection.inspect":
+                    _fail(f"$.operations[{index}].operationId", "is not the allowed URL Inspection read")
     elif name == "mutation-plan":
         generated = datetime.fromisoformat(data["generatedAt"].replace("Z", "+00:00"))
         expires = datetime.fromisoformat(data["expiresAt"].replace("Z", "+00:00"))
@@ -275,7 +295,7 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
         expires = datetime.fromisoformat(data["expiresAt"].replace("Z", "+00:00"))
         if generated >= expires:
             _fail("$.expiresAt", "must be later than generatedAt")
-    elif name == "search-console-report":
+    elif name in {"search-console-report", "search-console-inspection-report"}:
         from .artifact_store import canonical_json
 
         expected = hashlib.sha256(canonical_json({key: value for key, value in data.items() if key != "reportSha256"})).hexdigest()
@@ -283,9 +303,26 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
             _fail("$.reportSha256", "does not match canonical Search Console report content")
         if data.get("mutationPerformed") is not False:
             _fail("$.mutationPerformed", "Search Console reports are read-only")
-        for index, period in enumerate(data["periods"]):
-            if date.fromisoformat(period["from"]) > date.fromisoformat(period["to"]):
-                _fail(f"$.periods[{index}]", "period starts after it ends")
+        if name == "search-console-report":
+            for index, period in enumerate(data["periods"]):
+                if date.fromisoformat(period["from"]) > date.fromisoformat(period["to"]):
+                    _fail(f"$.periods[{index}]", "period starts after it ends")
+        elif data.get("budget", {}).get("automaticRetries") != 0:
+            _fail("$.budget.automaticRetries", "URL Inspection cannot retry automatically")
+    elif name == "search-console-sitemap-snapshot":
+        from .artifact_store import canonical_json
+
+        expected = hashlib.sha256(canonical_json({key: value for key, value in data.items() if key != "snapshotSha256"})).hexdigest()
+        if data["snapshotSha256"] != expected:
+            _fail("$.snapshotSha256", "does not match canonical sitemap snapshot content")
+        if data.get("mutationPerformed") is not False:
+            _fail("$.mutationPerformed", "sitemap snapshots are read-only")
+        if data["mode"] == "root-list" and (data.get("requestedSitemapIndex") is not None or data.get("requestedSitemap") is not None):
+            _fail("$", "root-list cannot name a sitemap")
+        if data["mode"] == "index-list" and (not data.get("requestedSitemapIndex") or data.get("requestedSitemap") is not None):
+            _fail("$", "index-list requires only requestedSitemapIndex")
+        if data["mode"] == "get" and (not data.get("requestedSitemap") or data.get("requestedSitemapIndex") is not None):
+            _fail("$", "get requires only requestedSitemap")
     elif name == "report":
         for index, period in enumerate(data["periods"]):
             if date.fromisoformat(period["from"]) > date.fromisoformat(period["to"]):

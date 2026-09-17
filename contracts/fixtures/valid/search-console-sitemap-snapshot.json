@@ -1,0 +1,34 @@
+{
+    "schemaVersion": 1,
+    "artifactType": "search-console-sitemap-snapshot",
+    "generatedAt": "2026-09-17T00:00:00Z",
+    "snapshotId": "search-console-sitemap-20260917T000000Z-123456789abc",
+    "snapshotSha256": "dcf699215ed58fbebf96f7a2ff6796cf311eabf35ccd8b02184435a762d15865",
+    "projectRoot": "C:/fixture/project",
+    "profileId": "profile-0123456789abcdef",
+    "credentialFingerprint": "0123456789abcdef01234567",
+    "site": "sc-domain:example.com",
+    "propertyIdentity": {
+        "siteUrl": "sc-domain:example.com",
+        "propertyType": "domain",
+        "permissionLevel": "owner",
+        "providerPermissionLevel": "SITE_OWNER",
+        "dataReadable": true,
+        "selectionKey": "sc-domain:example.com"
+    },
+    "mode": "root-list",
+    "requestedSitemapIndex": null,
+    "requestedSitemap": null,
+    "entries": [],
+    "totals": {
+        "returned": 0,
+        "omitted": 0,
+        "pending": 0,
+        "warnings": 0,
+        "errors": 0
+    },
+    "limitations": [],
+    "requestLedger": [],
+    "networkUsed": true,
+    "mutationPerformed": false
+}

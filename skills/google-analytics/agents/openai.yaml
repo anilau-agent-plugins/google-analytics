@@ -1,4 +1,4 @@
 interface:
   display_name: "Google Analytics Advisor"
-  short_description: "GA4 and Search Console reports, audits, and safe setup"
-  default_prompt: "Use $google-analytics to explain my GA4 and Google Search performance, data quality, and safest next steps."
+  short_description: "GA4, Search Console, indexing evidence, and safe setup"
+  default_prompt: "Use $google-analytics to explain my GA4, Google Search performance, sitemap and selected-URL indexing evidence, data quality, and safest next steps."

@@ -125,6 +125,47 @@ def build_parser() -> Parser:
     search_console_reports_show.add_argument("--report", required=True, type=Path)
     search_console_reports_show.add_argument("--language", choices=["auto", "ru", "en"], default="auto")
     search_console_reports_show.add_argument("--json", action="store_true")
+    search_console_sitemaps = search_console_sub.add_parser("sitemaps")
+    search_console_sitemaps_sub = search_console_sitemaps.add_subparsers(
+        dest="search_console_sitemaps_command", required=True, parser_class=Parser
+    )
+    search_console_sitemaps_list = search_console_sitemaps_sub.add_parser("list")
+    search_console_sitemaps_list.add_argument("--profile", required=True)
+    search_console_sitemaps_list.add_argument("--site", required=True)
+    search_console_sitemaps_list.add_argument("--project-root", required=True, type=Path)
+    search_console_sitemaps_list.add_argument("--sitemap-index")
+    search_console_sitemaps_list.add_argument("--snapshot", type=Path)
+    search_console_sitemaps_list.add_argument("--json", action="store_true")
+    search_console_sitemaps_get = search_console_sitemaps_sub.add_parser("get")
+    search_console_sitemaps_get.add_argument("--profile", required=True)
+    search_console_sitemaps_get.add_argument("--site", required=True)
+    search_console_sitemaps_get.add_argument("--sitemap", required=True)
+    search_console_sitemaps_get.add_argument("--snapshot", required=True, type=Path)
+    search_console_sitemaps_get.add_argument("--project-root", required=True, type=Path)
+    search_console_sitemaps_get.add_argument("--json", action="store_true")
+    search_console_indexing = search_console_sub.add_parser("indexing")
+    search_console_indexing_sub = search_console_indexing.add_subparsers(
+        dest="search_console_indexing_command", required=True, parser_class=Parser
+    )
+    search_console_indexing_catalog = search_console_indexing_sub.add_parser("catalog")
+    search_console_indexing_catalog.add_argument("--profile", required=True)
+    search_console_indexing_catalog.add_argument("--site", required=True)
+    search_console_indexing_catalog.add_argument("--json", action="store_true")
+    search_console_indexing_plan = search_console_indexing_sub.add_parser("plan")
+    search_console_indexing_plan.add_argument("--profile", required=True)
+    search_console_indexing_plan.add_argument("--site", required=True)
+    search_console_indexing_plan.add_argument("--request", required=True, type=Path)
+    search_console_indexing_plan.add_argument("--json", action="store_true")
+    search_console_indexing_show_plan = search_console_indexing_sub.add_parser("show-plan")
+    search_console_indexing_show_plan.add_argument("--plan", required=True, type=Path)
+    search_console_indexing_show_plan.add_argument("--json", action="store_true")
+    search_console_indexing_run = search_console_indexing_sub.add_parser("run")
+    search_console_indexing_run.add_argument("--plan", required=True, type=Path)
+    search_console_indexing_run.add_argument("--json", action="store_true")
+    search_console_indexing_show = search_console_indexing_sub.add_parser("show")
+    search_console_indexing_show.add_argument("--report", required=True, type=Path)
+    search_console_indexing_show.add_argument("--language", choices=["auto", "ru", "en"], default="auto")
+    search_console_indexing_show.add_argument("--json", action="store_true")
     site = sub.add_parser("site")
     site_sub = site.add_subparsers(dest="site_command", required=True, parser_class=Parser)
     site_inspect = site_sub.add_parser("inspect")
@@ -413,6 +454,33 @@ def dispatch(argv: list[str]) -> tuple[str, str, Any]:
         if args.search_console_reports_command == "show":
             result = service.show(args.report, args.language)
             return "search-console reports show", result["status"], result
+    if args.group == "search-console" and args.search_console_command in {"sitemaps", "indexing"}:
+        from .search_console_indexing_service import SearchConsoleIndexingService
+
+        service = SearchConsoleIndexingService()
+        if args.search_console_command == "sitemaps":
+            if args.search_console_sitemaps_command == "list":
+                result = service.sitemaps(
+                    args.profile, args.site, args.project_root,
+                    sitemap_index=args.sitemap_index, snapshot_path=args.snapshot,
+                )
+                return "search-console sitemaps list", result["status"], result
+            result = service.sitemap(args.profile, args.site, args.sitemap, args.snapshot, args.project_root)
+            return "search-console sitemaps get", result["status"], result
+        if args.search_console_indexing_command == "catalog":
+            result = service.catalog(args.profile, args.site)
+            return "search-console indexing catalog", result["status"], result
+        if args.search_console_indexing_command == "plan":
+            result = service.plan(args.profile, args.site, args.request)
+            return "search-console indexing plan", result["status"], result
+        if args.search_console_indexing_command == "show-plan":
+            result = service.show_plan(args.plan)
+            return "search-console indexing show-plan", result["status"], result
+        if args.search_console_indexing_command == "run":
+            result = service.run(args.plan)
+            return "search-console indexing run", result["status"], result
+        result = service.show(args.report, args.language)
+        return "search-console indexing show", result["status"], result
     if args.group == "audit" and args.audit_command == "baseline":
         from .baseline_audit import BaselineService
 

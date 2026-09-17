@@ -25,6 +25,7 @@ class ReleaseHygieneTests(unittest.TestCase):
             "skills/google-analytics/references/gtm-management.md",
             "skills/google-analytics/references/proactive-advisor-playbook.md",
             "skills/google-analytics/references/reporting-advisor.md",
+            "skills/google-analytics/references/search-console-indexing.md",
             "README.md",
             "CHANGELOG.md",
             "LICENSE",
@@ -182,6 +183,27 @@ class ReleaseHygieneTests(unittest.TestCase):
         self.assertIn("MAX_ROWS = 12_000", service)
         self.assertNotIn('"PATCH"', service)
         self.assertNotIn('"DELETE"', service)
+        for method in ('method="PATCH"', 'method="PUT"', 'method="DELETE"'):
+            self.assertNotIn(method, service)
+
+    def test_search_console_indexing_is_bounded_read_only_and_single_use(self) -> None:
+        skill = (ROOT / "skills" / "google-analytics" / "SKILL.md").read_text(encoding="utf-8")
+        reference = (ROOT / "skills" / "google-analytics" / "references" / "search-console-indexing.md").read_text(encoding="utf-8")
+        registry = (ROOT / "scripts" / "google_analytics_cli" / "read_operation.py").read_text(encoding="utf-8")
+        service = (ROOT / "scripts" / "google_analytics_cli" / "search_console_indexing_service.py").read_text(encoding="utf-8")
+        self.assertIn("Search Console sitemap and URL Inspection workflow", skill)
+        self.assertIn("not a live fetch", reference)
+        for operation in (
+            "searchconsole.sitemaps.list", "searchconsole.sitemaps.get",
+            "searchconsole.urlinspection.inspect",
+        ):
+            self.assertIn(operation, registry)
+        for forbidden in ("searchconsole.sitemaps.submit", "searchconsole.sitemaps.delete", "indexing.googleapis.com"):
+            self.assertNotIn(forbidden, registry)
+        self.assertIn("MAX_INSPECTION_URLS = 10", service)
+        self.assertIn("DEFAULT_INSPECTION_URLS = 5", service)
+        self.assertIn("plan_was_consumed", service)
+        self.assertIn('"automaticRetries": 0', service)
         for method in ('method="PATCH"', 'method="PUT"', 'method="DELETE"'):
             self.assertNotIn(method, service)
 

@@ -21,6 +21,10 @@
 - Fixed live Search Analytics summary rows that legitimately omit `keys`, prevented summary and
   availability probes from being mislabeled as truncated detail, and made the plain-language output
   show readable period comparisons without repeating identical limitations.
+- Added bounded Search Console sitemap metadata snapshots and single-use URL Inspection plans for a
+  reasoned sample of up to ten exact-property URLs, with zero automatic retries and partial evidence.
+- Added Domain/URL-prefix containment checks, privacy-safe provider normalization, deprecated sitemap
+  field handling, and explicit indexed-version-only and non-site-wide limitations in Russian and English.
 - Kept public version metadata unchanged while `0.20.0` remains under staged development.
 
 ## 0.11.0 - 2026-08-28

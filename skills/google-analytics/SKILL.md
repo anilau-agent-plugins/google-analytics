@@ -1,6 +1,6 @@
 ---
 name: google-analytics
-description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, bounded Search Console performance reports, evidence-backed Data API reports, measurement strategy, customer-owned Desktop OAuth, confirmed GA4 configuration, safe local measurement installation, Consent Mode, SPA/ecommerce events, Measurement Protocol validation, and separately confirmed GTM operations. Use when a user asks about GA4 setup, Search Console access or organic performance, acquisition, content, events, key events, ecommerce, realtime, funnels, analytics code, conversions, GTM, an audit, connecting Google, creating a Google Cloud OAuth application, checking Python, installing measurement code, or safely publishing a GTM version. It does not deploy websites or modify Search Console properties.
+description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, bounded Search Console performance, sitemap, and URL Inspection evidence, Data API reports, measurement strategy, customer-owned Desktop OAuth, confirmed GA4 configuration, safe local measurement installation, Consent Mode, SPA/ecommerce events, Measurement Protocol validation, and separately confirmed GTM operations. Use when a user asks about GA4 setup, Search Console access, organic performance or indexing, acquisition, content, events, key events, ecommerce, realtime, funnels, analytics code, conversions, GTM, an audit, connecting Google, creating a Google Cloud OAuth application, checking Python, installing measurement code, or safely publishing a GTM version. It does not deploy websites or modify Search Console properties.
 ---
 
 # Google Analytics Advisor
@@ -29,10 +29,10 @@ can run bounded overview, acquisition, landing/content, device/geo, events, key-
 realtime, approved custom-core, and separately gated experimental funnel reports; preserve source
 evidence, data-quality limitations, and prioritized plain-language recommendations.
 It can also safely add the Search Console read-only scope to the customer-owned authorization,
-list exact Search Console property identities and permission levels, and run immutable bounded
-Search Analytics reports for overview, queries, pages, devices, countries, search appearance, and
-short hourly diagnostics. Search Console sitemaps, URL Inspection, property changes, user
-management, cross-source GA4 correlation, and the GA4 link are not available yet.
+list exact Search Console property identities and permission levels, run immutable bounded Search
+Analytics reports, inspect sitemap metadata, and inspect Google's indexed version of a small,
+explained URL sample. Search Console property changes, user management, request indexing,
+cross-source GA4 correlation, and the GA4 link are not available yet.
 Only claim findings returned by the CLI, and preserve every
 reported limitation. Never describe a source-code match alone as proof that production collection
 works.
@@ -60,7 +60,7 @@ using it. The check sends no credentials, analytics data or identifiers, caches 
 metadata outside the plugin source for 30 days, never updates automatically, and can be disabled with
 `version --disable-check --json`.
 
-Use `contracts validate --schema <artifact-type> --input <absolute-path> --json` only for the eighteen
+Use `contracts validate --schema <artifact-type> --input <absolute-path> --json` only for the twenty-two
 project artifacts. Do not describe this validator as a general JSON Schema implementation.
 
 ## Google authorization workflow
@@ -181,6 +181,29 @@ interpretations, up to five recommendations, and one safe next step. Preserve
 `first_incomplete_date/hour`; never call query/page/search-appearance rows exhaustive, replace absent
 position with zero, retry quota failures automatically, combine search types, or present GenAI,
 branded-query, or platform-property UI features as available API evidence.
+
+## Search Console sitemap and URL Inspection workflow
+
+Read [references/search-console-indexing.md](references/search-console-indexing.md) before reading
+sitemap metadata or preparing URL Inspection. Start from the exact Domain or URL-prefix
+`selectionKey`; platform and unknown properties are unsupported. Existing `webmasters.readonly`
+authorization is sufficient and must not be upgraded again.
+
+Use `search-console sitemaps list` for one bounded root inventory. Nested list and exact get require
+the sitemap URL to come from an immutable snapshot for the same profile and property. Do not download
+or parse sitemap XML, recurse through indexes, use deprecated `contents[].indexed`, or turn submitted
+counts into an indexing percentage.
+
+For URL Inspection, select at most five URLs by default and never more than ten. Explain the reason
+and evidence source for every URL before planning. Run `search-console indexing plan`, show the exact
+ordered URL list, 30-minute expiry, zero-retry budget, indexed-version-only limitation, and full
+`planSha256`, then proceed only after the user agrees to that read-only list. The plan is single-use;
+after execution starts it cannot be rerun, including after a partial failure.
+
+Present URL Inspection as Google's last indexed evidence, never as a live test, request for indexing,
+or complete site coverage. Preserve missing fields and provider limitations. Any proposed change to
+robots, canonical, redirects, structured data, or website code requires a separate future website
+plan and deployment authorization. Never use the Google Indexing API in this workflow.
 
 ## Read-only baseline workflow
 
@@ -334,6 +357,6 @@ For unsupported remote mutation or reporting requests, return:
 
 - what the user is trying to achieve;
 - why live access or runtime support is required;
-- that the current development build can perform bounded evidence-backed GA4 and Search Console reports, the baseline, local measurement design, separately confirmed supported GA4 configuration, local website installation, and protected GTM lifecycle portions;
+- that the current development build can perform bounded evidence-backed GA4 and Search Console reports, sitemap metadata and selected-URL indexed-version diagnostics, the baseline, local measurement design, separately confirmed supported GA4 configuration, local website installation, and protected GTM lifecycle portions;
 - the implementation stage that will add it;
 - a safe next step that does not expose secrets or pretend the operation succeeded.
