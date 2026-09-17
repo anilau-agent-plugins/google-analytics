@@ -34,6 +34,9 @@ CORE_TEMPLATES: dict[str, ReportTemplate] = {
     "events": ReportTemplate(("eventName",), ("eventCount", "activeUsers"), required_dimensions=("eventName",), required_metrics=("eventCount",)),
     "key-events": ReportTemplate(("eventName",), ("keyEvents", "activeUsers"), required_dimensions=("eventName",), required_metrics=("keyEvents",)),
     "ecommerce": ReportTemplate((), ("ecommercePurchases", "purchaseRevenue", "grossPurchaseRevenue", "refundAmount", "itemsPurchased"), required_metrics=("ecommercePurchases",), max_rows=10),
+    "google-organic-overview": ReportTemplate((), ("sessions", "engagedSessions", "engagementRate", "keyEvents", "sessionKeyEventRate", "totalRevenue"), required_metrics=("sessions",), max_rows=10),
+    "google-organic-landing": ReportTemplate(("landingPage",), ("sessions", "engagedSessions", "engagementRate", "keyEvents", "sessionKeyEventRate"), required_dimensions=("landingPage",), required_metrics=("sessions",), max_rows=500),
+    "google-organic-device": ReportTemplate(("deviceCategory",), ("sessions", "engagedSessions", "engagementRate", "keyEvents", "sessionKeyEventRate"), required_dimensions=("deviceCategory",), required_metrics=("sessions",)),
 }
 
 REALTIME_DIMENSIONS = {"eventName", "deviceCategory", "country", "unifiedScreenName"}

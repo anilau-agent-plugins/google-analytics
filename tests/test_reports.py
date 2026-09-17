@@ -43,6 +43,7 @@ class FakeReportTransport:
             "dimensions": [{"apiName": item} for item in (
                 "date", "sessionDefaultChannelGroup", "firstUserDefaultChannelGroup", "landingPage",
                 "pagePath", "pageTitle", "deviceCategory", "country", "eventName",
+                "streamId", "sessionSource", "sessionMedium",
             )],
             "metrics": [{"apiName": item, "type": "TYPE_INTEGER", "blockedReasons": []} for item in (
                 "activeUsers", "newUsers", "sessions", "engagedSessions", "eventCount", "keyEvents",
@@ -62,6 +63,8 @@ class FakeReportTransport:
             if self.restricted:
                 next(item for item in metadata["metrics"] if item["apiName"] == "totalRevenue")["blockedReasons"] = ["NO_REVENUE_METRICS"]
             return JsonResponse(200, metadata, "metadata-1", {})
+        if method == "GET" and url.endswith("/v1beta/properties/200/dataStreams/300"):
+            return JsonResponse(200, {"name": "properties/200/dataStreams/300", "type": "WEB_DATA_STREAM", "webStreamData": {"defaultUri": "https://Example.Test:443/path", "measurementId": "G-TEST"}}, "stream-1", {})
         if method == "POST" and url.endswith(":checkCompatibility"):
             payload = kwargs["payload"]
             data = {
@@ -181,6 +184,30 @@ class ReportTests(unittest.TestCase):
         result = self._plan(self._request(["overview"]))
         self.assertEqual(result["status"], "blocked")
         self.assertTrue(any("incompatible" in item.lower() for item in result["plan"]["blockers"]))
+
+    def test_google_organic_presets_require_and_fingerprint_exact_web_stream(self) -> None:
+        request = self._request(
+            ["google-organic-overview", "google-organic-landing", "google-organic-device"],
+            webStream="properties/200/dataStreams/300",
+        )
+        planned = self._plan(request)
+        self.assertEqual(planned["status"], "ready")
+        context = planned["plan"]["propertyContext"]["webStream"]
+        self.assertEqual(context["defaultOrigin"], "https://example.test")
+        self.assertEqual(context["streamId"], "300")
+        for query in planned["plan"]["queries"]:
+            encoded = json.dumps(query["payload"]["dimensionFilter"])
+            self.assertIn('"streamId"', encoded)
+            self.assertIn('"google"', encoded)
+            self.assertIn('"organic"', encoded)
+        result = self.service.run(Path(planned["artifact"]["path"]))
+        self.assertEqual(result["report"]["propertyContext"]["webStream"], context)
+
+    def test_google_organic_presets_block_missing_or_cross_property_stream(self) -> None:
+        with self.assertRaises(AdvisorError):
+            self._plan(self._request(["google-organic-overview"]))
+        with self.assertRaises(AdvisorError):
+            self._plan(self._request(["google-organic-overview"], webStream="properties/999/dataStreams/300"))
 
     def test_unrequested_incompatible_catalog_fields_do_not_block_report(self) -> None:
         self.transport.extra_incompatible = True

@@ -158,6 +158,12 @@ class SearchConsoleReportTests(unittest.TestCase):
         result = self.service.run(Path(planned["artifact"]["path"]))
         self.assertIn(result["status"], {"ready", "partial"})
         report = result["report"]
+        self.assertEqual(report["schemaVersion"], 2)
+        page_row = next(dataset["rows"][0] for dataset in report["datasets"] if dataset["preset"] == "pages" and dataset["rows"])
+        self.assertEqual(page_row["dimensions"]["page"], "https://example.com/page")
+        self.assertIs(page_row["dimensionQuality"]["page"]["queryPresent"], True)
+        self.assertTrue(page_row["dimensionQuality"]["page"]["queryRemoved"])
+        self.assertNotIn("private=1", json.dumps(report))
         self.assertTrue(report["facts"])
         self.assertTrue(report["calculations"])
         self.assertTrue(any(item["code"] == "TOP_ROWS_ONLY" for item in report["limitations"]))

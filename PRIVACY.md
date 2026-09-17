@@ -50,6 +50,13 @@ counts are ignored. Provider URL query values are redacted before storage when n
 operations cannot add, delete, verify, or modify a Search Console property, its users, a sitemap, or
 the Google index.
 
+The unreleased cross-source analyzer reads only explicitly referenced immutable GA4 and Search
+Console report files inside the selected project. It rechecks file and internal SHA-256 values and
+does not receive OAuth credentials or call Google. Search Console page query strings and fragments are
+removed before storage; schema v2 retains only boolean/unknown ambiguity metadata. URL joining is
+exact-only, capped at 500 mappings, and the resulting credential-free plan/report remains under the
+project's `.google-analytics-advisor/` directory.
+
 Read-only baseline audits can request selected GA4 configuration, a bounded event-name/count report,
 and selected GTM configuration directly from Google. The CLI does not request Measurement Protocol
 secret resources. Normalized snapshots and a baseline report are stored inside the selected project

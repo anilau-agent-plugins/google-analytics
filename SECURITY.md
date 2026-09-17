@@ -31,6 +31,11 @@ fake transports and synthetic fixtures; an accidental request to a production ho
 HTTP. Mutation and Measurement Protocol tests therefore cannot change a Google resource or send a
 production event. OAuth loopback tests may contact only the local one-use callback server.
 
+Cross-source analysis accepts only absolute source paths inside the selected project, verifies the
+file and internal artifact SHA-256 values before planning and again before execution, and has no
+authorization or transport dependency. It never performs fuzzy URL matching and never persists
+Search Console query or fragment values.
+
 HTTP transport accepts credential-free HTTPS URLs on the standard port, bounds retries and response
 sizes, validates JSON responses, and removes Authorization headers on cross-host redirects. OAuth
 form requests are limited to Google's token and revocation endpoints. Protected credential backends

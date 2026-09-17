@@ -25,6 +25,8 @@ not live-tested for this release; compatibility feedback is handled through GitH
   device, country, search-appearance, and recent-hourly reports with completeness warnings;
 - inspect Search Console sitemap metadata and Google's indexed evidence for a small, explicitly
   selected URL sample without downloading sitemap XML or requesting indexing;
+- locally compare immutable GA4 `google / organic` and Search Console reports for the same complete
+  periods, with exact-only page mapping and explicit unmatched, query-ambiguous, and timezone limits;
 - find missing, duplicated, or conflicting analytics code in a local website project;
 - design useful events, key events, ecommerce tracking, funnels, and consent handling;
 - safely configure supported GA4 settings after showing you an exact change plan;
@@ -170,7 +172,8 @@ reports, snapshots, and journals.
 Google Analytics Advisor runs on your computer. It sends no telemetry, prompts, credentials, project
 files, Analytics data, or Search Console data to Anilau. Google authorization, Analytics requests,
 and read-only Search Console discovery, performance, sitemap, and URL Inspection requests go directly
-from your computer to Google.
+from your computer to Google. Cross-source analysis uses only already-created local reports and makes
+no network request.
 
 OAuth clients and refresh tokens are stored in the operating system's protected credential storage:
 Windows DPAPI, macOS Keychain, or Linux Secret Service. There is no plaintext fallback. Local plans,
@@ -201,6 +204,7 @@ Explain what changed in the last 28 complete days and whether the data is reliab
 Show which Search Console properties this Google account can read.
 Explain how my site performed in Google Search over the last 28 finalized days.
 Show which sitemaps Google knows and prepare a safe check of three important URLs.
+Compare Google Search visibility with what visitors did after landing, without treating clicks and sessions as the same metric.
 Show acquisition and key-event performance in plain language.
 Which conversions should this website track?
 Check this local website for duplicate Google tags.

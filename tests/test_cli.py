@@ -53,6 +53,14 @@ class CliTests(unittest.TestCase):
         self.assertEqual(code, 4)
         self.assertEqual(payload["errors"][0]["code"], "INVALID_ARGUMENTS")
 
+    def test_cross_source_cli_requires_local_artifacts(self) -> None:
+        code, payload = self.run_cli("advisor", "cross-source", "plan", "--json")
+        self.assertEqual(code, 4)
+        self.assertEqual(payload["errors"][0]["code"], "INVALID_ARGUMENTS")
+        code, payload = self.run_cli("advisor", "cross-source", "run", "--json")
+        self.assertEqual(code, 4)
+        self.assertEqual(payload["errors"][0]["code"], "INVALID_ARGUMENTS")
+
     def test_search_console_indexing_cli_requires_exact_inputs(self) -> None:
         code, payload = self.run_cli("search-console", "sitemaps", "list", "--profile", "profile-test")
         self.assertEqual(code, 4)

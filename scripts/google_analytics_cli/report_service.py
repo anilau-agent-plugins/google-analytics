@@ -10,6 +10,7 @@ from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Callable
+from urllib.parse import urlsplit, urlunsplit
 
 from .artifact_store import ArtifactStore, canonical_json, utc_now
 from .auth import AuthService
@@ -22,6 +23,43 @@ from .report_analysis import build_evidence, normalize_dataset, overall_quality,
 from .report_periods import resolve_periods
 from .report_renderer import render_report
 from .report_templates import CORE_TEMPLATES, DISCOVERY_REVISION, REALTIME_DIMENSIONS, REALTIME_METRICS, custom_template, supported_catalog
+
+
+ORGANIC_PRESETS = {"google-organic-overview", "google-organic-landing", "google-organic-device"}
+
+
+def _stream_context(stream: dict[str, Any], property_name: str, expected_name: str) -> dict[str, Any]:
+    name = str(stream.get("name") or "")
+    if name != expected_name or not name.startswith(property_name + "/dataStreams/"):
+        raise AdvisorError("REPORT_CONTEXT_DRIFT", "The selected web stream does not belong to the GA4 property.", EXIT_INPUT)
+    if stream.get("type") != "WEB_DATA_STREAM":
+        raise AdvisorError("REPORT_CONTEXT_DRIFT", "The selected data stream is not a web stream.", EXIT_INPUT)
+    default_uri = str(stream.get("webStreamData", {}).get("defaultUri") or "")
+    try:
+        parsed = urlsplit(default_uri)
+    except ValueError as exc:
+        raise AdvisorError("REPORT_CONTEXT_DRIFT", "The selected web stream has no safe HTTP(S) default URI.", EXIT_INPUT) from exc
+    if parsed.scheme.lower() not in {"http", "https"} or not parsed.hostname or parsed.username is not None or parsed.password is not None:
+        raise AdvisorError("REPORT_CONTEXT_DRIFT", "The selected web stream has no safe HTTP(S) default URI.", EXIT_INPUT)
+    try:
+        host = parsed.hostname.encode("idna").decode("ascii").lower()
+        port = parsed.port
+    except (UnicodeError, ValueError) as exc:
+        raise AdvisorError("REPORT_CONTEXT_DRIFT", "The selected web stream origin is invalid.", EXIT_INPUT) from exc
+    if port is not None and not ((parsed.scheme.lower() == "https" and port == 443) or (parsed.scheme.lower() == "http" and port == 80)):
+        host = f"{host}:{port}"
+    origin = urlunsplit((parsed.scheme.lower(), host, "", "", ""))
+    safe = {"name": name, "type": "WEB_DATA_STREAM", "defaultOrigin": origin, "streamId": name.rsplit("/", 1)[-1]}
+    safe["contentSha256"] = hashlib.sha256(canonical_json(safe)).hexdigest()
+    return safe
+
+
+def _organic_filter(stream_id: str) -> dict[str, Any]:
+    return {"andGroup": {"expressions": [
+        {"filter": {"fieldName": "streamId", "stringFilter": {"matchType": "EXACT", "value": stream_id, "caseSensitive": True}}},
+        {"filter": {"fieldName": "sessionSource", "stringFilter": {"matchType": "EXACT", "value": "google", "caseSensitive": False}}},
+        {"filter": {"fieldName": "sessionMedium", "stringFilter": {"matchType": "EXACT", "value": "organic", "caseSensitive": False}}},
+    ]}}
 
 
 def _hash_without(value: dict[str, Any], field: str) -> str:
@@ -144,6 +182,11 @@ class ReportService:
         _, redactions = redact_payload(request)
         if redactions:
             raise AdvisorError("REPORT_PRIVACY_REDACTED", "The report request contains personal or secret-like values.", EXIT_INPUT)
+        organic = any(item in ORGANIC_PRESETS for item in request["presets"])
+        if organic and not request.get("webStream"):
+            raise AdvisorError("REPORT_STREAM_REQUIRED", "Google-organic presets require an exact GA4 web stream resource.", EXIT_INPUT)
+        if not organic and request.get("webStream") is not None:
+            raise AdvisorError("REPORT_STREAM_UNEXPECTED", "webStream is allowed only for Google-organic presets.", EXIT_INPUT)
         return request
 
     def _project_evidence(self, request: dict[str, Any], root: Path) -> tuple[str | None, str | None, dict[str, Any] | None]:
@@ -188,8 +231,14 @@ class ReportService:
         blockers: list[str] = []
         queries: list[dict[str, Any]] = []
         date_ranges = [{"name": item["label"], "startDate": item["from"], "endDate": item["to"]} for item in periods]
+        stream_context = None
+        if request.get("webStream"):
+            if not request["webStream"].startswith(property_name + "/dataStreams/"):
+                raise AdvisorError("REPORT_CONTEXT_DRIFT", "The selected web stream does not belong to the GA4 property.", EXIT_INPUT)
+            stream_response = executor.execute("admin.stream.get", resource=request["webStream"])
+            stream_context = _stream_context(stream_response.data or {}, property_name, request["webStream"])
 
-        def add_core(preset: str, template: Any, dimension_filter: dict[str, Any] | None = None) -> None:
+        def add_core(preset: str, template: Any, dimension_filter: dict[str, Any] | None = None, compatibility_dimensions: tuple[str, ...] = ()) -> None:
             dimensions = [item for item in template.dimensions if item in dimensions_meta]
             metrics = [item for item in template.metrics if item in metrics_meta and not metrics_meta[item].get("blockedReasons")]
             missing_required = [item for item in template.required_dimensions if item not in dimensions] + [item for item in template.required_metrics if item not in metrics]
@@ -207,9 +256,11 @@ class ReportService:
                 for key in ("dimensions", "metrics", "dimensionFilter", "metricFilter")
                 if key in payload
             }
+            if compatibility_dimensions:
+                compatibility_payload["dimensions"] = [{"name": item} for item in dict.fromkeys((*dimensions, *compatibility_dimensions))]
             compatibility_payload["compatibilityFilter"] = "COMPATIBLE"
             compatibility = executor.execute("data.compatibility.check", resource=property_name, payload=compatibility_payload).data or {}
-            compatible, problems = _compatibility_ok(compatibility, dimensions, metrics)
+            compatible, problems = _compatibility_ok(compatibility, list(dict.fromkeys((*dimensions, *compatibility_dimensions))), metrics)
             if not compatible:
                 blockers.append(f"{preset}: Data API marked fields incompatible or omitted them: {', '.join(problems)}.")
                 return
@@ -219,6 +270,9 @@ class ReportService:
             if preset in CORE_TEMPLATES:
                 if preset == "ecommerce" and (measurement is None or not measurement.get("ecommerce", {}).get("enabled")):
                     blockers.append("ecommerce: an approved ecommerce measurement plan is required.")
+                elif preset in ORGANIC_PRESETS:
+                    assert stream_context is not None
+                    add_core(preset, CORE_TEMPLATES[preset], _organic_filter(stream_context["streamId"]), ("streamId", "sessionSource", "sessionMedium"))
                 else:
                     add_core(preset, CORE_TEMPLATES[preset])
             elif preset == "custom-core":
@@ -254,7 +308,7 @@ class ReportService:
             "planId": f"report-plan-{generated.strftime('%Y%m%dT%H%M%SZ')}-{uuid.uuid4().hex[:12]}", "planSha256": "",
             "projectRoot": str(root), "profileId": profile_id, "property": property_name, "request": request,
             "metadata": {"contentSha256": metadata_hash, "requestId": metadata_response.request_id, "discoveryRevision": DISCOVERY_REVISION, "dimensions": sorted(dimensions_meta), "metrics": sorted(metrics_meta)},
-            "propertyContext": {"timeZone": property_timezone, "currencyCode": currency, "baselineRef": baseline_ref, "measurementPlanRef": measurement_ref, "qualityTier": "business-context" if measurement else "descriptive", "language": request["language"]},
+            "propertyContext": {"timeZone": property_timezone, "currencyCode": currency, "baselineRef": baseline_ref, "measurementPlanRef": measurement_ref, "qualityTier": "business-context" if measurement else "descriptive", "language": request["language"], "webStream": stream_context},
             "periods": periods, "queries": queries, "blockers": sorted(set(blockers)), "limitations": sorted(set(limitations)), "networkUsed": True, "mutationPerformed": False,
         }
         plan["planSha256"] = report_plan_sha256(plan)
@@ -285,6 +339,14 @@ class ReportService:
         metadata_response = executor.execute("data.metadata.get", resource=plan["property"])
         if hashlib.sha256(canonical_json(metadata_response.data or {})).hexdigest() != plan["metadata"]["contentSha256"]:
             raise AdvisorError("REPORT_CONTEXT_DRIFT", "The property reporting metadata changed after planning.", EXIT_INPUT)
+        stream_context = plan["propertyContext"].get("webStream")
+        if stream_context:
+            current_stream = _stream_context(
+                executor.execute("admin.stream.get", resource=stream_context["name"]).data or {},
+                plan["property"], stream_context["name"],
+            )
+            if current_stream != stream_context:
+                raise AdvisorError("REPORT_CONTEXT_DRIFT", "The selected web stream changed after planning.", EXIT_INPUT)
         datasets: list[dict[str, Any]] = []
         query_evidence: list[dict[str, Any]] = []
         limitations = [{"type": "planning", "severity": "info", "queryId": None, "message": message} for message in plan["limitations"]]

@@ -27,6 +27,11 @@
   field handling, and explicit indexed-version-only and non-site-wide limitations in Russian and English.
 - Fixed live Search Console sitemap counters represented by Google as decimal JSON strings and kept
   their normalized artifact form as bounded non-negative integers.
+- Added three exact-web-stream GA4 `google / organic` source presets and Search Console report schema
+  v2 page ambiguity metadata that never stores query or fragment values.
+- Added immutable local-only GA4/Search Console cross-source request, plan, and report contracts,
+  exact-only URL mapping, overview/landing/device analysis, source-quality propagation, and Russian/
+  English plain-language rendering without equating clicks and sessions.
 - Kept public version metadata unchanged while `0.20.0` remains under staged development.
 
 ## 0.11.0 - 2026-08-28

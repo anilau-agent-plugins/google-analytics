@@ -1,6 +1,6 @@
 ---
 name: google-analytics
-description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, bounded Search Console performance, sitemap, and URL Inspection evidence, Data API reports, measurement strategy, customer-owned Desktop OAuth, confirmed GA4 configuration, safe local measurement installation, Consent Mode, SPA/ecommerce events, Measurement Protocol validation, and separately confirmed GTM operations. Use when a user asks about GA4 setup, Search Console access, organic performance or indexing, acquisition, content, events, key events, ecommerce, realtime, funnels, analytics code, conversions, GTM, an audit, connecting Google, creating a Google Cloud OAuth application, checking Python, installing measurement code, or safely publishing a GTM version. It does not deploy websites or modify Search Console properties.
+description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, bounded Search Console performance, sitemap, URL Inspection, and local GA4/Search Console cross-source evidence, Data API reports, measurement strategy, customer-owned Desktop OAuth, confirmed GA4 configuration, safe local measurement installation, Consent Mode, SPA/ecommerce events, Measurement Protocol validation, and separately confirmed GTM operations. Use when a user asks about GA4 setup, Search Console access, organic performance or indexing, acquisition, content, events, key events, ecommerce, realtime, funnels, analytics code, conversions, GTM, an audit, connecting Google, creating a Google Cloud OAuth application, checking Python, installing measurement code, or safely publishing a GTM version. It does not deploy websites or modify Search Console properties.
 ---
 
 # Google Analytics Advisor
@@ -31,8 +31,9 @@ evidence, data-quality limitations, and prioritized plain-language recommendatio
 It can also safely add the Search Console read-only scope to the customer-owned authorization,
 list exact Search Console property identities and permission levels, run immutable bounded Search
 Analytics reports, inspect sitemap metadata, and inspect Google's indexed version of a small,
-explained URL sample. Search Console property changes, user management, request indexing,
-cross-source GA4 correlation, and the GA4 link are not available yet.
+explained URL sample; and locally compare immutable GA4 `google / organic` and Search Console source
+reports with strict exact-only URL mapping. Search Console property changes, user management, request
+indexing, and the GA4 link are not available yet.
 Only claim findings returned by the CLI, and preserve every
 reported limitation. Never describe a source-code match alone as proof that production collection
 works.
@@ -60,7 +61,7 @@ using it. The check sends no credentials, analytics data or identifiers, caches 
 metadata outside the plugin source for 30 days, never updates automatically, and can be disabled with
 `version --disable-check --json`.
 
-Use `contracts validate --schema <artifact-type> --input <absolute-path> --json` only for the twenty-two
+Use `contracts validate --schema <artifact-type> --input <absolute-path> --json` only for the twenty-five
 project artifacts. Do not describe this validator as a general JSON Schema implementation.
 
 ## Google authorization workflow
@@ -204,6 +205,23 @@ Present URL Inspection as Google's last indexed evidence, never as a live test, 
 or complete site coverage. Preserve missing fields and provider limitations. Any proposed change to
 robots, canonical, redirects, structured data, or website code requires a separate future website
 plan and deployment authorization. Never use the Google Indexing API in this workflow.
+
+## Cross-source analysis workflow
+
+Read [references/cross-source-analysis.md](references/cross-source-analysis.md) before comparing GA4
+and Search Console. Prepare the GA4 and Search Console reports through their separate immutable
+read-only workflows, with the exact property, web stream, site and matching complete date labels.
+Never run either live source read merely because a local cross-source analysis was requested.
+
+Use `advisor cross-source plan` to verify paths, file and internal hashes, source identities, closed
+`streamId + google + organic` filters, finalized Search Console `web` evidence, periods, timezones and
+quality limitations. Then use `advisor cross-source run`; both commands are local-only and must return
+`networkUsed=false` and `mutationPerformed=false`. Join pages only on the documented exact safe key.
+Keep ambiguous, variant, other-origin and redacted rows separate.
+
+Explain visibility/click evidence and measured on-site outcomes as two different stages. Never state
+that Search Console `clicks` equal GA4 `sessions`, that their difference is lost traffic, or that a
+correlation is causal. Any recommended external change starts a separate plan and confirmation.
 
 ## Read-only baseline workflow
 

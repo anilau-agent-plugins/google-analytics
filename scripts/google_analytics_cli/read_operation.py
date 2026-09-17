@@ -39,6 +39,7 @@ OPERATIONS = {
     item.operation_id: item for item in (
         _op("admin.account_summaries.list", "GET", ADMIN, "/v1beta/accountSummaries"),
         _op("admin.property.get", "GET", ADMIN, "/v1beta/{resource}"),
+        _op("admin.stream.get", "GET", ADMIN, "/v1beta/{resource}"),
         _op("admin.streams.list", "GET", ADMIN, "/v1beta/{resource}/dataStreams"),
         _op("admin.key_events.list", "GET", ADMIN, "/v1beta/{resource}/keyEvents"),
         _op("admin.custom_dimensions.list", "GET", ADMIN, "/v1beta/{resource}/customDimensions"),

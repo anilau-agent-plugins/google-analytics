@@ -10,6 +10,7 @@ from copy import deepcopy
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Callable
+from urllib.parse import urlsplit
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from .artifact_store import ArtifactStore, canonical_json
@@ -33,6 +34,7 @@ MAX_ROW_LIMIT = 1_000
 MAX_PAGES = 2
 MAX_APPEARANCE_DETAILS = 4
 QUERY_OPERATION = "searchconsole.searchanalytics.query"
+PAGE_NORMALIZATION_REVISION = "search-console-page-v1"
 
 
 def _pacific_datetime(value: datetime) -> datetime:
@@ -234,6 +236,27 @@ def _number(value: Any, name: str) -> float:
     return float(value)
 
 
+def _page_quality(raw: str, *, redacted: bool) -> dict[str, Any]:
+    query_present: bool | str = "unknown"
+    query_removed = False
+    fragment_removed = False
+    try:
+        parsed = urlsplit(raw)
+        if parsed.scheme in {"http", "https"} and parsed.hostname:
+            query_present = bool(parsed.query)
+            query_removed = bool(parsed.query)
+            fragment_removed = bool(parsed.fragment)
+    except ValueError:
+        pass
+    return {
+        "queryPresent": query_present,
+        "queryRemoved": query_removed,
+        "fragmentRemoved": fragment_removed,
+        "redacted": redacted,
+        "normalizationRevision": PAGE_NORMALIZATION_REVISION,
+    }
+
+
 def _normalize_dataset(query: dict[str, Any], response: dict[str, Any], *, search_type: str, truncated: bool) -> dict[str, Any]:
     if not isinstance(response, dict) or not isinstance(response.get("rows", []), list):
         raise AdvisorError("SEARCH_CONSOLE_RESPONSE_INVALID", "Search Console returned an invalid report response.", EXIT_NETWORK)
@@ -245,10 +268,14 @@ def _normalize_dataset(query: dict[str, Any], response: dict[str, Any], *, searc
             raise AdvisorError("SEARCH_CONSOLE_RESPONSE_INVALID", "A Search Console row does not match the requested dimensions.", EXIT_NETWORK)
         keys = item.get("keys", [])
         dimension_values: dict[str, str] = {}
+        dimension_quality: dict[str, Any] = {}
         for name, raw in zip(dimensions, keys):
-            clean, changed = redact_text(str(raw))
+            raw_text = str(raw)
+            clean, changed = redact_text(raw_text)
             dimension_values[name] = clean
             redactions += int(changed)
+            if name == "page":
+                dimension_quality["page"] = _page_quality(raw_text, redacted=changed)
         clicks = _number(item.get("clicks", 0), "clicks")
         impressions = _number(item.get("impressions", 0), "impressions")
         ctr = _number(item.get("ctr", 0), "ctr")
@@ -256,7 +283,10 @@ def _normalize_dataset(query: dict[str, Any], response: dict[str, Any], *, searc
             raise AdvisorError("SEARCH_CONSOLE_RESPONSE_INVALID", "Search Console returned CTR outside the expected 0–1 range.", EXIT_NETWORK)
         metrics: dict[str, float | None] = {"clicks": clicks, "impressions": impressions, "ctr": ctr}
         metrics["position"] = None if search_type in {"discover", "googleNews"} or "position" not in item else _number(item["position"], "position")
-        rows.append({"dimensions": dimension_values, "metrics": metrics})
+        row = {"dimensions": dimension_values, "metrics": metrics}
+        if dimension_quality:
+            row["dimensionQuality"] = dimension_quality
+        rows.append(row)
     metadata = response.get("metadata", {}) if isinstance(response.get("metadata"), dict) else {}
     incomplete_date = metadata.get("first_incomplete_date")
     incomplete_hour = metadata.get("first_incomplete_hour")
@@ -514,7 +544,7 @@ class SearchConsoleReportService:
         quality = "insufficient" if not any_rows else "preliminary" if preliminary else "directional_only" if warned else "reliable_for_description"
         generated_time = self.now().astimezone(timezone.utc)
         report = {
-            "schemaVersion": 1, "artifactType": "search-console-report",
+            "schemaVersion": 2, "artifactType": "search-console-report",
             "generatedAt": generated_time.isoformat().replace("+00:00", "Z"),
             "reportId": f"search-console-report-{generated_time.strftime('%Y%m%dT%H%M%SZ')}-{uuid.uuid4().hex[:12]}",
             "reportSha256": "", "profileId": plan["profileId"], "site": plan["site"],

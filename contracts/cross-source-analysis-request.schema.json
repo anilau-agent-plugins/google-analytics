@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:anilau:google-analytics:cross-source-analysis-request:v1",
+  "title": "Google Analytics Advisor cross-source analysis request",
+  "$defs": {
+    "artifactRef": {"type": "object", "additionalProperties": false, "required": ["path", "fileSha256", "artifactSha256"], "properties": {"path": {"type": "string", "minLength": 3}, "fileSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "artifactSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}}},
+    "period": {"type": "object", "additionalProperties": false, "required": ["from", "to"], "properties": {"from": {"type": "string", "format": "date"}, "to": {"type": "string", "format": "date"}}}
+  },
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "artifactType", "createdAt", "requestId", "projectRoot", "profileId", "property", "webStream", "site", "question", "language", "ga4Report", "searchConsoleReport", "analyses", "expectedPeriods", "verifiedOrigin", "contentSha256"],
+  "properties": {
+    "schemaVersion": {"const": 1}, "artifactType": {"const": "cross-source-analysis-request"},
+    "createdAt": {"type": "string", "format": "date-time"}, "requestId": {"type": "string", "pattern": "^cross-source-request-[A-Za-z0-9._-]{8,140}$"},
+    "projectRoot": {"type": "string", "minLength": 3}, "profileId": {"type": "string", "pattern": "^profile-[a-f0-9]{16}$"},
+    "property": {"type": "string", "pattern": "^properties/[0-9]+$"}, "webStream": {"type": "string", "pattern": "^properties/[0-9]+/dataStreams/[0-9]+$"},
+    "site": {"type": "string", "minLength": 4}, "question": {"type": "string", "minLength": 3}, "language": {"enum": ["auto", "ru", "en"]},
+    "ga4Report": {"$ref": "#/$defs/artifactRef"}, "searchConsoleReport": {"$ref": "#/$defs/artifactRef"},
+    "analyses": {"type": "array", "minItems": 1, "maxItems": 3, "uniqueItems": true, "items": {"enum": ["overview-handoff", "landing-opportunities", "device-context"]}},
+    "expectedPeriods": {"type": "object", "additionalProperties": false, "required": ["current", "previous"], "properties": {"current": {"$ref": "#/$defs/period"}, "previous": {"$ref": "#/$defs/period"}}},
+    "verifiedOrigin": {"type": "string", "pattern": "^https?://[^/?#]+$"},
+    "baselineRef": {"type": ["string", "null"]}, "measurementPlanRef": {"type": ["string", "null"]}, "inspectionReportRef": {"type": ["string", "null"]},
+    "contentSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

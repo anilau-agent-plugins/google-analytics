@@ -21,6 +21,7 @@ ARTIFACTS = {
     "search-console-report-request", "search-console-report-plan", "search-console-report",
     "search-console-sitemap-snapshot", "search-console-inspection-request",
     "search-console-inspection-plan", "search-console-inspection-report",
+    "cross-source-analysis-request", "cross-source-analysis-plan", "cross-source-analysis-report",
 }
 ALLOWED = {
     "$schema", "$id", "$defs", "$ref", "title", "type", "const", "enum", "required",
@@ -187,12 +188,19 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
     discriminator = data.get("changeRequestType") if name == "ga4-change-request" else data.get("artifactType")
     if discriminator != name:
         _fail("$.changeRequestType" if name == "ga4-change-request" else "$.artifactType", f"does not match requested schema {name}")
-    if name in {"report-request", "search-console-report-request", "search-console-inspection-request"}:
+    if name in {"report-request", "search-console-report-request", "search-console-inspection-request", "cross-source-analysis-request"}:
         from .artifact_store import canonical_json
 
         expected = hashlib.sha256(canonical_json({key: value for key, value in data.items() if key != "contentSha256"})).hexdigest()
         if data["contentSha256"] != expected:
             _fail("$.contentSha256", "does not match canonical request content")
+        if name == "cross-source-analysis-request":
+            for label, period in data["expectedPeriods"].items():
+                if date.fromisoformat(period["from"]) > date.fromisoformat(period["to"]):
+                    _fail(f"$.expectedPeriods.{label}", "period starts after it ends")
+            if not data["webStream"].startswith(data["property"] + "/dataStreams/"):
+                _fail("$.webStream", "must belong to the selected property")
+            return
         if name == "search-console-inspection-request":
             if data["requestedBudget"]["maxUrls"] != len(data["urls"]):
                 _fail("$.requestedBudget.maxUrls", "must equal the exact selected URL count")
@@ -210,6 +218,11 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
                 _fail("$.customCore", "is required by custom-core")
             if "custom-core" not in data["presets"] and data.get("customCore") is not None:
                 _fail("$.customCore", "is allowed only with custom-core")
+            organic = any(item.startswith("google-organic-") for item in data["presets"])
+            if organic and not data.get("webStream"):
+                _fail("$.webStream", "is required by google-organic presets")
+            if not organic and data.get("webStream") is not None:
+                _fail("$.webStream", "is allowed only with google-organic presets")
         else:
             if data["dataState"] == "hourly_all" and data["presets"] != ["recent-hourly"]:
                 _fail("$.presets", "hourly_all requires only recent-hourly")
@@ -219,21 +232,25 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
                 item["dimension"] == "query" for item in data.get("filters", [])
             ):
                 _fail("$.filters", "query filters are unavailable for this search type")
-    elif name in {"report-plan", "search-console-report-plan", "search-console-inspection-plan"}:
+    elif name in {"report-plan", "search-console-report-plan", "search-console-inspection-plan", "cross-source-analysis-plan"}:
         from .artifact_store import canonical_json
 
         generated = datetime.fromisoformat(data["generatedAt"].replace("Z", "+00:00"))
-        expires = datetime.fromisoformat(data["expiresAt"].replace("Z", "+00:00"))
-        if generated >= expires:
-            _fail("$.expiresAt", "must be later than generatedAt")
+        if name != "cross-source-analysis-plan":
+            expires = datetime.fromisoformat(data["expiresAt"].replace("Z", "+00:00"))
+            if generated >= expires:
+                _fail("$.expiresAt", "must be later than generatedAt")
         expected = hashlib.sha256(canonical_json({key: value for key, value in data.items() if key != "planSha256"})).hexdigest()
         if data["planSha256"] != expected:
             _fail("$.planSha256", "does not match canonical plan content")
         if data.get("mutationPerformed") is not False:
             _fail("$.mutationPerformed", "report plans are read-only")
-        query_field = "operations" if name == "search-console-inspection-plan" else "queries"
-        if not data.get(query_field) and not data.get("blockers"):
-            _fail("$.queries", "an unblocked report plan requires at least one query")
+        if name != "cross-source-analysis-plan":
+            query_field = "operations" if name == "search-console-inspection-plan" else "queries"
+            if not data.get(query_field) and not data.get("blockers"):
+                _fail("$.queries", "an unblocked report plan requires at least one query")
+        elif data.get("networkUsed") is not False:
+            _fail("$.networkUsed", "cross-source analysis plans must remain local")
         if name == "search-console-report-plan":
             budget = data.get("budget", {})
             if budget.get("maxRequests", 0) > 20 or budget.get("maxRows", 0) > 12000:
@@ -295,7 +312,7 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
         expires = datetime.fromisoformat(data["expiresAt"].replace("Z", "+00:00"))
         if generated >= expires:
             _fail("$.expiresAt", "must be later than generatedAt")
-    elif name in {"search-console-report", "search-console-inspection-report"}:
+    elif name in {"search-console-report", "search-console-inspection-report", "cross-source-analysis-report"}:
         from .artifact_store import canonical_json
 
         expected = hashlib.sha256(canonical_json({key: value for key, value in data.items() if key != "reportSha256"})).hexdigest()
@@ -303,10 +320,36 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
             _fail("$.reportSha256", "does not match canonical Search Console report content")
         if data.get("mutationPerformed") is not False:
             _fail("$.mutationPerformed", "Search Console reports are read-only")
-        if name == "search-console-report":
+        if name == "cross-source-analysis-report":
+            if data.get("networkUsed") is not False:
+                _fail("$.networkUsed", "cross-source analysis must remain local")
+            for collection in ("facts", "calculations", "interpretations", "findings", "recommendations"):
+                for index, item in enumerate(data.get(collection, [])):
+                    if not item.get("evidenceRefs"):
+                        _fail(f"$.{collection}[{index}].evidenceRefs", "must identify source-qualified evidence")
+            if len(data.get("recommendations", [])) > 5:
+                _fail("$.recommendations", "must contain at most five items")
+        elif name == "search-console-report":
             for index, period in enumerate(data["periods"]):
                 if date.fromisoformat(period["from"]) > date.fromisoformat(period["to"]):
                     _fail(f"$.periods[{index}]", "period starts after it ends")
+            if data.get("schemaVersion") == 2:
+                for dataset_index, dataset in enumerate(data.get("datasets", [])):
+                    if "page" not in dataset.get("dimensions", []):
+                        continue
+                    for row_index, row in enumerate(dataset.get("rows", [])):
+                        quality = row.get("dimensionQuality", {}).get("page")
+                        if not isinstance(quality, dict):
+                            _fail(f"$.datasets[{dataset_index}].rows[{row_index}].dimensionQuality.page", "is required by report v2 page rows")
+                        required = {"queryPresent", "queryRemoved", "fragmentRemoved", "redacted", "normalizationRevision"}
+                        if not required.issubset(quality):
+                            _fail(f"$.datasets[{dataset_index}].rows[{row_index}].dimensionQuality.page", "is incomplete")
+                        if quality["queryPresent"] not in {True, False, "unknown"}:
+                            _fail(f"$.datasets[{dataset_index}].rows[{row_index}].dimensionQuality.page.queryPresent", "must be true, false, or unknown")
+                        if not all(isinstance(quality[field], bool) for field in ("queryRemoved", "fragmentRemoved", "redacted")):
+                            _fail(f"$.datasets[{dataset_index}].rows[{row_index}].dimensionQuality.page", "boolean quality fields are invalid")
+                        if quality["normalizationRevision"] != "search-console-page-v1":
+                            _fail(f"$.datasets[{dataset_index}].rows[{row_index}].dimensionQuality.page.normalizationRevision", "is unsupported")
         elif data.get("budget", {}).get("automaticRetries") != 0:
             _fail("$.budget.automaticRetries", "URL Inspection cannot retry automatically")
     elif name == "search-console-sitemap-snapshot":

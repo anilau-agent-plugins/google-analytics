@@ -294,6 +294,23 @@ def build_parser() -> Parser:
     reports_show.add_argument("--report", required=True, type=Path)
     reports_show.add_argument("--language", choices=["auto", "ru", "en"], default="auto")
     reports_show.add_argument("--json", action="store_true")
+    advisor = sub.add_parser("advisor")
+    advisor_sub = advisor.add_subparsers(dest="advisor_command", required=True, parser_class=Parser)
+    cross_source = advisor_sub.add_parser("cross-source")
+    cross_source_sub = cross_source.add_subparsers(dest="cross_source_command", required=True, parser_class=Parser)
+    cross_source_plan = cross_source_sub.add_parser("plan")
+    cross_source_plan.add_argument("--request", required=True, type=Path)
+    cross_source_plan.add_argument("--json", action="store_true")
+    cross_source_show_plan = cross_source_sub.add_parser("show-plan")
+    cross_source_show_plan.add_argument("--plan", required=True, type=Path)
+    cross_source_show_plan.add_argument("--json", action="store_true")
+    cross_source_run = cross_source_sub.add_parser("run")
+    cross_source_run.add_argument("--plan", required=True, type=Path)
+    cross_source_run.add_argument("--json", action="store_true")
+    cross_source_show = cross_source_sub.add_parser("show")
+    cross_source_show.add_argument("--report", required=True, type=Path)
+    cross_source_show.add_argument("--language", choices=["auto", "ru", "en"], default="auto")
+    cross_source_show.add_argument("--json", action="store_true")
     mp = sub.add_parser("mp")
     mp_sub = mp.add_subparsers(dest="mp_command", required=True, parser_class=Parser)
     mp_plan = mp_sub.add_parser("delivery-plan")
@@ -567,6 +584,21 @@ def dispatch(argv: list[str]) -> tuple[str, str, Any]:
         if args.reports_command == "show":
             result = service.show(args.report, args.language)
             return "reports show", result["status"], result
+    if args.group == "advisor" and args.advisor_command == "cross-source":
+        from .cross_source_service import CrossSourceService
+
+        service = CrossSourceService()
+        if args.cross_source_command == "plan":
+            result = service.plan(args.request)
+            return "advisor cross-source plan", result["status"], result
+        if args.cross_source_command == "show-plan":
+            result = service.show_plan(args.plan)
+            return "advisor cross-source show-plan", result["status"], result
+        if args.cross_source_command == "run":
+            result = service.run(args.plan)
+            return "advisor cross-source run", result["status"], result
+        result = service.show(args.report, args.language)
+        return "advisor cross-source show", result["status"], result
     if args.group == "mp":
         from .measurement_protocol_service import MeasurementProtocolService
 
