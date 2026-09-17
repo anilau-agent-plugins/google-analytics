@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from typing import Any
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode, urlsplit
 
 from .errors import AdvisorError, EXIT_INPUT, EXIT_NETWORK
 from .http import JsonResponse, JsonTransport
@@ -18,16 +18,22 @@ class ReadOperation:
     base_url: str
     path_template: str
     safe_post: bool = False
+    resource_kind: str = "google-resource"
+    max_attempts: int = 3
 
 
-def _op(operation_id: str, method: str, base: str, path: str, safe_post: bool = False) -> ReadOperation:
-    return ReadOperation(operation_id, method, base, path, safe_post)
+def _op(
+    operation_id: str, method: str, base: str, path: str, safe_post: bool = False,
+    resource_kind: str = "google-resource", max_attempts: int = 3,
+) -> ReadOperation:
+    return ReadOperation(operation_id, method, base, path, safe_post, resource_kind, max_attempts)
 
 
 ADMIN = "https://analyticsadmin.googleapis.com"
 DATA = "https://analyticsdata.googleapis.com"
 GTM = "https://tagmanager.googleapis.com"
 SEARCH_CONSOLE = "https://www.googleapis.com"
+SEARCH_CONSOLE_API = "https://searchconsole.googleapis.com"
 
 OPERATIONS = {
     item.operation_id: item for item in (
@@ -58,10 +64,31 @@ OPERATIONS = {
         _op("gtm.live_version.get", "GET", GTM, "/tagmanager/v2/{resource}/versions/live"),
         _op("gtm.version_headers.list", "GET", GTM, "/tagmanager/v2/{resource}/version_headers"),
         _op("searchconsole.sites.list", "GET", SEARCH_CONSOLE, "/webmasters/v3/sites"),
+        _op(
+            "searchconsole.searchanalytics.query", "POST", SEARCH_CONSOLE_API,
+            "/webmasters/v3/sites/{site_url}/searchAnalytics/query", True,
+            resource_kind="search-console-site", max_attempts=1,
+        ),
     )
 }
 
 RESOURCE_RE = re.compile(r"^[A-Za-z0-9_-]+/[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+/[A-Za-z0-9_-]+)*$")
+DOMAIN_PROPERTY_RE = re.compile(r"^sc-domain:[^\s/:]+(?:\.[^\s/:]+)+$", re.IGNORECASE)
+
+
+def _search_console_site(value: str) -> str:
+    if DOMAIN_PROPERTY_RE.fullmatch(value):
+        return quote(value, safe="")
+    try:
+        parsed = urlsplit(value)
+    except ValueError as exc:
+        raise AdvisorError("INVALID_SEARCH_CONSOLE_SITE", "The Search Console property identity is invalid.", EXIT_INPUT) from exc
+    if (
+        parsed.scheme not in {"http", "https"} or not parsed.hostname
+        or parsed.username is not None or parsed.password is not None or parsed.fragment
+    ):
+        raise AdvisorError("INVALID_SEARCH_CONSOLE_SITE", "The Search Console property identity is invalid.", EXIT_INPUT)
+    return quote(value, safe="")
 
 
 class ReadExecutor:
@@ -83,7 +110,11 @@ class ReadExecutor:
             raise AdvisorError("READ_OPERATION_NOT_ALLOWED", "The remote operation is not allowlisted.", EXIT_INPUT)
         if operation.method not in {"GET", "POST"} or (operation.method == "POST" and not operation.safe_post):
             raise AdvisorError("READ_OPERATION_NOT_ALLOWED", "Mutation methods are blocked.", EXIT_INPUT)
-        if "{resource}" in operation.path_template:
+        if "{site_url}" in operation.path_template:
+            if not resource:
+                raise AdvisorError("INVALID_SEARCH_CONSOLE_SITE", "A Search Console property identity is required.", EXIT_INPUT)
+            path = operation.path_template.format(site_url=_search_console_site(resource))
+        elif "{resource}" in operation.path_template:
             if not resource or not RESOURCE_RE.fullmatch(resource):
                 raise AdvisorError("INVALID_RESOURCE_NAME", "The Google resource name is invalid.", EXIT_INPUT)
             path = operation.path_template.format(resource=resource)
@@ -102,7 +133,7 @@ class ReadExecutor:
                 url,
                 headers={"Authorization": f"Bearer {self._token}"},
                 payload=payload,
-                max_attempts=3,
+                max_attempts=operation.max_attempts,
                 retry_mode="allowlisted-read" if operation.safe_post else None,
             )
             ledger_entry["requestId"] = response.request_id

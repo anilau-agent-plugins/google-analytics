@@ -39,10 +39,12 @@ separate workspace, sync, entity, compiler-preview, version, and publish plans. 
 not approve any mutation.
 
 The unreleased 0.20.0 development capability can make one bounded Search Console `sites.list`
-request. It returns exact property identities and the connected account's permission levels. The
-response is displayed for selection and is not written as a Search Console performance dataset.
-This stage does not query Search Analytics, sitemap, or URL Inspection data and cannot add, delete,
-verify, or modify a Search Console property or its users.
+request and immutable bounded Search Analytics report requests. It stores exact property identity,
+selected periods, normalized rows, request IDs, completeness markers and recommendations under the
+selected project's `.google-analytics-advisor/` directory. Search Analytics uses at most 20 requests
+and 12,000 rows per run and does not automatically retry quota or network failures. This stage does
+not query sitemap or URL Inspection data and cannot add, delete, verify, or modify a Search Console
+property or its users.
 
 Read-only baseline audits can request selected GA4 configuration, a bounded event-name/count report,
 and selected GTM configuration directly from Google. The CLI does not request Measurement Protocol

@@ -102,6 +102,29 @@ def build_parser() -> Parser:
     search_console_sites_list = search_console_sites_sub.add_parser("list")
     search_console_sites_list.add_argument("--profile", required=True)
     search_console_sites_list.add_argument("--json", action="store_true")
+    search_console_reports = search_console_sub.add_parser("reports")
+    search_console_reports_sub = search_console_reports.add_subparsers(
+        dest="search_console_reports_command", required=True, parser_class=Parser
+    )
+    search_console_reports_catalog = search_console_reports_sub.add_parser("catalog")
+    search_console_reports_catalog.add_argument("--profile", required=True)
+    search_console_reports_catalog.add_argument("--site", required=True)
+    search_console_reports_catalog.add_argument("--json", action="store_true")
+    search_console_reports_plan = search_console_reports_sub.add_parser("plan")
+    search_console_reports_plan.add_argument("--profile", required=True)
+    search_console_reports_plan.add_argument("--site", required=True)
+    search_console_reports_plan.add_argument("--request", required=True, type=Path)
+    search_console_reports_plan.add_argument("--json", action="store_true")
+    search_console_reports_show_plan = search_console_reports_sub.add_parser("show-plan")
+    search_console_reports_show_plan.add_argument("--plan", required=True, type=Path)
+    search_console_reports_show_plan.add_argument("--json", action="store_true")
+    search_console_reports_run = search_console_reports_sub.add_parser("run")
+    search_console_reports_run.add_argument("--plan", required=True, type=Path)
+    search_console_reports_run.add_argument("--json", action="store_true")
+    search_console_reports_show = search_console_reports_sub.add_parser("show")
+    search_console_reports_show.add_argument("--report", required=True, type=Path)
+    search_console_reports_show.add_argument("--language", choices=["auto", "ru", "en"], default="auto")
+    search_console_reports_show.add_argument("--json", action="store_true")
     site = sub.add_parser("site")
     site_sub = site.add_subparsers(dest="site_command", required=True, parser_class=Parser)
     site_inspect = site_sub.add_parser("inspect")
@@ -372,6 +395,24 @@ def dispatch(argv: list[str]) -> tuple[str, str, Any]:
 
         result = SearchConsoleService().sites(args.profile)
         return "search-console sites list", result["status"], result
+    if args.group == "search-console" and args.search_console_command == "reports":
+        from .search_console_report_service import SearchConsoleReportService
+
+        service = SearchConsoleReportService()
+        if args.search_console_reports_command == "catalog":
+            return "search-console reports catalog", "ready", service.catalog(args.profile, args.site)
+        if args.search_console_reports_command == "plan":
+            result = service.plan(args.profile, args.site, args.request)
+            return "search-console reports plan", result["status"], result
+        if args.search_console_reports_command == "show-plan":
+            result = service.show_plan(args.plan)
+            return "search-console reports show-plan", result["status"], result
+        if args.search_console_reports_command == "run":
+            result = service.run(args.plan)
+            return "search-console reports run", result["status"], result
+        if args.search_console_reports_command == "show":
+            result = service.show(args.report, args.language)
+            return "search-console reports show", result["status"], result
     if args.group == "audit" and args.audit_command == "baseline":
         from .baseline_audit import BaselineService
 

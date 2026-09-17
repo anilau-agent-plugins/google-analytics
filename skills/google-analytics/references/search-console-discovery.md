@@ -6,10 +6,11 @@ can be added later.
 
 ## Capability boundary
 
-This stage can request read-only Search Console access and list the properties visible to the
-connected Google account. It cannot yet query Search Analytics performance, sitemaps, or URL
-Inspection. It cannot add, verify, or delete a property, manage users, or create the GA4/Search
-Console link.
+This workflow can request read-only Search Console access and list the properties visible to the
+connected Google account. After exact selection, Search Analytics performance is available through
+[search-console-performance.md](search-console-performance.md). Sitemaps and URL Inspection remain
+unavailable. The plugin cannot add, verify, or delete a property, manage users, or create the
+GA4/Search Console link.
 
 The only Search Console scope is
 `https://www.googleapis.com/auth/webmasters.readonly`. Never request the broader
@@ -75,5 +76,4 @@ is partial, not failed.
 - `SEARCH_CONSOLE_RESPONSE_INVALID`: do not use a partial malformed list as complete evidence.
 
 Search Console failure is a limitation for a broad advisor request. Continue any valid GA4 analysis
-and state that organic-search performance remains unavailable until later stages or until the access
-issue is resolved.
+and state that organic-search performance remains unavailable until the access issue is resolved.

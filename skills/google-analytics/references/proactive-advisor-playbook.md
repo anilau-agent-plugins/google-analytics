@@ -111,10 +111,12 @@ Track these domains:
     and quota coverage;
 12. unanswered business questions.
 
-Search Console property discovery is available, but Search Console performance is outside this
-stage. When an already connected profile has the read-only capability, use
-[search-console-discovery.md](search-console-discovery.md) to establish the exact property identity.
-Do not start OAuth consent automatically for a broad request. If the capability is missing, explain
+Search Console performance is an optional separate evidence source. When an already connected
+profile has the read-only capability, use [search-console-discovery.md](search-console-discovery.md)
+to establish the exact property identity and [search-console-performance.md](search-console-performance.md)
+for a bounded finalized overview. Until the cross-source stage is implemented, present GA4 and
+Search Console findings separately and do not join URLs or attribute causes across sources. Do not
+start OAuth consent automatically for a broad request. If the capability is missing, explain
 the optional upgrade and continue the available GA4 analysis. In every case state that organic-search
 performance itself was not assessed yet.
 

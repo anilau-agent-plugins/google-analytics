@@ -18,6 +18,7 @@ ARTIFACTS = {
     "journal-entry", "baseline-report", "ga4-change-request", "website-context",
     "website-change-request", "mp-delivery-plan", "gtm-context", "gtm-change-request",
     "report-request", "report-plan",
+    "search-console-report-request", "search-console-report-plan", "search-console-report",
 }
 ALLOWED = {
     "$schema", "$id", "$defs", "$ref", "title", "type", "const", "enum", "required",
@@ -184,7 +185,7 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
     discriminator = data.get("changeRequestType") if name == "ga4-change-request" else data.get("artifactType")
     if discriminator != name:
         _fail("$.changeRequestType" if name == "ga4-change-request" else "$.artifactType", f"does not match requested schema {name}")
-    if name == "report-request":
+    if name in {"report-request", "search-console-report-request"}:
         from .artifact_store import canonical_json
 
         expected = hashlib.sha256(canonical_json({key: value for key, value in data.items() if key != "contentSha256"})).hexdigest()
@@ -195,11 +196,21 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
             _fail("$.period", "last-complete-days requires days only")
         if period["mode"] == "explicit" and (period.get("days") is not None or not period.get("from") or not period.get("to")):
             _fail("$.period", "explicit requires from/to only")
-        if "custom-core" in data["presets"] and not data.get("customCore"):
-            _fail("$.customCore", "is required by custom-core")
-        if "custom-core" not in data["presets"] and data.get("customCore") is not None:
-            _fail("$.customCore", "is allowed only with custom-core")
-    elif name == "report-plan":
+        if name == "report-request":
+            if "custom-core" in data["presets"] and not data.get("customCore"):
+                _fail("$.customCore", "is required by custom-core")
+            if "custom-core" not in data["presets"] and data.get("customCore") is not None:
+                _fail("$.customCore", "is allowed only with custom-core")
+        else:
+            if data["dataState"] == "hourly_all" and data["presets"] != ["recent-hourly"]:
+                _fail("$.presets", "hourly_all requires only recent-hourly")
+            if data["dataState"] != "hourly_all" and "recent-hourly" in data["presets"]:
+                _fail("$.dataState", "recent-hourly requires hourly_all")
+            if data["searchType"] in {"discover", "googleNews"} and any(
+                item["dimension"] == "query" for item in data.get("filters", [])
+            ):
+                _fail("$.filters", "query filters are unavailable for this search type")
+    elif name in {"report-plan", "search-console-report-plan"}:
         from .artifact_store import canonical_json
 
         generated = datetime.fromisoformat(data["generatedAt"].replace("Z", "+00:00"))
@@ -213,6 +224,15 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
             _fail("$.mutationPerformed", "report plans are read-only")
         if not data.get("queries") and not data.get("blockers"):
             _fail("$.queries", "an unblocked report plan requires at least one query")
+        if name == "search-console-report-plan":
+            budget = data.get("budget", {})
+            if budget.get("maxRequests", 0) > 20 or budget.get("maxRows", 0) > 12000:
+                _fail("$.budget", "exceeds the Search Console product budget")
+            for index, query in enumerate(data.get("queries", [])):
+                if query.get("operationId") != "searchconsole.searchanalytics.query":
+                    _fail(f"$.queries[{index}].operationId", "is not an allowed Search Console read")
+                if query.get("rowLimit", 0) > 1000 or query.get("maxPages", 0) > 2:
+                    _fail(f"$.queries[{index}]", "exceeds the per-query product budget")
     elif name == "mutation-plan":
         generated = datetime.fromisoformat(data["generatedAt"].replace("Z", "+00:00"))
         expires = datetime.fromisoformat(data["expiresAt"].replace("Z", "+00:00"))
@@ -255,6 +275,17 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
         expires = datetime.fromisoformat(data["expiresAt"].replace("Z", "+00:00"))
         if generated >= expires:
             _fail("$.expiresAt", "must be later than generatedAt")
+    elif name == "search-console-report":
+        from .artifact_store import canonical_json
+
+        expected = hashlib.sha256(canonical_json({key: value for key, value in data.items() if key != "reportSha256"})).hexdigest()
+        if data["reportSha256"] != expected:
+            _fail("$.reportSha256", "does not match canonical Search Console report content")
+        if data.get("mutationPerformed") is not False:
+            _fail("$.mutationPerformed", "Search Console reports are read-only")
+        for index, period in enumerate(data["periods"]):
+            if date.fromisoformat(period["from"]) > date.fromisoformat(period["to"]):
+                _fail(f"$.periods[{index}]", "period starts after it ends")
     elif name == "report":
         for index, period in enumerate(data["periods"]):
             if date.fromisoformat(period["from"]) > date.fromisoformat(period["to"]):

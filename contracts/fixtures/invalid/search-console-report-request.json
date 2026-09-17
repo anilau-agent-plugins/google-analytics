@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "artifactType": "search-console-report-request",
+  "createdAt": "2026-09-17T10:00:00Z",
+  "requestId": "sc-request-example",
+  "projectRoot": "C:/project",
+  "profileId": "profile-0123456789abcdef",
+  "site": "sc-domain:example.com",
+  "question": "What changed in organic search?",
+  "language": "en",
+  "period": {"mode": "last-complete-days", "days": 28, "from": null, "to": null},
+  "comparisons": [],
+  "presets": ["recent-hourly"],
+  "searchType": "web",
+  "dataState": "final",
+  "filters": [],
+  "contentSha256": "0000000000000000000000000000000000000000000000000000000000000000"
+}

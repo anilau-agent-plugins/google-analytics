@@ -21,6 +21,8 @@ not live-tested for this release; compatibility feedback is handled through GitH
 - check accessible GA4 properties, website streams, and Google Tag Manager containers;
 - connect read-only Google Search Console access and list exact URL-prefix/Domain properties and
   permission levels without changing them;
+- in the current `0.20.0` development build, run bounded Search Console overview, query, page,
+  device, country, search-appearance, and recent-hourly reports with completeness warnings;
 - find missing, duplicated, or conflicting analytics code in a local website project;
 - design useful events, key events, ecommerce tracking, funnels, and consent handling;
 - safely configure supported GA4 settings after showing you an exact change plan;
@@ -42,7 +44,7 @@ computer and helps install a suitable version when needed.
 - Codex or Claude Code;
 - Python 3.10, 3.11, 3.12, or 3.13;
 - a Google account that can access the Analytics resources you want to inspect and, when Search
-  Console discovery is requested, the relevant Search Console properties.
+  Console discovery or reporting is requested, the relevant Search Console properties.
 
 ## How to install
 
@@ -165,7 +167,7 @@ reports, snapshots, and journals.
 
 Google Analytics Advisor runs on your computer. It sends no telemetry, prompts, credentials, project
 files, Analytics data, or Search Console data to Anilau. Google authorization, Analytics requests,
-and read-only Search Console discovery go directly from your computer to Google.
+and read-only Search Console discovery/performance requests go directly from your computer to Google.
 
 OAuth clients and refresh tokens are stored in the operating system's protected credential storage:
 Windows DPAPI, macOS Keychain, or Linux Secret Service. There is no plaintext fallback. Local plans,
@@ -194,6 +196,7 @@ production Measurement Protocol events.
 Explain what my Google Analytics setup measures today.
 Explain what changed in the last 28 complete days and whether the data is reliable.
 Show which Search Console properties this Google account can read.
+Explain how my site performed in Google Search over the last 28 finalized days.
 Show acquisition and key-event performance in plain language.
 Which conversions should this website track?
 Check this local website for duplicate Google tags.

@@ -24,7 +24,7 @@ class ReadOperationTests(unittest.TestCase):
         posts = [item.operation_id for item in OPERATIONS.values() if item.method == "POST"]
         self.assertEqual(posts, [
             "data.compatibility.check", "data.report.run", "data.report.batch",
-            "data.report.realtime", "data.report.funnel",
+            "data.report.realtime", "data.report.funnel", "searchconsole.searchanalytics.query",
         ])
         self.assertTrue(all(item.method in {"GET", "POST"} for item in OPERATIONS.values()))
         self.assertNotIn("secret", " ".join(OPERATIONS).lower())
@@ -48,12 +48,32 @@ class ReadOperationTests(unittest.TestCase):
                     executor.execute(operation, resource=resource)
         self.assertEqual(transport.calls, [])
 
-    def test_search_console_registry_exposes_only_sites_list(self) -> None:
+    def test_search_console_registry_exposes_only_read_operations(self) -> None:
         operations = [name for name in OPERATIONS if name.startswith("searchconsole.")]
-        self.assertEqual(operations, ["searchconsole.sites.list"])
+        self.assertEqual(operations, ["searchconsole.sites.list", "searchconsole.searchanalytics.query"])
         operation = OPERATIONS[operations[0]]
         self.assertEqual(operation.method, "GET")
         self.assertEqual(operation.base_url + operation.path_template, "https://www.googleapis.com/webmasters/v3/sites")
+        query = OPERATIONS[operations[1]]
+        self.assertEqual(query.method, "POST")
+        self.assertTrue(query.safe_post)
+        self.assertEqual(query.max_attempts, 1)
+
+    def test_search_analytics_site_is_encoded_and_never_retried(self) -> None:
+        transport = CapturingTransport()
+        executor = ReadExecutor("private", transport=transport)
+        executor.execute(
+            "searchconsole.searchanalytics.query", resource="https://www.example.com/path/",
+            payload={"startDate": "2026-08-01", "endDate": "2026-08-02", "rowLimit": 1},
+        )
+        method, url, kwargs = transport.calls[0]
+        self.assertEqual(method, "POST")
+        self.assertEqual(
+            url,
+            "https://searchconsole.googleapis.com/webmasters/v3/sites/https%3A%2F%2Fwww.example.com%2Fpath%2F/searchAnalytics/query",
+        )
+        self.assertEqual(kwargs["max_attempts"], 1)
+        self.assertEqual(kwargs["retry_mode"], "allowlisted-read")
 
     def test_allowlisted_post_retries_but_arbitrary_post_does_not(self) -> None:
         class Response:

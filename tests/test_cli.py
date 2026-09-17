@@ -48,6 +48,14 @@ class CliTests(unittest.TestCase):
         self.assertEqual(code, 4)
         self.assertEqual(payload["errors"][0]["code"], "INVALID_ARGUMENTS")
 
+    def test_search_console_reports_cli_requires_exact_site_and_artifacts(self) -> None:
+        code, payload = self.run_cli("search-console", "reports", "catalog", "--profile", "profile-test")
+        self.assertEqual(code, 4)
+        self.assertEqual(payload["errors"][0]["code"], "INVALID_ARGUMENTS")
+        code, payload = self.run_cli("search-console", "reports", "run", "--json")
+        self.assertEqual(code, 4)
+        self.assertEqual(payload["errors"][0]["code"], "INVALID_ARGUMENTS")
+
     def test_consent_preview_contains_exact_complete_scope_set(self) -> None:
         code, payload = self.run_cli("auth", "consent-preview", "--json")
         self.assertEqual(code, 0)

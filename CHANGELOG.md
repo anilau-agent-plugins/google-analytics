@@ -12,6 +12,12 @@
   declined, partial, or wrong-account upgrades preserve the previous GA4/GTM credential.
 - Added conditional Search Console diagnostics and customer-owned Cloud onboarding without requesting
   Search Console write access, Cloud Platform scopes, or treating consent as mutation approval.
+- Added immutable bounded Search Console performance reports for overview, queries, pages, devices,
+  countries, search appearance, and short hourly diagnostics with Pacific Time periods, explicit
+  preliminary/top-row/privacy limitations, and a no-retry 20-request/12,000-row safety budget.
+- Added separate Search Console request/plan/report contracts, deterministic Russian/English
+  rendering, exact property and credential guards, and fail-closed handling for unsupported GenAI,
+  branded-query, and platform-property UI features.
 - Kept public version metadata unchanged while `0.20.0` remains under staged development.
 
 ## 0.11.0 - 2026-08-28

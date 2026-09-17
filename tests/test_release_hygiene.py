@@ -168,6 +168,20 @@ class ReleaseHygieneTests(unittest.TestCase):
         self.assertIn("restricted metric is unavailable, not zero", reference)
         for operation in ("data.report.run", "data.report.realtime", "data.report.funnel"):
             self.assertIn(operation, registry)
+
+    def test_search_console_reporting_is_bounded_read_only_and_separate(self) -> None:
+        skill = (ROOT / "skills" / "google-analytics" / "SKILL.md").read_text(encoding="utf-8")
+        reference = (ROOT / "skills" / "google-analytics" / "references" / "search-console-performance.md").read_text(encoding="utf-8")
+        registry = (ROOT / "scripts" / "google_analytics_cli" / "read_operation.py").read_text(encoding="utf-8")
+        service = (ROOT / "scripts" / "google_analytics_cli" / "search_console_report_service.py").read_text(encoding="utf-8")
+        self.assertIn("Search Console performance workflow", skill)
+        self.assertIn("20 performance requests and 12,000 rows", reference)
+        self.assertIn("searchconsole.searchanalytics.query", registry)
+        self.assertIn("max_attempts=1", registry)
+        self.assertIn("MAX_REQUESTS = 20", service)
+        self.assertIn("MAX_ROWS = 12_000", service)
+        self.assertNotIn('"PATCH"', service)
+        self.assertNotIn('"DELETE"', service)
         for method in ('method="PATCH"', 'method="PUT"', 'method="DELETE"'):
             self.assertNotIn(method, service)
 

@@ -1,6 +1,6 @@
 ---
 name: google-analytics
-description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, Search Console authorization and property discovery, evidence-backed Data API reports, measurement strategy, customer-owned Desktop OAuth, confirmed GA4 configuration, safe local measurement installation, Consent Mode, SPA/ecommerce events, Measurement Protocol validation, and separately confirmed GTM operations. Use when a user asks about GA4 setup, Search Console access, performance, acquisition, content, events, key events, ecommerce, realtime, funnels, analytics code, conversions, GTM, an audit, connecting Google, creating a Google Cloud OAuth application, checking Python, installing measurement code, or safely publishing a GTM version. It does not deploy websites or modify Search Console properties.
+description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, bounded Search Console performance reports, evidence-backed Data API reports, measurement strategy, customer-owned Desktop OAuth, confirmed GA4 configuration, safe local measurement installation, Consent Mode, SPA/ecommerce events, Measurement Protocol validation, and separately confirmed GTM operations. Use when a user asks about GA4 setup, Search Console access or organic performance, acquisition, content, events, key events, ecommerce, realtime, funnels, analytics code, conversions, GTM, an audit, connecting Google, creating a Google Cloud OAuth application, checking Python, installing measurement code, or safely publishing a GTM version. It does not deploy websites or modify Search Console properties.
 ---
 
 # Google Analytics Advisor
@@ -14,7 +14,7 @@ explanation, but keep exact product names, event names, metric names, commands a
 
 ## Current capability boundary
 
-Treat the current development build as the security-validated read-only reporting, baseline, measurement-design, confirmed GA4 configuration, safe local website-installation, protected GTM lifecycle, and Search Console property-discovery capability. It can discover GA4 accounts, properties,
+Treat the current development build as the security-validated read-only reporting, baseline, measurement-design, confirmed GA4 configuration, safe local website-installation, protected GTM lifecycle, and Search Console reporting capability. It can discover GA4 accounts, properties,
 website streams and core settings; inspect selected GTM resources; statically inspect a local website
 project; run one bounded 28-day event diagnostic; correlate public tag IDs; and write immutable
 snapshots plus a baseline report; create, validate, render, approve, and migrate immutable local
@@ -28,9 +28,11 @@ workspace/entity/preview/version/publish stages with fresh fingerprints and inde
 can run bounded overview, acquisition, landing/content, device/geo, events, key-events, ecommerce,
 realtime, approved custom-core, and separately gated experimental funnel reports; preserve source
 evidence, data-quality limitations, and prioritized plain-language recommendations.
-It can also safely add the Search Console read-only scope to the customer-owned authorization and
-list exact Search Console property identities and permission levels. Search Console performance,
-sitemaps, URL Inspection, property changes, user management, and the GA4 link are not available yet.
+It can also safely add the Search Console read-only scope to the customer-owned authorization,
+list exact Search Console property identities and permission levels, and run immutable bounded
+Search Analytics reports for overview, queries, pages, devices, countries, search appearance, and
+short hourly diagnostics. Search Console sitemaps, URL Inspection, property changes, user
+management, cross-source GA4 correlation, and the GA4 link are not available yet.
 Only claim findings returned by the CLI, and preserve every
 reported limitation. Never describe a source-code match alone as proof that production collection
 works.
@@ -58,7 +60,7 @@ using it. The check sends no credentials, analytics data or identifiers, caches 
 metadata outside the plugin source for 30 days, never updates automatically, and can be disabled with
 `version --disable-check --json`.
 
-Use `contracts validate --schema <artifact-type> --input <absolute-path> --json` only for the fifteen
+Use `contracts validate --schema <artifact-type> --input <absolute-path> --json` only for the eighteen
 project artifacts. Do not describe this validator as a general JSON Schema implementation.
 
 ## Google authorization workflow
@@ -138,16 +140,16 @@ copying protected state between computers.
 Classify analytics questions by their meaning before choosing a workflow. For an overall assessment,
 an unexplained business-result change, or improvement ideas without a narrow metric or slice, read
 [references/proactive-advisor-playbook.md](references/proactive-advisor-playbook.md) and run its
-broad GA4-only route. For a concrete metric, event, period, page, channel, device, or hypothesis, use
+broad advisor route. For a concrete metric, event, period, page, channel, device, or hypothesis, use
 only the smallest relevant existing workflow. When the exact project, property, period, or requested
 outcome is ambiguous, ask the single question that unlocks the most progress; never make a
 non-specialist choose raw dimensions, metrics, or preset names.
 
 Do not use a keyword-only classifier. A broad diagnosis remains read-only and never authorizes a
-GA4, GTM, Search Console, website, publish, or deployment change. Search Console property discovery
-is available but its performance data is not. Do not start consent merely because a broad request
-was asked; explain the optional capability and never let its absence block the available GA4
-assessment.
+GA4, GTM, Search Console, website, publish, or deployment change. Search Console performance is an
+optional separate evidence source when read-only capability and an exact property are already
+available. Do not start consent merely because a broad request was asked; explain the optional
+capability and never let its absence block the available GA4 assessment.
 
 ## Search Console discovery workflow
 
@@ -160,6 +162,25 @@ Run `search-console sites list --profile <profile-id> --json` only when the capa
 Preserve the exact `selectionKey`, property type, raw permission, normalized permission, and every
 limitation. Never infer that similar URL-prefix and Domain properties are interchangeable. This
 command is discovery only: do not claim Search performance, sitemap, index, or GA4-link findings.
+
+## Search Console performance workflow
+
+Read [references/search-console-performance.md](references/search-console-performance.md) before
+preparing or explaining Search Console performance. Start from the exact `selectionKey` returned by
+discovery; never merge a Domain and URL-prefix property or infer a site from a display name.
+
+Use `search-console reports catalog`, then let the agent prepare a versioned
+`search-console-report-request` artifact. Default a broad organic-search question to finalized
+28-day `overview` with the immediately preceding period and `searchType=web`. Run
+`search-console reports plan` before performance queries, explain the Pacific Time periods,
+data state, top-row/privacy limits, exact request/row budget and immutable `planSha256`, then run only
+an unexpired unchanged plan. Planning verifies the property but does not read performance data.
+
+Present the report in this order: answer, reliability, confirmed facts, calculations, limitations,
+interpretations, up to five recommendations, and one safe next step. Preserve
+`first_incomplete_date/hour`; never call query/page/search-appearance rows exhaustive, replace absent
+position with zero, retry quota failures automatically, combine search types, or present GenAI,
+branded-query, or platform-property UI features as available API evidence.
 
 ## Read-only baseline workflow
 
@@ -313,6 +334,6 @@ For unsupported remote mutation or reporting requests, return:
 
 - what the user is trying to achieve;
 - why live access or runtime support is required;
-- that version 0.11.0 can perform bounded evidence-backed reports, the baseline, local measurement design, separately confirmed supported GA4 configuration, local website installation, and protected GTM lifecycle portions;
+- that the current development build can perform bounded evidence-backed GA4 and Search Console reports, the baseline, local measurement design, separately confirmed supported GA4 configuration, local website installation, and protected GTM lifecycle portions;
 - the implementation stage that will add it;
 - a safe next step that does not expose secrets or pretend the operation succeeded.

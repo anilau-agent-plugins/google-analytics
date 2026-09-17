@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:anilau:google-analytics:search-console-report-request:v1",
+  "title": "Google Analytics Advisor Search Console report request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "artifactType", "createdAt", "requestId", "projectRoot", "profileId", "site", "question", "language", "period", "comparisons", "presets", "searchType", "dataState", "filters", "contentSha256"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "artifactType": {"const": "search-console-report-request"},
+    "createdAt": {"type": "string", "format": "date-time"},
+    "requestId": {"type": "string", "pattern": "^[A-Za-z0-9._-]{8,128}$"},
+    "projectRoot": {"type": "string", "minLength": 3},
+    "profileId": {"type": "string", "pattern": "^profile-[a-f0-9]{16}$"},
+    "site": {"type": "string", "minLength": 4},
+    "question": {"type": "string", "minLength": 3},
+    "language": {"enum": ["auto", "ru", "en"]},
+    "period": {
+      "type": "object", "additionalProperties": false,
+      "required": ["mode", "days", "from", "to"],
+      "properties": {
+        "mode": {"enum": ["last-complete-days", "explicit"]},
+        "days": {"type": ["integer", "null"], "minimum": 1, "maximum": 366},
+        "from": {"type": ["string", "null"], "format": "date"},
+        "to": {"type": ["string", "null"], "format": "date"}
+      }
+    },
+    "comparisons": {"type": "array", "uniqueItems": true, "maxItems": 2, "items": {"enum": ["previous-period", "previous-year"]}},
+    "presets": {"type": "array", "minItems": 1, "maxItems": 7, "uniqueItems": true, "items": {"enum": ["overview", "queries", "pages", "devices", "countries", "search-appearance", "recent-hourly"]}},
+    "searchType": {"enum": ["web", "image", "video", "news", "discover", "googleNews"]},
+    "dataState": {"enum": ["final", "all", "hourly_all"]},
+    "filters": {
+      "type": "array", "maxItems": 5,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["dimension", "operator", "expression"],
+        "properties": {
+          "dimension": {"enum": ["country", "device", "page", "query", "searchAppearance"]},
+          "operator": {"enum": ["equals", "notEquals", "contains", "notContains", "includingRegex", "excludingRegex"]},
+          "expression": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "contentSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

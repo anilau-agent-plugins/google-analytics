@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "artifactType": "search-console-report-plan",
+  "generatedAt": "2026-09-17T10:00:00Z",
+  "expiresAt": "2026-09-17T10:30:00Z",
+  "planId": "search-console-report-plan-20260917T100000Z-example123456",
+  "planSha256": "e4ba1cf26d14c7260663cc50edf8cb44796e2537164d7da8af9331d7b579da9e",
+  "projectRoot": "C:/project",
+  "profileId": "profile-0123456789abcdef",
+  "credentialFingerprint": "0123456789abcdef01234567",
+  "site": "sc-domain:example.com",
+  "propertyIdentity": {"siteUrl": "sc-domain:example.com", "propertyType": "domain", "permissionLevel": "owner", "providerPermissionLevel": "SITE_OWNER", "dataReadable": true, "selectionKey": "sc-domain:example.com"},
+  "request": {"requestId": "sc-request-example"},
+  "periods": [{"label": "current", "from": "2026-08-17", "to": "2026-09-13", "complete": true, "dataState": "final"}],
+  "queries": [{"queryId": "sc-availability-current", "preset": "availability", "periodLabel": "current", "operationId": "searchconsole.searchanalytics.query", "dimensions": ["date"], "payload": {"startDate": "2026-08-17", "endDate": "2026-09-13", "dimensions": ["date"], "type": "web", "dataState": "final", "aggregationType": "auto", "rowLimit": 10, "startRow": 0}, "rowLimit": 10, "maxPages": 1, "role": "availability"}],
+  "budget": {"maxRequests": 20, "maxRows": 12000, "plannedRequests": 1, "plannedRows": 10, "reservedDynamicRequests": 0, "automaticRetries": 0},
+  "blockers": [],
+  "limitations": [],
+  "networkUsed": true,
+  "mutationPerformed": false
+}

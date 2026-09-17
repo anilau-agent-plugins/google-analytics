@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "artifactType": "search-console-report-plan",
+  "generatedAt": "2026-09-17T10:30:00Z",
+  "expiresAt": "2026-09-17T10:00:00Z",
+  "planId": "search-console-report-plan-invalid-example",
+  "planSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "projectRoot": "C:/project",
+  "profileId": "profile-0123456789abcdef",
+  "credentialFingerprint": "0123456789abcdef01234567",
+  "site": "sc-domain:example.com",
+  "propertyIdentity": {},
+  "request": {},
+  "periods": [],
+  "queries": [],
+  "budget": {"maxRequests": 21, "maxRows": 12000},
+  "blockers": [],
+  "limitations": [],
+  "networkUsed": true,
+  "mutationPerformed": false
+}
