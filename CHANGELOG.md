@@ -32,6 +32,9 @@
 - Added immutable local-only GA4/Search Console cross-source request, plan, and report contracts,
   exact-only URL mapping, overview/landing/device analysis, source-quality propagation, and Russian/
   English plain-language rendering without equating clicks and sessions.
+- Fixed live cross-source acceptance for long numeric GA4 stream IDs while retaining phone-number
+  protection, and prevented duplicate overview/dedicated Search Console page datasets from creating
+  false canonical ambiguity.
 - Kept public version metadata unchanged while `0.20.0` remains under staged development.
 
 ## 0.11.0 - 2026-08-28

@@ -62,6 +62,31 @@ def _organic_filter(stream_id: str) -> dict[str, Any]:
     ]}}
 
 
+def _restore_exact_stream_id(raw: Any, clean: Any, stream_id: str) -> int:
+    """Restore only the schema-validated machine stream ID after generic redaction."""
+    restored = 0
+    if isinstance(raw, dict) and isinstance(clean, dict):
+        raw_filter = raw.get("stringFilter")
+        clean_filter = clean.get("stringFilter")
+        if (
+            raw.get("fieldName") == "streamId"
+            and isinstance(raw_filter, dict)
+            and isinstance(clean_filter, dict)
+            and raw_filter.get("matchType") == "EXACT"
+            and raw_filter.get("value") == stream_id
+            and clean_filter.get("value") != stream_id
+        ):
+            clean_filter["value"] = stream_id
+            restored += 1
+        for key, child in raw.items():
+            if key in clean:
+                restored += _restore_exact_stream_id(child, clean[key], stream_id)
+    elif isinstance(raw, list) and isinstance(clean, list):
+        for raw_child, clean_child in zip(raw, clean):
+            restored += _restore_exact_stream_id(raw_child, clean_child, stream_id)
+    return restored
+
+
 def _hash_without(value: dict[str, Any], field: str) -> str:
     return hashlib.sha256(canonical_json({key: child for key, child in value.items() if key != field})).hexdigest()
 
@@ -179,7 +204,12 @@ class ReportService:
         issues = pii_issues(request)
         if issues:
             raise AdvisorError("REPORT_PRIVACY_REDACTED", "The report request contains personal data or PII-bearing fields.", EXIT_INPUT, details={"issues": issues})
-        _, redactions = redact_payload(request)
+        redaction_input = deepcopy(request)
+        # ``webStream`` is a schema-validated Google resource name. Long numeric
+        # stream IDs can look like phone numbers to the generic value redactor,
+        # but are required machine identifiers rather than user-entered data.
+        redaction_input.pop("webStream", None)
+        _, redactions = redact_payload(redaction_input)
         if redactions:
             raise AdvisorError("REPORT_PRIVACY_REDACTED", "The report request contains personal or secret-like values.", EXIT_INPUT)
         organic = any(item in ORGANIC_PRESETS for item in request["presets"])
@@ -378,6 +408,8 @@ class ReportService:
             datasets.append(dataset)
             limitations.extend(incoming)
             clean_payload, redactions = redact_payload(payload)
+            if query["preset"] in ORGANIC_PRESETS and stream_context:
+                redactions -= _restore_exact_stream_id(payload, clean_payload, stream_context["streamId"])
             if redactions:
                 limitations.append({"type": "privacy", "severity": "warning", "queryId": query["queryId"], "message": "Potential personal or secret-like request values were redacted from evidence."})
             query_evidence.append({"queryId": query["queryId"], "preset": query["preset"], "provider": "analytics-data", "method": query["operationId"], "apiChannel": query["apiChannel"], "requestIds": request_ids, "request": clean_payload, "returnPropertyQuota": True, "responseQuality": dataset["quality"]})

@@ -86,6 +86,10 @@ class CrossSourceTests(unittest.TestCase):
             {"datasetId": "dataset:sc-devices-current", "queryId": "sc-devices-current", "preset": "devices", "periodLabel": "current", "searchType": "web", "dataState": "final", "dimensions": ["device"], "aggregationType": "auto", "metadata": {}, "rows": [{"dimensions": {"device": "MOBILE"}, "metrics": {"clicks": 80.0, "impressions": 4000.0, "ctr": .02, "position": 8.0}}], "returnedRows": 1, "truncated": False, "completeness": "complete_summary", "privacyRedactions": 0, "rowsSha256": "d" * 64},
             {"datasetId": "dataset:sc-devices-previous", "queryId": "sc-devices-previous", "preset": "devices", "periodLabel": "previous", "searchType": "web", "dataState": "final", "dimensions": ["device"], "aggregationType": "auto", "metadata": {}, "rows": [], "returnedRows": 0, "truncated": False, "completeness": "empty", "privacyRedactions": 0, "rowsSha256": "e" * 64},
         ]
+        overview_pages = json.loads(json.dumps(datasets[1]))
+        overview_pages["datasetId"] = "dataset:sc-overview-pages-current"
+        overview_pages["queryId"] = "sc-overview-pages-current"
+        datasets.append(overview_pages)
         report = {"schemaVersion": 2, "artifactType": "search-console-report", "generatedAt": "2026-09-17T10:00:00Z", "reportId": "search-console-report-cross-example", "reportSha256": "", "profileId": PROFILE, "site": SITE, "propertyIdentity": {"selectionKey": SITE}, "timezone": "America/Los_Angeles", "status": "ready", "qualityTier": "directional_only", "periods": [{**item, "dataState": "final"} for item in PERIODS], "datasets": datasets, "queries": [], "budget": {"automaticRetries": 0}, "facts": [], "calculations": [], "interpretations": [], "limitations": [{"code": "TOP_ROWS_ONLY", "severity": "warning", "message": "Page rows are top rows.", "evidenceRef": "dataset:sc-pages-current"}], "recommendations": [], "questions": [], "mutationPerformed": False}
         report["reportSha256"] = search_console_report_sha256(report)
         return self._write("sc-report.json", report)

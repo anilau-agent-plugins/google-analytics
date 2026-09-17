@@ -63,8 +63,9 @@ class FakeReportTransport:
             if self.restricted:
                 next(item for item in metadata["metrics"] if item["apiName"] == "totalRevenue")["blockedReasons"] = ["NO_REVENUE_METRICS"]
             return JsonResponse(200, metadata, "metadata-1", {})
-        if method == "GET" and url.endswith("/v1beta/properties/200/dataStreams/300"):
-            return JsonResponse(200, {"name": "properties/200/dataStreams/300", "type": "WEB_DATA_STREAM", "webStreamData": {"defaultUri": "https://Example.Test:443/path", "measurementId": "G-TEST"}}, "stream-1", {})
+        if method == "GET" and "/v1beta/properties/200/dataStreams/" in url:
+            stream_name = url.split("/v1beta/", 1)[1]
+            return JsonResponse(200, {"name": stream_name, "type": "WEB_DATA_STREAM", "webStreamData": {"defaultUri": "https://Example.Test:443/path", "measurementId": "G-TEST"}}, "stream-1", {})
         if method == "POST" and url.endswith(":checkCompatibility"):
             payload = kwargs["payload"]
             data = {
@@ -202,6 +203,23 @@ class ReportTests(unittest.TestCase):
             self.assertIn('"organic"', encoded)
         result = self.service.run(Path(planned["artifact"]["path"]))
         self.assertEqual(result["report"]["propertyContext"]["webStream"], context)
+
+    def test_long_numeric_web_stream_resource_is_not_mistaken_for_a_phone_number(self) -> None:
+        request = self._request(
+            ["google-organic-overview"],
+            webStream="properties/200/dataStreams/12992060055",
+        )
+        planned = self._plan(request)
+        result = self.service.run(Path(planned["artifact"]["path"]))
+        encoded_filter = json.dumps(result["report"]["queries"][0]["request"]["dimensionFilter"])
+        self.assertIn('"12992060055"', encoded_filter)
+        self.assertFalse(any(item["type"] == "privacy" for item in result["report"]["limitations"]))
+
+    def test_phone_shaped_user_text_remains_blocked(self) -> None:
+        request = self._request(question="Call +1 202 555 0123")
+        with self.assertRaises(AdvisorError) as raised:
+            self.service._load_request(request)
+        self.assertEqual(raised.exception.code, "REPORT_PRIVACY_REDACTED")
 
     def test_google_organic_presets_block_missing_or_cross_property_stream(self) -> None:
         with self.assertRaises(AdvisorError):

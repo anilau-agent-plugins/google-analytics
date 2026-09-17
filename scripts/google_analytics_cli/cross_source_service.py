@@ -270,7 +270,9 @@ class CrossSourceService:
                 ga_rows.append((normalize_ga4_landing(str(row.get("dimensions", {}).get("landingPage", "")), origin), row, date_range_label(row)))
         sc_rows: list[tuple[dict[str, Any], dict[str, Any], str]] = []
         for period in ("current", "previous"):
-            for dataset in _dataset(search, "pages", period):
+            page_datasets = _dataset(search, "pages", period)
+            dedicated = [item for item in page_datasets if item.get("queryId") == f"sc-pages-{period}"]
+            for dataset in dedicated or page_datasets:
                 for row in dataset.get("rows", []):
                     quality = row.get("dimensionQuality", {}).get("page", {})
                     sc_rows.append((normalize_search_console_page(str(row.get("dimensions", {}).get("page", "")), quality, origin), row, period))
@@ -338,7 +340,9 @@ class CrossSourceService:
                 item["ga4"][date_range_label(row)] = _metric_bundle(row, ("sessions", "engagedSessions", "engagementRate", "keyEvents", "sessionKeyEventRate"))
                 item["evidenceRefs"].append("ga4:dataset:query-google-organic-device")
         for period in ("current", "previous"):
-            for dataset in _dataset(search, "devices", period):
+            device_datasets = _dataset(search, "devices", period)
+            dedicated = [item for item in device_datasets if item.get("queryId") == f"sc-devices-{period}"]
+            for dataset in dedicated or device_datasets:
                 for row in dataset.get("rows", []):
                     device = str(row.get("dimensions", {}).get("device", "")).casefold()
                     key = device if device in DEVICE_VALUES else f"unmapped:{device or 'empty'}"
