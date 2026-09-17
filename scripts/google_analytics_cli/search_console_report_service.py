@@ -243,8 +243,9 @@ def _normalize_dataset(query: dict[str, Any], response: dict[str, Any], *, searc
     for item in response.get("rows", []):
         if not isinstance(item, dict) or not isinstance(item.get("keys", []), list) or len(item.get("keys", [])) != len(dimensions):
             raise AdvisorError("SEARCH_CONSOLE_RESPONSE_INVALID", "A Search Console row does not match the requested dimensions.", EXIT_NETWORK)
+        keys = item.get("keys", [])
         dimension_values: dict[str, str] = {}
-        for name, raw in zip(dimensions, item["keys"]):
+        for name, raw in zip(dimensions, keys):
             clean, changed = redact_text(str(raw))
             dimension_values[name] = clean
             redactions += int(changed)
@@ -462,7 +463,13 @@ class SearchConsoleReportService:
                 break
             try:
                 response, pages = self._fetch(executor, plan["site"], query, budget)
-                truncated = bool(pages and pages[-1]["rowsReceived"] == query["rowLimit"] and len(pages) >= query["maxPages"])
+                truncated = bool(
+                    query["dimensions"]
+                    and query["role"] != "availability"
+                    and pages
+                    and pages[-1]["rowsReceived"] == query["rowLimit"]
+                    and len(pages) >= query["maxPages"]
+                )
                 dataset = _normalize_dataset(query, response, search_type=plan["request"]["searchType"], truncated=truncated)
                 datasets.append(dataset)
                 safe_request, redactions = redact_payload(query["payload"])

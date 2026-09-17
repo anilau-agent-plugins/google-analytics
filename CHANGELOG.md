@@ -18,6 +18,9 @@
 - Added separate Search Console request/plan/report contracts, deterministic Russian/English
   rendering, exact property and credential guards, and fail-closed handling for unsupported GenAI,
   branded-query, and platform-property UI features.
+- Fixed live Search Analytics summary rows that legitimately omit `keys`, prevented summary and
+  availability probes from being mislabeled as truncated detail, and made the plain-language output
+  show readable period comparisons without repeating identical limitations.
 - Kept public version metadata unchanged while `0.20.0` remains under staged development.
 
 ## 0.11.0 - 2026-08-28

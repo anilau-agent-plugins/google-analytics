@@ -40,6 +40,7 @@ class FakeTransport:
         self.empty = False
         self.malformed = False
         self.preliminary = False
+        self.omit_summary_keys = False
         self.error: AdvisorError | None = None
 
     def request(self, method, url, **kwargs):
@@ -73,6 +74,8 @@ class FakeTransport:
             else:
                 is_previous = payload["endDate"] < "2026-08-20"
                 rows = [{"keys": [], "clicks": 80 if is_previous else 100, "impressions": 4000 if is_previous else 5000, "ctr": 0.02, "position": 6.0}]
+                if self.omit_summary_keys:
+                    rows[0].pop("keys")
         metadata = {"first_incomplete_date": payload["endDate"]} if self.preliminary else {}
         return JsonResponse(200, {"rows": rows, "responseAggregationType": "byProperty", "metadata": metadata}, f"request-{len(self.calls)}", {})
 
@@ -158,11 +161,24 @@ class SearchConsoleReportTests(unittest.TestCase):
         self.assertTrue(report["facts"])
         self.assertTrue(report["calculations"])
         self.assertTrue(any(item["code"] == "TOP_ROWS_ONLY" for item in report["limitations"]))
+        top_rows = [item for item in report["limitations"] if item["code"] == "TOP_ROWS_ONLY"]
+        self.assertTrue(all("total-" not in item["evidenceRef"] and "availability" not in item["evidenceRef"] for item in top_rows))
         query_calls = [call for call in self.transport.calls if "searchAnalytics/query" in call["url"]]
         self.assertTrue(query_calls)
         self.assertTrue(all(call["max_attempts"] == 1 for call in query_calls))
         self.assertTrue(all(item["automaticRetries"] == 0 for item in report["queries"]))
         self.assertFalse(report["mutationPerformed"])
+
+    def test_summary_row_may_omit_keys_when_no_dimensions_were_requested(self) -> None:
+        self.transport.omit_summary_keys = True
+        planned = self.service.plan(PROFILE, SITE, self.request())
+        result = self.service.run(Path(planned["artifact"]["path"]))
+        current = next(
+            item for item in result["report"]["datasets"]
+            if item["preset"] == "overview" and item["periodLabel"] == "current" and not item["dimensions"]
+        )
+        self.assertEqual(current["rows"][0]["dimensions"], {})
+        self.assertEqual(current["rows"][0]["metrics"]["clicks"], 100.0)
 
     def test_search_appearance_uses_provider_value_in_second_step(self) -> None:
         planned = self.service.plan(PROFILE, SITE, self.request(presets=["search-appearance"], comparisons=[]))
@@ -251,7 +267,10 @@ class SearchConsoleReportTests(unittest.TestCase):
         self.assertIn("Google Search Console", render_search_console_report(result["report"], "en"))
         russian = render_search_console_report(result["report"], "ru")
         self.assertIn("Что происходит", russian)
-        self.assertIn("Клики (clicks)", russian)
+        self.assertIn("Клики (clicks): 100", russian)
+        self.assertIn("Сравнение с предыдущим периодом", russian)
+        self.assertIn("80 → 100", russian)
+        self.assertEqual(russian.count("Показаны только ведущие строки"), 1)
 
 
 if __name__ == "__main__":
