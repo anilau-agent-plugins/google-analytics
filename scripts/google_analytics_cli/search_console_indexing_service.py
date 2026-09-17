@@ -175,7 +175,9 @@ def validate_inspection_url(url: str, site: str, property_type: str) -> dict[str
 
 
 def _non_negative(value: Any, field: str) -> int:
-    if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+    if isinstance(value, str) and re.fullmatch(r"[0-9]{1,20}", value):
+        value = int(value)
+    if not isinstance(value, int) or isinstance(value, bool) or value < 0 or value > 18_446_744_073_709_551_615:
         raise AdvisorError("SEARCH_CONSOLE_INSPECTION_RESPONSE_INVALID", f"Search Console returned an invalid {field} value.", EXIT_NETWORK)
     return value
 

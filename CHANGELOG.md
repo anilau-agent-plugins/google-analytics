@@ -25,6 +25,8 @@
   reasoned sample of up to ten exact-property URLs, with zero automatic retries and partial evidence.
 - Added Domain/URL-prefix containment checks, privacy-safe provider normalization, deprecated sitemap
   field handling, and explicit indexed-version-only and non-site-wide limitations in Russian and English.
+- Fixed live Search Console sitemap counters represented by Google as decimal JSON strings and kept
+  their normalized artifact form as bounded non-negative integers.
 - Kept public version metadata unchanged while `0.20.0` remains under staged development.
 
 ## 0.11.0 - 2026-08-28

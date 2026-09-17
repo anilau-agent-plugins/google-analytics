@@ -41,9 +41,9 @@ class FakeTransport:
         if url.endswith("/webmasters/v3/sites"):
             return JsonResponse(200, {"siteEntry": [{"siteUrl": SITE, "permissionLevel": "SITE_OWNER"}]}, "sites-request", {})
         if "/sitemaps/" in url:
-            return JsonResponse(200, {"path": "https://example.com/sitemap.xml", "type": "WEB", "isPending": False, "isSitemapsIndex": False, "lastSubmitted": "2026-09-16T00:00:00Z", "lastDownloaded": "2026-09-17T00:00:00Z", "warnings": 0, "errors": 0, "contents": [{"type": "web", "submitted": 12, "indexed": 10}]}, "sitemap-get", {})
+            return JsonResponse(200, {"path": "https://example.com/sitemap.xml", "type": "WEB", "isPending": False, "isSitemapsIndex": False, "lastSubmitted": "2026-09-16T00:00:00Z", "lastDownloaded": "2026-09-17T00:00:00Z", "warnings": "0", "errors": "0", "contents": [{"type": "web", "submitted": "12", "indexed": "10"}]}, "sitemap-get", {})
         if "/sitemaps" in url:
-            return JsonResponse(200, {"sitemap": [{"path": "https://example.com/sitemap.xml", "type": "WEB", "isPending": False, "isSitemapsIndex": False, "warnings": 1, "errors": 0, "contents": [{"type": "web", "submitted": 12, "indexed": 10}]}, {"path": "https://example.com/index.xml", "type": "SITEMAP", "isPending": True, "isSitemapsIndex": True, "warnings": 0, "errors": 0, "contents": []}]}, "sitemaps-list", {})
+            return JsonResponse(200, {"sitemap": [{"path": "https://example.com/sitemap.xml", "type": "WEB", "isPending": False, "isSitemapsIndex": False, "warnings": "1", "errors": "0", "contents": [{"type": "web", "submitted": "12", "indexed": "10"}]}, {"path": "https://example.com/index.xml", "type": "SITEMAP", "isPending": True, "isSitemapsIndex": True, "warnings": "0", "errors": "0", "contents": []}]}, "sitemaps-list", {})
         if url.endswith("/v1/urlInspection/index:inspect"):
             self.inspections += 1
             if self.fail_on_inspection and self.inspections == self.fail_on_inspection:
@@ -99,6 +99,9 @@ class SearchConsoleIndexingTests(unittest.TestCase):
         result = self.service.sitemaps(PROFILE, SITE, self.root)
         snapshot = result["snapshot"]
         self.assertEqual(snapshot["totals"]["returned"], 2)
+        sitemap = next(item for item in snapshot["entries"] if item["path"].endswith("sitemap.xml"))
+        self.assertEqual(sitemap["contents"][0]["submitted"], 12)
+        self.assertEqual(snapshot["totals"]["warnings"], 1)
         self.assertTrue(any(item["code"] == "DEPRECATED_INDEXED_FIELD_IGNORED" for item in snapshot["limitations"]))
         self.assertNotIn("indexed", repr(snapshot["entries"]))
         sitemap_calls = [item for item in self.transport.calls if "/sitemaps" in item["url"]]
