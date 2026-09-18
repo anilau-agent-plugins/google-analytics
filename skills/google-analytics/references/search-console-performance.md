@@ -75,5 +75,7 @@ interpretations, recommendations, unresolved questions, and one safe next step. 
 names beside everyday explanations. Separate correlation from causation, identify CTR thresholds as
 local review heuristics, and never promise traffic or commercial results.
 
-Search Console reporting is not yet cross-source GA4 analysis. Present the two sources separately;
-URL normalization, joined evidence and causal funnel interpretation belong to a later stage.
+A targeted Search Console report remains single-source. For an explicitly broad website assessment,
+the full-picture workflow may pass finalized Search Console and matching GA4 organic artifacts to the
+separate exact-only cross-source analyzer. Preserve both source definitions and timezone limitations;
+never turn clicks-versus-sessions differences or joined evidence into a causal funnel claim.

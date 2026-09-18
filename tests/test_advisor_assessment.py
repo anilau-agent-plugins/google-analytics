@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from scripts.google_analytics_cli.advisor_assessment_policy import assessment_request_sha256
+from scripts.google_analytics_cli.advisor_assessment_renderer import render_assessment
 from scripts.google_analytics_cli.advisor_assessment_service import AdvisorAssessmentService
 from scripts.google_analytics_cli.artifact_store import ArtifactStore
 from scripts.google_analytics_cli.errors import AdvisorError, EXIT_INPUT
@@ -181,7 +182,98 @@ class AdvisorAssessmentTests(unittest.TestCase):
         self.assertEqual(latest["sequence"], 5)
         self.assertEqual(latest["status"], "ready")
         plain = self.service.show(Path(result["artifact"]["path"]), "auto")["plain"]
-        self.assertIn("Полная картина по сайту", plain)
+        self.assertIn("Коротко: что происходит", plain)
+
+    def test_russian_renderer_explains_live_shaped_evidence_without_english_templates(self) -> None:
+        report = {
+            "diagnosis": "GA4 и Search Console объединены в одну проверяемую картину сайта.",
+            "qualityTier": "directional_only",
+            "confidence": {
+                "level": "directional_only",
+                "reasons": [
+                    "Checked 14 of 14 domains.",
+                    "GA4 and Search Console keep separate definitions and timezone limitations.",
+                ],
+            },
+            "domains": [
+                {"domainId": f"domain-{index}", "state": "checked", "reason": "Checked."}
+                for index in range(14)
+            ],
+            "facts": [
+                {
+                    "factId": "fact:overview:activeUsers:current",
+                    "technicalName": "activeUsers",
+                    "value": 294,
+                    "statement": "Current activeUsers: 294",
+                },
+                {
+                    "factId": "fact:overview:engagementRate:current",
+                    "technicalName": "engagementRate",
+                    "value": 0.4278,
+                    "statement": "Current engagementRate: 0.4278",
+                },
+            ],
+            "calculations": [
+                {
+                    "calculationId": "calc:search:clicks",
+                    "name": "Change in clicks",
+                    "inputs": {"current": 40.0, "previous": 49.0},
+                    "result": {"absolute": -9.0, "relative": -0.183673},
+                },
+                {
+                    "calculationId": "calculation:search-console:clicks",
+                    "name": "Duplicate clicks change",
+                    "result": {"current": 40.0, "previous": 49.0, "absolute": -9.0, "relative": -0.183673},
+                },
+            ],
+            "findings": [
+                {
+                    "findingId": "finding:clicks-without-measured-sessions",
+                    "statement": "9 exactly mapped pages have Search Console clicks but no measured GA4 sessions.",
+                    "evidenceRefs": [f"page:{index}" for index in range(9)],
+                },
+                {
+                    "code": "KEY_EVENT_NOT_OBSERVED",
+                    "eventName": "signup",
+                    "statement": "A configured key event was not observed.",
+                },
+            ],
+            "interpretations": [
+                {
+                    "interpretationId": "interpretation:metric-boundary",
+                    "statement": "Search Console clicks are not GA4 sessions.",
+                }
+            ],
+            "limitations": [
+                {"code": "TOP_ROWS_ONLY", "message": "This detailed dataset contains top rows."},
+                {"type": "small-data", "message": "At least one period has fewer than 20 key events."},
+            ],
+            "recommendations": [
+                {
+                    "priority": 1,
+                    "problem": "Some clicked pages have no corresponding measured GA4 sessions in the bounded evidence.",
+                    "verification": "Validate collection locally.",
+                    "requiresMutationWorkflow": True,
+                }
+            ],
+            "safeNextStep": "Prepare a separate safe plan.",
+        }
+
+        plain = render_assessment(report, "ru")
+
+        self.assertIn("только для понимания направления", plain)
+        self.assertIn("Проверено 14 из 14 областей", plain)
+        self.assertIn("Клики из поиска Google (clicks): 49 → 40; изменение -9 (-18.4%)", plain)
+        self.assertEqual(plain.count("Клики из поиска Google (clicks):"), 1)
+        self.assertIn("Активные пользователи (activeUsers): 294", plain)
+        self.assertIn("Доля сессий с взаимодействием (engagementRate): 42.78%", plain)
+        self.assertIn("У 9 точно сопоставленных страниц", plain)
+        self.assertIn("ключевое событие `signup`", plain)
+        self.assertIn("проверены все запланированные области", plain)
+        self.assertIn("Подготовить отдельный безопасный план", plain)
+        self.assertNotIn("Some clicked pages", plain)
+        self.assertNotIn("Validate collection locally", plain)
+        self.assertNotIn("Checked 14 of 14", plain)
 
     def test_missing_search_console_keeps_ga4_and_marks_cross_source_unavailable(self) -> None:
         planned = self.service.plan(self.request(search_console=False))

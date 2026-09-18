@@ -18,6 +18,11 @@ model. Reference a matching baseline and approved measurement plan when availabl
 Console as `ready` only when the selected authorization and exact property already permit it. Compute
 `contentSha256` over canonical content excluding that field, then validate the artifact:
 
+Set `gtmContainer` only for a discovered resource whose `containerKind` is `gtm` and whose features
+support workspaces. A resource marked `google-tag` may still have a Tag Manager API container path,
+but it has no GTM workspace to audit: keep `gtmContainer` null and use the site scan plus GA4 stream
+correlation for that Google tag. Never send a `google-tag` container path into the deep GTM baseline.
+
 ```text
 google-analytics contracts validate --schema advisor-assessment-request --input <absolute-request-path> --json
 ```
