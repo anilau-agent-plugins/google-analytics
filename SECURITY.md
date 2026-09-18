@@ -55,3 +55,15 @@ HTTP transport accepts credential-free HTTPS URLs on the standard port, bounds r
 sizes, validates JSON responses, and removes Authorization headers on cross-host redirects. OAuth
 form requests are limited to Google's token and revocation endpoints. Protected credential backends
 reject empty or oversized values and never fall back to plaintext storage.
+
+## Release validation
+
+GitHub Actions is a release-only gate, not continuous CI. Its sole workflow uses only the manual
+`workflow_dispatch` trigger, has `contents: read`, receives no Google credentials or repository
+secrets, and never publishes or deploys. After separate release authorization it validates one exact
+full commit SHA on CPython 3.10–3.13 across fixed Windows, macOS, and Linux runner images. All twelve
+jobs must pass before a tag or GitHub Release is created.
+
+Runner checks use synthetic credentials and do not claim a live round trip through a real user's
+macOS login Keychain or Linux desktop Secret Service. The detailed rationale and evidence boundary
+are recorded in [ADR 0002](docs/decisions/0002-release-only-github-actions.md).

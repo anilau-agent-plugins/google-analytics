@@ -1,6 +1,6 @@
 {
   "name": "google-analytics",
-  "version": "0.11.0",
+  "version": "0.20.0",
   "description": "Plain-language GA4 and Search Console evidence, recommendations, and protected analytics changes.",
   "author": {
     "name": "Eduard Volkov",
@@ -39,8 +39,8 @@
       "Local tag inspection"
     ],
     "websiteURL": "https://anilau.com/en/agent-plugins/google-analytics/",
-    "privacyPolicyURL": "https://github.com/anilau-agent-plugins/google-analytics/blob/v0.11.0/PRIVACY.md",
-    "termsOfServiceURL": "https://github.com/anilau-agent-plugins/google-analytics/blob/v0.11.0/LICENSE",
+    "privacyPolicyURL": "https://github.com/anilau-agent-plugins/google-analytics/blob/v0.20.0/PRIVACY.md",
+    "termsOfServiceURL": "https://github.com/anilau-agent-plugins/google-analytics/blob/v0.20.0/LICENSE",
     "defaultPrompt": [
       "Help me plan analytics for my website.",
       "Explain which conversions my project needs.",

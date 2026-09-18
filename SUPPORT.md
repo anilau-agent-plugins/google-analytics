@@ -20,10 +20,13 @@ The plugin is provided under the MIT License. Community support has no guarantee
 Paid implementation or consulting can be discussed separately through
 [anilau.com](https://anilau.com/en/agent-plugins/).
 
-Version 0.11.0 received full release acceptance on Windows with the available CPython runtime.
-macOS and Linux adapters remain included but were not live-tested for this release. Reports from
-those systems are welcome; include the OS version, Python version, launcher used, and redacted error
-code without sending credentials or customer data.
+Version 0.20.0 receives local desktop acceptance on Windows and is release-gated by the full
+dependency-free suite on CPython 3.10–3.13 using native Windows, macOS, and Linux GitHub-hosted
+runners. Those runners verify launchers, runtime behavior, paths, encoding, safety contracts, and
+platform-adapter loading with synthetic credentials. They do not prove a live round trip through a
+real user's macOS login Keychain or Linux desktop Secret Service. Reports from those systems are
+welcome; include the OS version, Python version, launcher used, and redacted error code without
+sending credentials or customer data.
 
 ## Safe diagnostics
 

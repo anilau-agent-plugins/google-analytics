@@ -28,7 +28,7 @@ def _loopback(host: Any) -> bool:
 
 
 def _blocked(host: Any) -> OSError:
-    return OSError(f"Stage 11 test safety blocked non-loopback network host: {host!r}")
+    return OSError(f"Release validation blocked non-loopback network host: {host!r}")
 
 
 def install() -> None:

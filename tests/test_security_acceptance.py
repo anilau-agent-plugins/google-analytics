@@ -93,16 +93,21 @@ class SecurityAcceptanceTests(unittest.TestCase):
                     continue
                 self.assertFalse(isinstance(value, dict) and "installed" in value and "client_secret" in value.get("installed", {}))
 
-    def test_release_records_local_validation_exception_and_has_no_github_workflow(self) -> None:
+    def test_release_records_manual_only_ci_policy(self) -> None:
         workflow_root = ROOT / ".github" / "workflows"
-        workflows = [] if not workflow_root.exists() else [
+        workflows = [
             path for path in workflow_root.iterdir() if path.suffix.lower() in {".yml", ".yaml"}
         ]
-        self.assertEqual(workflows, [])
+        self.assertEqual([path.name for path in workflows], ["release-acceptance.yml"])
+        workflow = workflows[0].read_text(encoding="utf-8")
+        self.assertIn("workflow_dispatch:", workflow)
+        self.assertNotIn("  push:", workflow)
+        self.assertNotIn("  pull_request:", workflow)
+        self.assertNotIn("${{ secrets.", workflow)
         decision = (
-            ROOT / "docs" / "decisions" / "0001-release-validation-without-github-ci.md"
+            ROOT / "docs" / "decisions" / "0002-release-only-github-actions.md"
         ).read_text(encoding="utf-8")
-        for phrase in ("Version 0.11.0", "without GitHub Actions", "Windows", "0.20.0"):
+        for phrase in ("release-only", "workflow_dispatch", "twelve mandatory jobs", "0.20.0"):
             self.assertIn(phrase, decision)
         self.assertEqual(os.environ.get("GOOGLE_ANALYTICS_ADVISOR_NETWORK_POLICY"), "loopback-only")
 

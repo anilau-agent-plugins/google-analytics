@@ -1,6 +1,14 @@
 # Changelog
 
-## Unreleased - 0.20.0 development
+## 0.20.0 - 2026-09-18
+
+- Added a release-only GitHub Actions acceptance gate with no automatic triggers, read-only
+  repository permission, exact version/commit checks, and an explicit Windows/macOS/Linux by
+  CPython 3.10–3.13 matrix. It can run only after separate release authorization and never
+  publishes, tags, deploys, or receives Google credentials.
+- Added release-candidate verification, synthetic empty/small/incomplete/hourly/truncated/
+  conflicting/ambiguous/malformed fixtures, stricter archive and workflow-policy checks, and
+  truthful platform evidence boundaries for protected credential stores.
 
 - Added immutable `advisor full-picture` request, plan, checkpoint, and report contracts plus a
   five-step sequential coordinator over baseline, GA4, Search Console, exact-only cross-source
@@ -50,7 +58,8 @@
 - Added plain-language linking guidance and UI readback while keeping link deletion/recreation,
   ownership verification, user management, and Search Console collection publication outside the
   confirmed operation.
-- Kept public version metadata unchanged while `0.20.0` remains under staged development.
+- Updated Codex, Claude Code, marketplace, launcher, privacy, support, installation, and rollback
+  metadata for the `0.20.0` release candidate.
 
 ## 0.11.0 - 2026-08-28
 

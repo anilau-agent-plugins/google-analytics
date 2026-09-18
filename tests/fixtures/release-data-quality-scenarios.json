@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "synthetic": true,
+  "scenarios": [
+    {"id": "empty-ga4", "source": "ga4", "state": "empty", "rows": 0, "expected": "explicit_empty"},
+    {"id": "small-ga4", "source": "ga4", "state": "small", "rows": 3, "expected": "directional_only"},
+    {"id": "incomplete-ga4", "source": "ga4", "state": "incomplete", "completePeriod": false, "expected": "limitation"},
+    {"id": "hourly-search-console", "source": "search-console", "state": "hourly", "dataState": "hourly_all", "expected": "preliminary"},
+    {"id": "truncated-search-console", "source": "search-console", "state": "truncated", "rowLimitReached": true, "expected": "not_exhaustive"},
+    {"id": "conflicting-cross-source", "source": "cross-source", "state": "conflicting", "clicksDirection": "up", "sessionsDirection": "down", "expected": "no_causal_claim"},
+    {"id": "ambiguous-link", "source": "search-console-link", "state": "ambiguous", "oneShot": true, "expected": "no_retry"},
+    {"id": "malformed-provider", "source": "provider", "state": "malformed", "missingRequiredShape": true, "expected": "fail_closed"}
+  ],
+  "invariants": {
+    "mutationPerformed": false,
+    "productionNetwork": false,
+    "containsCustomerData": false,
+    "containsCredentials": false
+  }
+}

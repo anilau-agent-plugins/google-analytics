@@ -12,7 +12,7 @@
       "name": "google-analytics",
       "source": "./",
       "description": "Plain-language GA4 reports, recommendations, and protected analytics changes.",
-      "version": "0.11.0",
+      "version": "0.20.0",
       "author": {
         "name": "Eduard Volkov",
         "email": "admin@anilau.com"

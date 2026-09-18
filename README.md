@@ -1,6 +1,6 @@
 # Google Analytics Advisor
 
-[![Version 0.11.0](https://img.shields.io/badge/version-0.11.0-2563eb)](https://github.com/anilau-agent-plugins/google-analytics/releases/latest)
+[![Version 0.20.0](https://img.shields.io/badge/version-0.20.0-2563eb)](https://github.com/anilau-agent-plugins/google-analytics/releases/latest)
 [![MIT License](https://img.shields.io/badge/license-MIT-16a34a)](LICENSE)
 [![Codex and Claude Code](https://img.shields.io/badge/works_with-Codex%20%7C%20Claude%20Code-7c3aed)](#how-to-install)
 
@@ -8,9 +8,11 @@ Google Analytics Advisor is a free plugin that helps you understand and improve 
 without becoming an analytics specialist. Talk to it in your own language. It explains what it finds
 in plain words, prepares a safe plan, and asks before making any important change.
 
-It works with **Codex** and **Claude Code** on Windows, macOS, and Linux. Version 0.11.0 received its
-complete release acceptance on Windows. The macOS and Linux implementations are included, but were
-not live-tested for this release; compatibility feedback is handled through GitHub Issues.
+It works with **Codex** and **Claude Code** on Windows, macOS, and Linux. Version 0.20.0 receives
+local desktop acceptance on Windows and is release-gated by the same dependency-free suite on
+CPython 3.10–3.13 using native Windows, macOS, and Linux GitHub-hosted runners. Runner validation
+does not claim a live round trip through a real user's macOS login Keychain or Linux desktop Secret
+Service; compatibility feedback from those environments is handled through GitHub Issues.
 
 ## What it helps you do
 
@@ -24,7 +26,7 @@ not live-tested for this release; compatibility feedback is handled through GitH
 - check accessible GA4 properties, website streams, and Google Tag Manager containers;
 - connect read-only Google Search Console access and list exact URL-prefix/Domain properties and
   permission levels without changing them;
-- in the current `0.20.0` development build, run bounded Search Console overview, query, page,
+- run bounded Search Console overview, query, page,
   device, country, search-appearance, and recent-hourly reports with completeness warnings;
 - inspect Search Console sitemap metadata and Google's indexed evidence for a small, explicitly
   selected URL sample without downloading sitemap XML or requesting indexing;
@@ -95,7 +97,7 @@ Run `/reload-plugins` or restart Claude Code. The skill name is
 ### Release ZIP fallback
 
 1. Open the [latest release](https://github.com/anilau-agent-plugins/google-analytics/releases/latest).
-2. Download the file named `google-analytics-0.11.0.zip` and unpack it.
+2. Download the file named `google-analytics-0.20.0.zip` and unpack it.
 3. In Codex or Claude Code, point to the unpacked folder and say: **“Install this plugin.”**
 4. Start a new task or conversation and say: **“Check my Google Analytics setup.”**
 
@@ -115,7 +117,7 @@ powershell -NoProfile -File .\scripts\google-analytics.ps1 doctor --json
 sh ./scripts/google-analytics.sh doctor --json
 ```
 
-The result should identify version `0.11.0`, a supported Python runtime, writable protected-data
+The result should identify version `0.20.0`, a supported Python runtime, writable protected-data
 locations, and available TLS support. `doctor` does not access an Analytics property or change
 Google, GTM, or website resources.
 
@@ -143,7 +145,7 @@ and ask the agent to update from that folder.
 
 An update replaces the installed plugin copy. It does not delete Google credentials or project
 reports because those are stored outside the plugin folder. Automatic updates are not enabled in
-version 0.11.0; this prevents an unverified file from silently changing installed code. The plugin can
+version 0.20.0; this prevents an unverified file from silently changing installed code. The plugin can
 perform a telemetry-free version check when a trusted signed update manifest is configured, but it
 still asks before installation.
 
@@ -210,6 +212,12 @@ recreates a conflicting link. Link readback is separate from delayed report-data
 The published validation entrypoint runs with non-loopback network access disabled. Security tests
 use synthetic data and fake transports, so validation cannot change GA4/GTM resources or send
 production Measurement Protocol events.
+
+GitHub Actions is not continuous CI for this repository. Its only workflow uses the manual
+`workflow_dispatch` trigger, read-only repository permission, no Google credentials, and twelve
+required jobs: Python 3.10–3.13 on Windows, macOS, and Linux. Pushes, pull requests, tags, releases,
+and schedules do not trigger it. A tag or public release is blocked until the owner separately
+authorizes the release operation and that exact commit passes all twelve jobs.
 
 ## Try these requests
 

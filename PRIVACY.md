@@ -2,7 +2,7 @@
 
 ## Current version
 
-Google Analytics Advisor 0.11.0 runs locally in the user's environment. It does not collect telemetry
+Google Analytics Advisor 0.20.0 runs locally in the user's environment. It does not collect telemetry
 and does not send prompts, credentials, project files or analytics data to Anilau. Google
 authorization and connection diagnostics communicate directly from the user's computer to Google;
 they do not pass through Anilau infrastructure.
@@ -32,13 +32,13 @@ not configured by default and can be disabled from the CLI.
 The customer supplies a Desktop OAuth client from the customer's own Google Cloud project. The local
 CLI sends the browser authorization request, authorization-code exchange, token refresh, optional
 revocation, read-only discovery and bounded diagnostics directly to Google over HTTPS. The requested scopes cover
-identity, GA4 read/edit, GTM read/edit/version/publish, and Search Console read-only. Version 0.11.0 can perform allowlisted GA4
+identity, GA4 read/edit, GTM read/edit/version/publish, and Search Console read-only. Version 0.20.0 can perform allowlisted GA4
 Admin configuration and local website source changes after separate immutable expiring plans and
 exact SHA-256 confirmations. It can also perform supported GTM web-container operations through
 separate workspace, sync, entity, compiler-preview, version, and publish plans. Authorization does
 not approve any mutation.
 
-The unreleased 0.20.0 development capability can make bounded Search Console property discovery,
+Version 0.20.0 can make bounded Search Console property discovery,
 Search Analytics, sitemap metadata, and URL Inspection requests. It stores exact property identity,
 selected periods or URLs, reasons for URL selection, normalized provider evidence, request IDs,
 completeness markers and recommendations under the selected project's
@@ -50,14 +50,14 @@ counts are ignored. Provider URL query values are redacted before storage when n
 operations cannot add, delete, verify, or modify a Search Console property, its users, a sitemap, or
 the Google index.
 
-The unreleased cross-source analyzer reads only explicitly referenced immutable GA4 and Search
+The cross-source analyzer reads only explicitly referenced immutable GA4 and Search
 Console report files inside the selected project. It rechecks file and internal SHA-256 values and
 does not receive OAuth credentials or call Google. Search Console page query strings and fragments are
 removed before storage; schema v2 retains only boolean/unknown ambiguity metadata. URL joining is
 exact-only, capped at 500 mappings, and the resulting credential-free plan/report remains under the
 project's `.google-analytics-advisor/` directory.
 
-The unreleased full-picture advisor stores a credential-free request, expiring plan, one immutable
+The full-picture advisor stores a credential-free request, expiring plan, one immutable
 checkpoint after each sequential step, and a final report under the selected project's
 `.google-analytics-advisor/` directory. Checkpoints contain exact selected resource identities,
 periods, domain and step states, bounded budgets, error classifications, artifact paths and hashes;
@@ -65,7 +65,7 @@ they contain no OAuth token or client secret. Resume verifies the complete check
 reuses valid completed local results instead of repeating their Google reads. The workflow does not
 send advisor artifacts to Anilau and cannot approve or perform a recommended mutation.
 
-The unreleased Search Console/GA4 linking workflow cannot use a public Google API to create the
+The Search Console/GA4 linking workflow cannot use a public Google API to create the
 link. Its CLI writes only credential-free request, 30-minute plan, and semantic result artifacts
 under the selected project's `.google-analytics-advisor/` directory. Optional browser assistance
 uses the user's existing Google session only after fresh permission. Account email is compared only
@@ -112,7 +112,7 @@ checks. They must not contain production customer records or secrets.
 When a Measurement Protocol credential is created, its provider value is handled in process memory
 and immediately placed in DPAPI, Keychain, or Secret Service. Only an opaque credential reference is
 written to output and journals. If protected storage cannot be confirmed, the operation is reported
-as ambiguous and is not retried automatically. Version 0.11.0 can send only an event bound to a
+as ambiguous and is not retried automatically. Version 0.20.0 can send only an event bound to a
 separate immutable one-shot delivery plan and new exact confirmation. Debug and production endpoints
 are never mixed; an uncertain production response is not retried.
 

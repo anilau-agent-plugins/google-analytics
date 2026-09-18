@@ -37,6 +37,8 @@ class ReleaseHygieneTests(unittest.TestCase):
             "CONTRIBUTING.md",
             "CODE_OF_CONDUCT.md",
             "docs/decisions/0001-release-validation-without-github-ci.md",
+            "docs/decisions/0002-release-only-github-actions.md",
+            ".github/workflows/release-acceptance.yml",
         )
         for relative in required:
             with self.subTest(relative=relative):
@@ -76,6 +78,8 @@ class ReleaseHygieneTests(unittest.TestCase):
         self.assertIn("How updates work", readme)
         self.assertIn("Uninstall and rollback", readme)
         self.assertIn("GitHub Issues", support)
+        self.assertIn("release-gated", support)
+        self.assertIn("workflow_dispatch", readme)
         self.assertTrue(license_text.startswith("MIT License"))
         for phrase in ("LicenseRef-Anilau-Commercial", "not yet available for commercial"):
             self.assertNotIn(phrase, readme)

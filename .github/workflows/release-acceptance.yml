@@ -1,0 +1,76 @@
+name: Release acceptance
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: Exact SemVer release candidate, for example 0.20.0
+        required: true
+        type: string
+      release_commit:
+        description: Exact full 40-character commit SHA to validate
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-acceptance-${{ inputs.release_commit }}
+  cancel-in-progress: false
+
+jobs:
+  acceptance:
+    name: ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - windows-2025
+          - ubuntu-24.04
+          - macos-15-intel
+        python:
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
+    env:
+      PYTHONDONTWRITEBYTECODE: "1"
+      GOOGLE_ANALYTICS_ADVISOR_NETWORK_POLICY: loopback-only
+      RELEASE_VERSION: ${{ inputs.release_version }}
+      RELEASE_COMMIT: ${{ inputs.release_commit }}
+    steps:
+      - name: Check out the exact release candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ inputs.release_commit }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up the requested Python version
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Verify exact commit and release metadata
+        run: python tests/verify_release_candidate.py
+
+      - name: Run the Windows acceptance suite
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File tests/validate.ps1
+
+      - name: Run the macOS and Linux acceptance suite
+        if: runner.os != 'Windows'
+        shell: bash
+        run: sh tests/validate.sh
+
+      - name: Verify validation left the checkout clean
+        shell: bash
+        run: |
+          if [ -n "$(git status --porcelain --untracked-files=all)" ]; then
+            git status --short --untracked-files=all
+            exit 1
+          fi

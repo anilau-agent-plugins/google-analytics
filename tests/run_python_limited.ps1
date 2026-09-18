@@ -84,9 +84,12 @@ function ConvertTo-ProcessArgument {
 $pythonFile = $null
 $pythonPrefix = @()
 foreach ($candidate in @(
-    @{ File = "py"; Prefix = @("-3") },
+    # actions/setup-python places the requested matrix runtime first on PATH. Prefer it so every
+    # Windows release job actually exercises its declared Python version instead of the newest
+    # machine-wide py launcher entry.
+    @{ File = "python"; Prefix = @() },
     @{ File = "python3"; Prefix = @() },
-    @{ File = "python"; Prefix = @() }
+    @{ File = "py"; Prefix = @("-3") }
 )) {
     if (Get-Command $candidate.File -ErrorAction SilentlyContinue) {
         & $candidate.File @($candidate.Prefix) -c "import sys; raise SystemExit(0 if (3,10) <= sys.version_info[:2] < (3,14) else 1)" 2>$null

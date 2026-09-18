@@ -14,7 +14,7 @@ explanation, but keep exact product names, event names, metric names, commands a
 
 ## Current capability boundary
 
-Treat the current development build as the security-validated read-only reporting, baseline, measurement-design, confirmed GA4 configuration, safe local website-installation, protected GTM lifecycle, and Search Console reporting capability. It can discover GA4 accounts, properties,
+Treat the current version as the security-validated read-only reporting, baseline, measurement-design, confirmed GA4 configuration, safe local website-installation, protected GTM lifecycle, and Search Console reporting capability. It can discover GA4 accounts, properties,
 website streams and core settings; inspect selected GTM resources; statically inspect a local website
 project; run one bounded 28-day event diagnostic; correlate public tag IDs; and write immutable
 snapshots plus a baseline report; create, validate, render, approve, and migrate immutable local
@@ -409,6 +409,6 @@ For unsupported remote mutation or reporting requests, return:
 
 - what the user is trying to achieve;
 - why live access or runtime support is required;
-- that the current development build can perform bounded evidence-backed GA4 and Search Console reports, sitemap metadata and selected-URL indexed-version diagnostics, the baseline, local measurement design, separately confirmed supported GA4 configuration, local website installation, and protected GTM lifecycle portions;
+- that the current version can perform bounded evidence-backed GA4 and Search Console reports, sitemap metadata and selected-URL indexed-version diagnostics, the baseline, local measurement design, separately confirmed supported GA4 configuration, local website installation, and protected GTM lifecycle portions;
 - the implementation stage that will add it;
 - a safe next step that does not expose secrets or pretend the operation succeeded.
