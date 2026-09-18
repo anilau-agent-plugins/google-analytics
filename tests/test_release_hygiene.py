@@ -24,6 +24,7 @@ class ReleaseHygieneTests(unittest.TestCase):
             "skills/google-analytics/references/ga4-configuration.md",
             "skills/google-analytics/references/gtm-management.md",
             "skills/google-analytics/references/proactive-advisor-playbook.md",
+            "skills/google-analytics/references/full-picture-advisor.md",
             "skills/google-analytics/references/reporting-advisor.md",
             "skills/google-analytics/references/search-console-indexing.md",
             "skills/google-analytics/references/search-console-linking.md",
@@ -170,6 +171,17 @@ class ReleaseHygieneTests(unittest.TestCase):
         self.assertIn("restricted metric is unavailable, not zero", reference)
         for operation in ("data.report.run", "data.report.realtime", "data.report.funnel"):
             self.assertIn(operation, registry)
+
+    def test_full_picture_advisor_is_resumable_and_does_not_authorize_mutations(self) -> None:
+        skill = (ROOT / "skills" / "google-analytics" / "SKILL.md").read_text(encoding="utf-8")
+        reference = (ROOT / "skills" / "google-analytics" / "references" / "full-picture-advisor.md").read_text(encoding="utf-8")
+        service = (ROOT / "scripts" / "google_analytics_cli" / "advisor_assessment_service.py").read_text(encoding="utf-8")
+        self.assertIn("advisor full-picture", skill)
+        self.assertIn("fourteen-domain completeness matrix", reference)
+        self.assertIn("resume-plan", reference)
+        self.assertIn('"mutationPerformed": False', service)
+        for method in ('method="PATCH"', 'method="PUT"', 'method="DELETE"'):
+            self.assertNotIn(method, service)
 
     def test_search_console_reporting_is_bounded_read_only_and_separate(self) -> None:
         skill = (ROOT / "skills" / "google-analytics" / "SKILL.md").read_text(encoding="utf-8")

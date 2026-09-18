@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:anilau:google-analytics:advisor-assessment-plan:v1",
+  "title": "Google Analytics Advisor immutable full-picture plan",
+  "$defs": {"safe": {"oneOf": [{"type": ["string", "number", "boolean", "null"]}, {"type": "array", "items": {"$ref": "#/$defs/safe"}}, {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}]}},
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "artifactType", "generatedAt", "expiresAt", "planId", "planSha256", "projectRoot", "request", "requestRef", "identities", "periods", "steps", "domains", "budget", "blockers", "limitations", "planningNetworkUsed", "mutationPerformed"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "artifactType": {"const": "advisor-assessment-plan"},
+    "generatedAt": {"type": "string", "format": "date-time"},
+    "expiresAt": {"type": "string", "format": "date-time"},
+    "planId": {"type": "string", "pattern": "^advisor-plan-[A-Za-z0-9._-]{8,140}$"},
+    "planSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "projectRoot": {"type": "string", "minLength": 3},
+    "request": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}},
+    "requestRef": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}},
+    "identities": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}},
+    "periods": {"type": "array", "minItems": 2, "maxItems": 3, "items": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}},
+    "steps": {"type": "array", "minItems": 5, "maxItems": 6, "items": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}},
+    "domains": {"type": "array", "minItems": 14, "maxItems": 14, "items": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}},
+    "budget": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}},
+    "resumeFrom": {"type": ["object", "null"], "additionalProperties": {"$ref": "#/$defs/safe"}},
+    "blockers": {"type": "array", "items": {"type": "string"}},
+    "limitations": {"type": "array", "items": {"type": "string"}},
+    "planningNetworkUsed": {"type": "boolean"},
+    "mutationPerformed": {"const": false}
+  }
+}

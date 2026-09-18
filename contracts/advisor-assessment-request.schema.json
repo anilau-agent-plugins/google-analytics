@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:anilau:google-analytics:advisor-assessment-request:v1",
+  "title": "Google Analytics Advisor full-picture request",
+  "$defs": {"safe": {"oneOf": [{"type": ["string", "number", "boolean", "null"]}, {"type": "array", "items": {"$ref": "#/$defs/safe"}}, {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}}]}},
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "artifactType", "createdAt", "requestId", "projectRoot", "profileId", "property", "webStream", "site", "verifiedOrigin", "question", "language", "mode", "period", "comparisons", "businessModel", "baselineRef", "measurementPlanRef", "gtmContainer", "knownChangesAfter", "capabilities", "contentSha256"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "artifactType": {"const": "advisor-assessment-request"},
+    "createdAt": {"type": "string", "format": "date-time"},
+    "requestId": {"type": "string", "pattern": "^advisor-request-[A-Za-z0-9._-]{8,140}$"},
+    "projectRoot": {"type": "string", "minLength": 3},
+    "profileId": {"type": "string", "pattern": "^profile-[a-f0-9]{16}$"},
+    "property": {"type": "string", "pattern": "^properties/[0-9]+$"},
+    "webStream": {"type": "string", "pattern": "^properties/[0-9]+/dataStreams/[0-9]+$"},
+    "site": {"type": ["string", "null"]},
+    "verifiedOrigin": {"type": "string", "pattern": "^https?://[^/?#]+$"},
+    "question": {"type": "string", "minLength": 3},
+    "language": {"enum": ["auto", "ru", "en"]},
+    "mode": {"const": "broad"},
+    "period": {"type": "object", "additionalProperties": false, "required": ["mode", "days", "from", "to"], "properties": {"mode": {"enum": ["last-complete-days", "explicit"]}, "days": {"type": ["integer", "null"], "minimum": 1, "maximum": 366}, "from": {"type": ["string", "null"], "format": "date"}, "to": {"type": ["string", "null"], "format": "date"}}},
+    "comparisons": {"type": "array", "uniqueItems": true, "maxItems": 2, "items": {"enum": ["previous-period", "previous-year"]}},
+    "businessModel": {"enum": ["lead_generation", "ecommerce", "content", "mixed", "unknown"]},
+    "baselineRef": {"type": ["string", "null"]},
+    "measurementPlanRef": {"type": ["string", "null"]},
+    "gtmContainer": {"type": ["string", "null"]},
+    "knownChangesAfter": {"type": ["string", "null"], "format": "date-time"},
+    "capabilities": {"type": "object", "additionalProperties": {"$ref": "#/$defs/safe"}},
+    "contentSha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

@@ -2,6 +2,15 @@
 
 ## Unreleased - 0.20.0 development
 
+- Added immutable `advisor full-picture` request, plan, checkpoint, and report contracts plus a
+  five-step sequential coordinator over baseline, GA4, Search Console, exact-only cross-source
+  analysis, and deterministic local synthesis.
+- Added a fourteen-domain completeness matrix, partial-result preservation, tamper-evident checkpoint
+  chains, resume without repeating verified completed source reads, bilingual plain-language output,
+  no more than five evidence-linked recommendations, and one safe next step.
+- Kept the full-picture workflow read-only: normal source failures degrade independently, while
+  identity, context, child-plan, checkpoint, and source-result drift fail closed; recommendations do
+  not authorize mutations.
 - Added a GA4-only proactive advisor playbook that routes broad, targeted, and ambiguous requests,
   tracks assessment completeness, degrades safely when evidence is missing, and keeps analysis
   separate from every mutation workflow.

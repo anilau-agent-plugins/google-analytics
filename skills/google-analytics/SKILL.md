@@ -1,6 +1,6 @@
 ---
 name: google-analytics
-description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including read-only GA4/GTM discovery, bounded Search Console performance, sitemap, URL Inspection, local GA4/Search Console cross-source evidence, guarded help linking Search Console to GA4 in Google's UI, Data API reports, measurement strategy, customer-owned Desktop OAuth, confirmed GA4 configuration, safe local measurement installation, Consent Mode, SPA/ecommerce events, Measurement Protocol validation, and separately confirmed GTM operations. Use when a user asks about GA4 setup, Search Console access, organic performance or indexing, linking Search Console and Analytics, acquisition, content, events, key events, ecommerce, realtime, funnels, analytics code, conversions, GTM, an audit, connecting Google, creating a Google Cloud OAuth application, checking Python, installing measurement code, or safely publishing a GTM version. It does not deploy websites or directly modify Search Console properties.
+description: Help non-specialists plan, understand, audit, configure, and use Google Analytics 4 for websites, including a resumable full-picture advisor, GA4/GTM discovery, Search Console evidence, guarded help linking Search Console to GA4 in Google's UI, Data API reports, measurement strategy, customer-owned Desktop OAuth, confirmed GA4 configuration, safe local measurement installation, Consent Mode, SPA/ecommerce events, Measurement Protocol validation, and separately confirmed GTM operations. Use when a user asks what is happening with a site, what to improve, about GA4 setup, Search Console access, organic performance or indexing, linking Search Console and Analytics, acquisition, content, events, key events, ecommerce, realtime, funnels, analytics code, conversions, GTM, an audit, connecting Google, creating a Google Cloud OAuth application, checking Python, installing measurement code, or safely publishing a GTM version. It does not deploy websites or directly modify Search Console properties.
 ---
 
 # Google Analytics Advisor
@@ -34,8 +34,14 @@ Analytics reports, inspect sitemap metadata, and inspect Google's indexed versio
 explained URL sample; and locally compare immutable GA4 `google / organic` and Search Console source
 reports with strict exact-only URL mapping. It can prepare and record a short-lived, exact-resource
 plan for one Google UI Search Console/GA4 link, while the user chooses self-service or separately
-permits browser assistance and confirms the full SHA-256 before the final Submit. Search Console
-property changes, user management, request indexing, link deletion/recreation, and automatic report-
+permits browser assistance and confirms the full SHA-256 before the final Submit.
+It can also coordinate baseline, GA4, Search Console, exact-only cross-source analysis, and local
+synthesis through an immutable full-picture plan with five sequential checkpoints. A valid completed
+source is reused after interruption instead of being read again; unavailable sources remain explicit
+and do not erase usable evidence from other sources. The final report always exposes all fourteen
+assessment domains, no more than five recommendations, and one safe next step. This advisor workflow
+is read-only and never authorizes any recommended change. Search Console property changes, user
+management, request indexing, link deletion/recreation, and automatic report-
 collection publication remain unavailable.
 Only claim findings returned by the CLI, and preserve every
 reported limitation. Never describe a source-code match alone as proof that production collection
@@ -64,7 +70,7 @@ using it. The check sends no credentials, analytics data or identifiers, caches 
 metadata outside the plugin source for 30 days, never updates automatically, and can be disabled with
 `version --disable-check --json`.
 
-Use `contracts validate --schema <artifact-type> --input <absolute-path> --json` only for the twenty-eight
+Use `contracts validate --schema <artifact-type> --input <absolute-path> --json` only for the thirty-two
 project artifacts. Do not describe this validator as a general JSON Schema implementation.
 
 ## Google authorization workflow
@@ -143,15 +149,16 @@ copying protected state between computers.
 
 Classify analytics questions by their meaning before choosing a workflow. For an overall assessment,
 an unexplained business-result change, or improvement ideas without a narrow metric or slice, read
-[references/proactive-advisor-playbook.md](references/proactive-advisor-playbook.md) and run its
-broad advisor route. For a concrete metric, event, period, page, channel, device, or hypothesis, use
+[references/proactive-advisor-playbook.md](references/proactive-advisor-playbook.md), then read
+[references/full-picture-advisor.md](references/full-picture-advisor.md) and run the immutable
+`advisor full-picture` route. For a concrete metric, event, period, page, channel, device, or hypothesis, use
 only the smallest relevant existing workflow. When the exact project, property, period, or requested
 outcome is ambiguous, ask the single question that unlocks the most progress; never make a
 non-specialist choose raw dimensions, metrics, or preset names.
 
 Do not use a keyword-only classifier. A broad diagnosis remains read-only and never authorizes a
 GA4, GTM, Search Console, website, publish, or deployment change. Search Console performance is an
-optional separate evidence source when read-only capability and an exact property are already
+optional coordinated evidence source when read-only capability and an exact property are already
 available. Do not start consent merely because a broad request was asked; explain the optional
 capability and never let its absence block the available GA4 assessment.
 

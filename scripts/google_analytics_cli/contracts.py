@@ -23,6 +23,8 @@ ARTIFACTS = {
     "search-console-inspection-plan", "search-console-inspection-report",
     "cross-source-analysis-request", "cross-source-analysis-plan", "cross-source-analysis-report",
     "search-console-link-request", "search-console-link-plan", "search-console-link-result",
+    "advisor-assessment-request", "advisor-assessment-plan", "advisor-assessment-checkpoint",
+    "advisor-assessment-report",
 }
 ALLOWED = {
     "$schema", "$id", "$defs", "$ref", "title", "type", "const", "enum", "required",
@@ -203,12 +205,21 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
         search = {key: data["searchConsoleProperty"].get(key) for key in ("selectionKey", "propertyType", "permissionLevel", "providerPermissionLevel")}
         if data["searchConsoleProperty"]["fingerprintSha256"] != hashlib.sha256(canonical_json(search)).hexdigest():
             _fail("$.searchConsoleProperty.fingerprintSha256", "does not match the exact Search Console preview")
-    elif name in {"report-request", "search-console-report-request", "search-console-inspection-request", "cross-source-analysis-request"}:
+    elif name in {"report-request", "search-console-report-request", "search-console-inspection-request", "cross-source-analysis-request", "advisor-assessment-request"}:
         from .artifact_store import canonical_json
 
         expected = hashlib.sha256(canonical_json({key: value for key, value in data.items() if key != "contentSha256"})).hexdigest()
         if data["contentSha256"] != expected:
             _fail("$.contentSha256", "does not match canonical request content")
+        if name == "advisor-assessment-request":
+            if not data["webStream"].startswith(data["property"] + "/dataStreams/"):
+                _fail("$.webStream", "must belong to the selected property")
+            period = data["period"]
+            if period["mode"] == "last-complete-days" and (period.get("days") is None or period.get("from") is not None or period.get("to") is not None):
+                _fail("$.period", "last-complete-days requires days only")
+            if period["mode"] == "explicit" and (period.get("days") is not None or not period.get("from") or not period.get("to")):
+                _fail("$.period", "explicit requires from/to only")
+            return
         if name == "cross-source-analysis-request":
             for label, period in data["expectedPeriods"].items():
                 if date.fromisoformat(period["from"]) > date.fromisoformat(period["to"]):
@@ -270,7 +281,7 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
         else:
             if data["operations"] or data["confirmationRequired"] is not False or data["browserMutationPending"] is not False:
                 _fail("$", "blocked and no-op link plans cannot contain a pending UI mutation")
-    elif name in {"report-plan", "search-console-report-plan", "search-console-inspection-plan", "cross-source-analysis-plan"}:
+    elif name in {"report-plan", "search-console-report-plan", "search-console-inspection-plan", "cross-source-analysis-plan", "advisor-assessment-plan"}:
         from .artifact_store import canonical_json
 
         generated = datetime.fromisoformat(data["generatedAt"].replace("Z", "+00:00"))
@@ -283,6 +294,19 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
             _fail("$.planSha256", "does not match canonical plan content")
         if data.get("mutationPerformed") is not False:
             _fail("$.mutationPerformed", "report plans are read-only")
+        if name == "advisor-assessment-plan":
+            allowed_steps = {"baseline", "ga4", "search-console", "cross-source", "synthesis"}
+            steps = data.get("steps", [])
+            if {item.get("stepId") for item in steps} != allowed_steps:
+                _fail("$.steps", "must contain the five exact full-picture steps")
+            allowed_states = {"planned", "reused", "not_applicable", "unavailable", "blocked"}
+            if any(item.get("state") not in allowed_states for item in steps):
+                _fail("$.steps", "contains an invalid planning state")
+            if data.get("blockers"):
+                return
+            if not any(item.get("stepId") in {"ga4", "search-console"} and item.get("state") in {"planned", "reused"} for item in steps):
+                _fail("$.steps", "an unblocked assessment requires at least one performance source")
+            return
         if name != "cross-source-analysis-plan":
             query_field = "operations" if name == "search-console-inspection-plan" else "queries"
             if not data.get(query_field) and not data.get("blockers"):
@@ -365,7 +389,7 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
                 _fail("$.readback", "successful outcomes require exact-pair GA4 UI readback")
         if data["mode"] == "self_service" and data["browserInteractionRecorded"]:
             _fail("$.browserInteractionRecorded", "self-service results cannot claim browser interaction")
-    elif name in {"search-console-report", "search-console-inspection-report", "cross-source-analysis-report"}:
+    elif name in {"search-console-report", "search-console-inspection-report", "cross-source-analysis-report", "advisor-assessment-report"}:
         from .artifact_store import canonical_json
 
         expected = hashlib.sha256(canonical_json({key: value for key, value in data.items() if key != "reportSha256"})).hexdigest()
@@ -373,6 +397,20 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
             _fail("$.reportSha256", "does not match canonical Search Console report content")
         if data.get("mutationPerformed") is not False:
             _fail("$.mutationPerformed", "Search Console reports are read-only")
+        if name == "advisor-assessment-report":
+            allowed_states = {"checked", "not_applicable", "unavailable", "blocked", "stale", "not_checked"}
+            domains = data.get("domains", [])
+            if len({item.get("domainId") for item in domains}) != 14:
+                _fail("$.domains", "must contain fourteen unique domains")
+            if any(item.get("state") not in allowed_states or not item.get("reason") for item in domains):
+                _fail("$.domains", "contains an invalid or unexplained state")
+            for collection in ("facts", "calculations", "interpretations", "findings", "recommendations"):
+                for index, item in enumerate(data.get(collection, [])):
+                    if isinstance(item, dict) and not item.get("evidenceRefs"):
+                        _fail(f"$.{collection}[{index}].evidenceRefs", "must identify source-qualified evidence")
+            if len(data.get("recommendations", [])) > 5:
+                _fail("$.recommendations", "must contain at most five items")
+            return
         if name == "cross-source-analysis-report":
             if data.get("networkUsed") is not False:
                 _fail("$.networkUsed", "cross-source analysis must remain local")
@@ -458,6 +496,20 @@ def _semantics(name: str, data: dict[str, Any]) -> None:
                     _fail("$", f"approved plan has blockers: {'; '.join(evaluation['blockers'])}")
                 if not data["approvedAt"] or not data["approvalSha256"]:
                     _fail("$", "approved plan requires approval evidence")
+    elif name == "advisor-assessment-checkpoint":
+        from .artifact_store import canonical_json
+
+        expected = hashlib.sha256(canonical_json({key: value for key, value in data.items() if key != "checkpointSha256"})).hexdigest()
+        if data["checkpointSha256"] != expected:
+            _fail("$.checkpointSha256", "does not match canonical checkpoint content")
+        if data.get("mutationPerformed") is not False:
+            _fail("$.mutationPerformed", "assessment checkpoints are read-only")
+        allowed_steps = {"baseline", "ga4", "search-console", "cross-source", "synthesis"}
+        if {item.get("stepId") for item in data.get("steps", [])} != allowed_steps:
+            _fail("$.steps", "must preserve every full-picture step")
+        allowed_states = {"pending", "completed", "reused", "skipped", "blocked", "failed"}
+        if any(item.get("state") not in allowed_states for item in data.get("steps", [])):
+            _fail("$.steps", "contains an invalid execution state")
 
 
 def validate_artifact_data(name: str, data: dict[str, Any], *, path_label: str = "<memory>") -> dict[str, Any]:

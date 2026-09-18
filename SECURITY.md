@@ -36,6 +36,13 @@ file and internal artifact SHA-256 values before planning and again before execu
 authorization or transport dependency. It never performs fuzzy URL matching and never persists
 Search Console query or fragment values.
 
+Full-picture advisor execution validates the request and expiring top-level plan, rechecks every
+referenced child-plan file and internal hash before a source read, and writes a hash-linked immutable
+checkpoint after every sequential step. Resume rejects modified, non-contiguous, or cyclic checkpoint
+chains and changed completed results. Recoverable source failures stay partial and independent;
+identity, context, integrity, or artifact drift fails closed. The coordinator has no mutation method,
+and its recommendations never serve as confirmation for another workflow.
+
 Search Console/GA4 link planning is local-only and accepts only project-contained artifacts with
 canonical SHA-256 validation. Ready plans expire after 30 minutes, are single-use, contain one exact
 UI Submit, and require the full plan hash. The CLI has no link-management transport and cannot click

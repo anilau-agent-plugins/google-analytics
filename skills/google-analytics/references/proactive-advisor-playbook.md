@@ -2,8 +2,9 @@
 
 Use this playbook when the user asks for an overall assessment, an unexplained business-result
 change, or improvement ideas without limiting the request to one metric or slice. It coordinates the
-existing read-only baseline and reporting workflows. It does not add an API, scope, credential,
-mutation permission, or durable orchestration artifact.
+existing read-only baseline and reporting workflows. For broad requests, the durable implementation
+is the immutable, resumable workflow in [full-picture-advisor.md](full-picture-advisor.md). It does not
+add an API, scope, credential, or mutation permission.
 
 ## Route the request by meaning
 
@@ -45,7 +46,7 @@ If authorization is missing, access is denied, network access is forbidden, the 
 ambiguous, or an immutable artifact is invalid, stop before Google reads and explain the one safe
 action that can unblock the assessment.
 
-## Run the broad GA4-only route
+## Run the broad full-picture route
 
 ### 1. Establish measurement reliability
 
@@ -111,14 +112,16 @@ Track these domains:
     and quota coverage;
 12. unanswered business questions.
 
-Search Console performance is an optional separate evidence source. When an already connected
+Search Console performance is an optional coordinated evidence source. When an already connected
 profile has the read-only capability, use [search-console-discovery.md](search-console-discovery.md)
 to establish the exact property identity and [search-console-performance.md](search-console-performance.md)
-for a bounded finalized overview. Until the cross-source stage is implemented, present GA4 and
-Search Console findings separately and do not join URLs or attribute causes across sources. Do not
+for bounded finalized overview, page, and device evidence. Use
+[cross-source-analysis.md](cross-source-analysis.md) only through the full-picture coordinator and
+only when exact compatible GA4 and Search Console reports exist. Do not equate clicks with sessions,
+fuzzy-join URLs, or attribute causes across sources. Do not
 start OAuth consent automatically for a broad request. If the capability is missing, explain
-the optional upgrade and continue the available GA4 analysis. In every case state that organic-search
-performance itself was not assessed yet.
+the optional upgrade and continue the available GA4 analysis. Mark organic-search performance as
+unavailable rather than pretending it was assessed.
 
 Sitemap metadata and URL Inspection are an additional optional technical-organic evidence source.
 Use [search-console-indexing.md](search-console-indexing.md) only when the broad assessment has a
@@ -175,5 +178,7 @@ When the assessment cannot finish in one turn, state:
 - the blocker or next safe read;
 - the single prompt the user can use to continue.
 
-On continuation, revalidate identity, integrity, relevance, and known changes. Reuse valid evidence
-instead of rerunning the whole suite. Never edit an immutable artifact to make it look current.
+On continuation, run `advisor full-picture resume-plan` with the newest checkpoint. It revalidates the
+complete checkpoint chain, source identities, file/internal hashes, relevance, and known changes,
+then reuses valid completed steps instead of rerunning the whole suite. Never edit an immutable
+artifact to make it look current.

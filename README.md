@@ -18,6 +18,9 @@ not live-tested for this release; compatibility feedback is handled through GitH
 - receive bounded overview, acquisition, content, audience, event, key-event, ecommerce, realtime,
   and approved funnel reports with evidence and data-quality warnings;
 - compare complete periods and get up to five prioritized recommendations in everyday language;
+- turn a broad question such as “what is happening with my site?” into one immutable, resumable
+  full-picture assessment across measurement reliability, GA4, Search Console, and exact-only
+  cross-source evidence, with fourteen explicit completeness domains and one safe next step;
 - check accessible GA4 properties, website streams, and Google Tag Manager containers;
 - connect read-only Google Search Console access and list exact URL-prefix/Domain properties and
   permission levels without changing them;
@@ -177,7 +180,9 @@ Google Analytics Advisor runs on your computer. It sends no telemetry, prompts, 
 files, Analytics data, or Search Console data to Anilau. Google authorization, Analytics requests,
 and read-only Search Console discovery, performance, sitemap, and URL Inspection requests go directly
 from your computer to Google. Cross-source analysis uses only already-created local reports and makes
-no network request.
+no network request. Full-picture advisor plans, checkpoints, and reports stay in the selected
+project's `.google-analytics-advisor/` directory; completed source evidence can be reused after an
+interruption instead of being fetched again.
 
 OAuth clients and refresh tokens are stored in the operating system's protected credential storage:
 Windows DPAPI, macOS Keychain, or Linux Secret Service. There is no plaintext fallback. Local plans,
@@ -211,6 +216,7 @@ production Measurement Protocol events.
 ```text
 Explain what my Google Analytics setup measures today.
 Explain what changed in the last 28 complete days and whether the data is reliable.
+What is happening with my site? Give me the full picture, explain the gaps, and tell me what to improve first.
 Show which Search Console properties this Google account can read.
 Explain how my site performed in Google Search over the last 28 finalized days.
 Show which sitemaps Google knows and prepare a safe check of three important URLs.

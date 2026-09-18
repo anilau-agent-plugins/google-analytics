@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "scenarios": [
+    {"id": "full-ga4-search-console", "expectedStatus": "ready", "resume": false, "searchConsole": true},
+    {"id": "ga4-only", "expectedStatus": "partial", "resume": false, "searchConsole": false},
+    {"id": "search-console-temporary-failure", "expectedStatus": "partial", "resume": false, "searchConsole": true},
+    {"id": "resume-after-search-console-failure", "expectedStatus": "ready", "resume": true, "searchConsole": true},
+    {"id": "tampered-child-plan", "expectedStatus": "blocked", "resume": false, "searchConsole": true},
+    {"id": "tampered-checkpoint-chain", "expectedStatus": "blocked", "resume": true, "searchConsole": true}
+  ],
+  "invariants": {
+    "domainCount": 14,
+    "stepIds": ["baseline", "ga4", "search-console", "cross-source", "synthesis"],
+    "maxRecommendations": 5,
+    "mutations": false,
+    "execution": "sequential"
+  }
+}

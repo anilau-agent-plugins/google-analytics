@@ -332,6 +332,24 @@ def build_parser() -> Parser:
     cross_source_show.add_argument("--report", required=True, type=Path)
     cross_source_show.add_argument("--language", choices=["auto", "ru", "en"], default="auto")
     cross_source_show.add_argument("--json", action="store_true")
+    full_picture = advisor_sub.add_parser("full-picture")
+    full_picture_sub = full_picture.add_subparsers(dest="full_picture_command", required=True, parser_class=Parser)
+    full_picture_plan = full_picture_sub.add_parser("plan")
+    full_picture_plan.add_argument("--request", required=True, type=Path)
+    full_picture_plan.add_argument("--json", action="store_true")
+    full_picture_show_plan = full_picture_sub.add_parser("show-plan")
+    full_picture_show_plan.add_argument("--plan", required=True, type=Path)
+    full_picture_show_plan.add_argument("--json", action="store_true")
+    full_picture_run = full_picture_sub.add_parser("run")
+    full_picture_run.add_argument("--plan", required=True, type=Path)
+    full_picture_run.add_argument("--json", action="store_true")
+    full_picture_resume = full_picture_sub.add_parser("resume-plan")
+    full_picture_resume.add_argument("--checkpoint", required=True, type=Path)
+    full_picture_resume.add_argument("--json", action="store_true")
+    full_picture_show = full_picture_sub.add_parser("show")
+    full_picture_show.add_argument("--report", required=True, type=Path)
+    full_picture_show.add_argument("--language", choices=["auto", "ru", "en"], default="auto")
+    full_picture_show.add_argument("--json", action="store_true")
     mp = sub.add_parser("mp")
     mp_sub = mp.add_subparsers(dest="mp_command", required=True, parser_class=Parser)
     mp_plan = mp_sub.add_parser("delivery-plan")
@@ -635,6 +653,24 @@ def dispatch(argv: list[str]) -> tuple[str, str, Any]:
             return "advisor cross-source run", result["status"], result
         result = service.show(args.report, args.language)
         return "advisor cross-source show", result["status"], result
+    if args.group == "advisor" and args.advisor_command == "full-picture":
+        from .advisor_assessment_service import AdvisorAssessmentService
+
+        service = AdvisorAssessmentService()
+        if args.full_picture_command == "plan":
+            result = service.plan(args.request)
+            return "advisor full-picture plan", result["status"], result
+        if args.full_picture_command == "show-plan":
+            result = service.show_plan(args.plan)
+            return "advisor full-picture show-plan", result["status"], result
+        if args.full_picture_command == "run":
+            result = service.run(args.plan)
+            return "advisor full-picture run", result["status"], result
+        if args.full_picture_command == "resume-plan":
+            result = service.resume_plan(args.checkpoint)
+            return "advisor full-picture resume-plan", result["status"], result
+        result = service.show(args.report, args.language)
+        return "advisor full-picture show", result["status"], result
     if args.group == "mp":
         from .measurement_protocol_service import MeasurementProtocolService
 

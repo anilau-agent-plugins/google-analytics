@@ -57,6 +57,14 @@ removed before storage; schema v2 retains only boolean/unknown ambiguity metadat
 exact-only, capped at 500 mappings, and the resulting credential-free plan/report remains under the
 project's `.google-analytics-advisor/` directory.
 
+The unreleased full-picture advisor stores a credential-free request, expiring plan, one immutable
+checkpoint after each sequential step, and a final report under the selected project's
+`.google-analytics-advisor/` directory. Checkpoints contain exact selected resource identities,
+periods, domain and step states, bounded budgets, error classifications, artifact paths and hashes;
+they contain no OAuth token or client secret. Resume verifies the complete checkpoint chain and
+reuses valid completed local results instead of repeating their Google reads. The workflow does not
+send advisor artifacts to Anilau and cannot approve or perform a recommended mutation.
+
 The unreleased Search Console/GA4 linking workflow cannot use a public Google API to create the
 link. Its CLI writes only credential-free request, 30-minute plan, and semantic result artifacts
 under the selected project's `.google-analytics-advisor/` directory. Optional browser assistance
