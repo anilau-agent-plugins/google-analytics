@@ -59,6 +59,11 @@ computer and helps install a suitable version when needed.
 - a Google account that can access the Analytics resources you want to inspect and, when Search
   Console discovery or reporting is requested, the relevant Search Console properties.
 
+No Python packages are installed at runtime. The plugin includes a compressed, licensed snapshot of
+the first-party Python `tzdata` database as a fallback for clean Windows installations; macOS and
+Linux continue to prefer their native IANA timezone data. See
+[third-party notices](docs/THIRD_PARTY_NOTICES.md).
+
 ## How to install
 
 The simplest managed installation is to ask the agent:

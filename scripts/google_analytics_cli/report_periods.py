@@ -4,15 +4,16 @@ from __future__ import annotations
 
 from datetime import date, datetime, timedelta, timezone
 from typing import Any, Callable
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+from zoneinfo import ZoneInfoNotFoundError
 
 from .errors import AdvisorError, EXIT_INPUT
+from .timezone_data import load_timezone
 
 
 def resolve_periods(request: dict[str, Any], property_timezone: str, *, now: Callable[[], datetime] | None = None) -> tuple[list[dict[str, Any]], list[str]]:
     try:
-        zone = ZoneInfo(property_timezone)
-    except ZoneInfoNotFoundError as exc:
+        zone = load_timezone(property_timezone)
+    except (ValueError, ZoneInfoNotFoundError) as exc:
         raise AdvisorError("REPORT_CONTEXT_DRIFT", "The GA4 property timezone is not a valid IANA timezone.", EXIT_INPUT) from exc
     current_now = (now or (lambda: datetime.now(timezone.utc)))().astimezone(zone)
     today = current_now.date()

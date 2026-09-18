@@ -64,6 +64,11 @@ secrets, and never publishes or deploys. After separate release authorization it
 full commit SHA on CPython 3.10–3.13 across fixed Windows, macOS, and Linux runner images. All twelve
 jobs must pass before a tag or GitHub Release is created.
 
+The plugin ships a data-only compressed snapshot of the first-party Python `tzdata` project so a
+clean Windows Python runtime can resolve IANA property timezones without a package installation.
+System timezone data remains preferred where available. The archive contains only compiled TZif
+records; attribution and license texts are in [the third-party notices](docs/THIRD_PARTY_NOTICES.md).
+
 Runner checks use synthetic credentials and do not claim a live round trip through a real user's
 macOS login Keychain or Linux desktop Secret Service. The detailed rationale and evidence boundary
 are recorded in [ADR 0002](docs/decisions/0002-release-only-github-actions.md).

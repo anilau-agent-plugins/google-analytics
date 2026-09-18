@@ -9,6 +9,10 @@
 - Added release-candidate verification, synthetic empty/small/incomplete/hourly/truncated/
   conflicting/ambiguous/malformed fixtures, stricter archive and workflow-policy checks, and
   truthful platform evidence boundaries for protected credential stores.
+- Added an attributed bundled `tzdata` 2026.2 fallback so clean Windows Python installations can
+  resolve GA4 IANA property timezones without installing a package; native OS data remains preferred.
+- Fixed target-platform absolute-path validation and made cross-platform launcher tests skip only a
+  shell that is genuinely unavailable on that runner.
 
 - Added immutable `advisor full-picture` request, plan, checkpoint, and report contracts plus a
   five-step sequential coordinator over baseline, GA4, Search Console, exact-only cross-source

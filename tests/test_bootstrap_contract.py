@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import subprocess
 import unittest
 from pathlib import Path
@@ -11,8 +12,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class BootstrapTests(unittest.TestCase):
     def test_powershell_bootstrap(self) -> None:
+        executable = shutil.which("powershell") or shutil.which("pwsh")
+        if executable is None:
+            self.skipTest("PowerShell is not available on this runner")
         result = subprocess.run(
-            ["powershell", "-NoProfile", "-File", str(ROOT / "scripts" / "google-analytics.ps1"), "version", "--json"],
+            [executable, "-NoProfile", "-File", str(ROOT / "scripts" / "google-analytics.ps1"), "version", "--json"],
             capture_output=True,
             text=True,
             encoding="utf-8",

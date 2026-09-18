@@ -20,6 +20,12 @@ class PathTests(unittest.TestCase):
         result = runtime_paths(env={}, system="Linux", home=Path("/home/test"))
         self.assertEqual(result["state"], Path("/home/test/.local/state/anilau/google-analytics-advisor"))
 
+    def test_target_platform_decides_override_syntax(self) -> None:
+        with self.assertRaises(AdvisorError):
+            runtime_paths(env={"GOOGLE_ANALYTICS_ADVISOR_HOME": "C:\\runtime"}, system="Linux")
+        with self.assertRaises(AdvisorError):
+            runtime_paths(env={"GOOGLE_ANALYTICS_ADVISOR_HOME": "/runtime"}, system="Windows")
+
 
 if __name__ == "__main__":
     unittest.main()

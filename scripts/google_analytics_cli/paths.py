@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 import platform
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 from .errors import AdvisorError, EXIT_CONFIGURATION
 
@@ -16,7 +16,7 @@ def source_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
-def _absolute_override(env: dict[str, str]) -> Path | None:
+def _absolute_override(env: dict[str, str], system: str) -> Path | None:
     raw = env.get(ENV_HOME)
     if raw is None:
         return None
@@ -27,8 +27,16 @@ def _absolute_override(env: dict[str, str]) -> Path | None:
             EXIT_CONFIGURATION,
             next_action=f"Unset {ENV_HOME} or set it to an absolute path.",
         )
-    path = Path(raw).expanduser()
-    if not path.is_absolute():
+    expanded = os.path.expanduser(raw)
+    if system == "Windows":
+        target_path = PureWindowsPath(expanded)
+        is_absolute = target_path.is_absolute()
+        path = Path(target_path.as_posix())
+    else:
+        target_path = PurePosixPath(expanded)
+        is_absolute = target_path.is_absolute()
+        path = Path(expanded)
+    if not is_absolute:
         raise AdvisorError(
             "INVALID_RUNTIME_HOME",
             f"{ENV_HOME} must be an absolute path.",
@@ -36,17 +44,17 @@ def _absolute_override(env: dict[str, str]) -> Path | None:
             details={"value": raw},
             next_action=f"Set {ENV_HOME} to an absolute path.",
         )
-    return path.resolve()
+    return path.resolve() if system == platform.system() else path
 
 
 def runtime_paths(
     *, env: dict[str, str] | None = None, system: str | None = None, home: Path | None = None
 ) -> dict[str, Path]:
     environ = os.environ if env is None else env
-    override = _absolute_override(environ)
+    os_name = system or platform.system()
+    override = _absolute_override(environ, os_name)
     if override is not None:
         return {"state": override / "state", "cache": override / "cache"}
-    os_name = system or platform.system()
     user_home = home or Path.home()
     if os_name == "Windows":
         local = Path(environ.get("LOCALAPPDATA", user_home / "AppData" / "Local"))

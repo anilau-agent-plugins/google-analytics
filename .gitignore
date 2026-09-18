@@ -12,5 +12,6 @@ venv/
 !.env.example
 *.log
 *.zip
+!scripts/google_analytics_cli/_vendor/tzdata-2026.2.zip
 dist/
 build/
